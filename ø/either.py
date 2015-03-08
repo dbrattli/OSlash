@@ -7,14 +7,18 @@ from .functor import Functor
 from .monad import Monad
 
 
-class Either(Applicative, Functor, metaclass=ABCMeta):
-
-    @abstractmethod
-    def apply(self, something) -> "Applicative":
-        return NotImplemented
+class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
 
     @abstractmethod
     def fmap(self, _) -> "Either":
+        return NotImplemented
+
+    @abstractmethod
+    def apply(self, something) -> "Either":
+        return NotImplemented
+
+    @abstractmethod
+    def bind(self, func) -> "Either":
         return NotImplemented
 
     @property
@@ -38,34 +42,49 @@ class Either(Applicative, Functor, metaclass=ABCMeta):
 
 
 class Right(Either):
-    def apply(self, something) -> Either:
-        return something.fmap(self._get_value())
-
     def __init__(self, value: Any):
         self._get_value = lambda: value
 
     def fmap(self, mapper) -> Either:
-        return Right(mapper(self._get_value()))
+        value = self._get_value()
+        try:
+            result = mapper(value)
+        except TypeError:
+            result = partial(mapper, value)
+
+        return Right(result)
+
+    def apply(self, something) -> Either:
+        return something.fmap(self._get_value())
+
+    def bind(self, func) -> "Either":
+        return func(self._get_value())
 
     def __eq__(self, other) -> bool:
-        return self._get_value() == other.value
+        return isinstance(other, Right) and self._get_value() == other.value
 
     def __str__(self) -> str:
         return "Right %s" % self._get_value()
 
 class Left(Either):
     def apply(self, something) -> Either:
-        return something.fmap(self._get_value())
+        return Left(self._get_value())
 
     def __init__(self, value: Any):
         self._get_value = lambda: value
 
     def fmap(self, mapper) -> Either:
-        mapper(self._get_value()) # TODO: fixme
+        try:
+            mapper(self._get_value()) # TODO: fixme
+        except TypeError:
+            pass
+        return Left(self._get_value())
+
+    def bind(self, func) -> "Either":
         return Left(self._get_value())
 
     def __eq__(self, other) -> bool:
-        return self._get_value() == other.value
+        return isinstance(other, Left) and self._get_value() == other.value
 
     def __str__(self) -> str:
         return "Left %s" % self._get_value()
