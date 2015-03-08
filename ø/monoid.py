@@ -2,9 +2,9 @@ from abc import ABCMeta, abstractmethod
 from functools import reduce
 
 class Monoid(metaclass=ABCMeta):
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def mempty() -> "IMonoid":
+    def mempty(cls) -> "IMonoid":
         """mempty :: m"""
         return NotImplemented
 
