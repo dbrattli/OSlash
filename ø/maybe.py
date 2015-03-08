@@ -85,7 +85,7 @@ class Just(Maybe):
         return Just(value.mappend(other_value))
 
     def bind(self, func) -> "Maybe":
-        """Just x >>= f  = f x"""
+        """Just x >>= f = f x"""
 
         value = self._value()
         return func(value)
