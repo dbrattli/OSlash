@@ -81,3 +81,25 @@ class TestMaybe(unittest.TestCase):
         m = Just(42).bind(lambda x: Just(x*10))
         self.assertEqual(m, Just(420))
 
+    def test_maybe_monad_nothing_bind(self):
+        """Nothing >>= \\x -> return (x*10)"""
+        m = Nothing().bind(lambda x: Just(x*10))
+        self.assertEqual(m, Nothing())
+
+    def test_maybe_monad_law_left_identity(self):
+        # return 3 >>= (\x -> Just (x+100000))
+        a = Just(3).bind(lambda x: Just(x+100000))
+        # (\x -> Just (x+100000)) 3
+        b = (lambda x: Just(x+100000))(3)
+        self.assertEqual(a, b)
+
+    def test_maybe_monad_law_right_identity(self):
+        # Just "move on up" >>= (\x -> return x)
+        a = Just("move on up").bind(lambda x: Just(x))
+        self.assertEqual(a, Just("move on up"))
+
+    def test_maybe_monad_law_associativity(self):
+        # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
+        a = Just(42).bind(lambda x: Just(x+1000)).bind(lambda y: Just(y*100))
+        b = Just(42).bind(lambda x: Just(x+1000).bind(lambda y: Just(y*100)))
+        self.assertEqual(a, b)
