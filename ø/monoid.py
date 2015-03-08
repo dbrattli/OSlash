@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from functools import reduce
 
+
 class Monoid(metaclass=ABCMeta):
     @classmethod
     @abstractmethod
