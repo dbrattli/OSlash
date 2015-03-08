@@ -32,8 +32,7 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 
     @property
     def value(self: 'Just') -> Any:
-        """
-        Uses fmap to gets internal value of Maybe object
+        """Uses fmap to gets internal value of Maybe object
         :param self: Just
         :return: :rtype: Any
         """

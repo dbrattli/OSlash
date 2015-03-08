@@ -57,7 +57,7 @@ class Right(Either):
     def apply(self, something) -> Either:
         return something.fmap(self._get_value())
 
-    def bind(self, func) -> "Either":
+    def bind(self, func) -> Either:
         return func(self._get_value())
 
     def __eq__(self, other) -> bool:

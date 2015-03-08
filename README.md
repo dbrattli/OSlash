@@ -8,8 +8,8 @@ Python 3. The project currently contains implementations for:
  - Applicatives
  - Monoids
  - Monads
- - Maybe (Just|Nothing)
- - Either (Right|Left)
+ - Maybe (Just | Nothing)
+ - Either (Right | Left)
 
 Yes, I know there are other projects out there, but I'm simply doing this in 
 order to better understand the book.
