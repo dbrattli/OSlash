@@ -101,10 +101,6 @@ class Just(Maybe):
     def __repr__(self) -> str:
         return self.__str__()
 
-    @classmethod
-    def pure(cls, x: Any) -> Maybe:
-        return Just(x)
-
 
 class Nothing(Maybe):
 
@@ -129,7 +125,3 @@ class Nothing(Maybe):
 
     def __repr__(self) -> str:
         return "Nothing"
-
-    @classmethod
-    def pure(cls, _) -> Maybe:
-        return Nothing()
