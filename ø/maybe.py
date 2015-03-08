@@ -1,18 +1,18 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 from typing import Any
-import typing
 
 from .applicative import Applicative
 from .functor import Functor
 from .monoid import Monoid
+from .monad import Monad
 
 
 def get_value(maybe: 'Maybe') -> Any:
     """
     Uses fmap to gets internal value of Maybe type
-    :param maybe:
-    :return: :rtype: Maybe
+    :param maybe: Maybe
+    :return: :rtype: Any
     """
     value = None
 
@@ -23,7 +23,11 @@ def get_value(maybe: 'Maybe') -> Any:
     return value
 
 
-class Maybe(Monoid, Applicative, Functor, metaclass=ABCMeta):
+class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
+
+    @abstractmethod
+    def bind(self, func) -> "Maybe":
+        return NotImplemented
 
     @abstractmethod
     def fmap(self, _) -> "Maybe":
@@ -80,6 +84,12 @@ class Just(Maybe):
         # Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
         return Just(value.mappend(other_value))
 
+    def bind(self, func) -> "Maybe":
+        """Just x >>= f  = f x"""
+
+        value = self._value()
+        return func(value)
+
     def __eq__(self: 'Just', other: Maybe) -> bool:
         other_value = get_value(other)
         result = self._value() == other_value
@@ -98,13 +108,17 @@ class Just(Maybe):
 
 class Nothing(Maybe):
 
-    def mappend(self, other: Maybe) -> Maybe:
-        return other
-
     def fmap(self, _) -> Maybe:
         return Nothing()
 
     def apply(self, _) -> Maybe:
+        return Nothing()
+
+    def mappend(self, other: Maybe) -> Maybe:
+        return other
+
+    def bind(self, func) -> "Maybe":
+        """Nothing >>= f = Nothing"""
         return Nothing()
 
     def __eq__(self, other: Maybe) -> bool:

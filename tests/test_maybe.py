@@ -77,3 +77,7 @@ class TestMaybe(unittest.TestCase):
             Nothing().fmap(lambda x: g(f(x)))
         )
 
+    def test_maybe_monad_bind(self):
+        m = Just(42).bind(lambda x: Just(x*10))
+        self.assertEqual(m, Just(420))
+
