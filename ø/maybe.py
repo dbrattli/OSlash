@@ -99,6 +99,7 @@ class Just(Maybe):
     def __str__(self) -> str:
         return "Just %s" % self._get_value()
 
+
 class Nothing(Maybe):
 
     def fmap(self, _) -> Maybe:

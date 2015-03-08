@@ -66,6 +66,7 @@ class Right(Either):
     def __str__(self) -> str:
         return "Right %s" % self._get_value()
 
+
 class Left(Either):
     def apply(self, something) -> Either:
         return Left(self._get_value())
@@ -75,7 +76,7 @@ class Left(Either):
 
     def fmap(self, mapper) -> Either:
         try:
-            mapper(self._get_value()) # TODO: fixme
+            mapper(self._get_value())  # TODO: fixme
         except TypeError:
             pass
         return Left(self._get_value())
