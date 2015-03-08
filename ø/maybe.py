@@ -84,7 +84,7 @@ class Just(Maybe):
         # Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
         return Just(value.mappend(other_value))
 
-    def bind(self, func) -> "Maybe":
+    def bind(self, func) -> Maybe:
         """Just x >>= f = f x"""
 
         value = self._get_value()
@@ -113,7 +113,7 @@ class Nothing(Maybe):
     def mappend(self, other: Maybe) -> Maybe:
         return other
 
-    def bind(self, func) -> "Maybe":
+    def bind(self, func) -> Maybe:
         """Nothing >>= f = Nothing"""
         return Nothing()
 
