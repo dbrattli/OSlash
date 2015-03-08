@@ -49,6 +49,9 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     def __eq__(self, other) -> bool:
         return NotImplemented
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 class Just(Maybe):
 
@@ -91,16 +94,10 @@ class Just(Maybe):
         return func(value)
 
     def __eq__(self: 'Just', other: Maybe) -> bool:
-        other_value = other.value
-        result = self._get_value() == other_value
-        return result
+        return self._get_value() == other.value
 
     def __str__(self) -> str:
         return "Just %s" % self._get_value()
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
 
 class Nothing(Maybe):
 
@@ -121,7 +118,4 @@ class Nothing(Maybe):
         return isinstance(other, Nothing)
 
     def __str__(self) -> str:
-        return "Nothing"
-
-    def __repr__(self) -> str:
         return "Nothing"
