@@ -9,4 +9,4 @@ class Monad(metaclass=ABCMeta):
 
     @classmethod
     def return_(cls, x) -> "Applicative":
-        return cls()
+        return cls(x)
