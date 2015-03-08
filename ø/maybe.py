@@ -8,21 +8,6 @@ from .monoid import Monoid
 from .monad import Monad
 
 
-def get_value(maybe: 'Maybe') -> Any:
-    """
-    Uses fmap to gets internal value of Maybe type
-    :param maybe: Maybe
-    :return: :rtype: Any
-    """
-    value = None
-
-    def mapper(x):
-        nonlocal value
-        value = x
-    maybe.fmap(mapper)
-    return value
-
-
 class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 
     @abstractmethod
@@ -45,6 +30,21 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     def mappend(self, other) -> "Maybe":
         return NotImplemented
 
+    @property
+    def value(self: 'Just') -> Any:
+        """
+        Uses fmap to gets internal value of Maybe object
+        :param self: Just
+        :return: :rtype: Any
+        """
+        value = None
+
+        def mapper(x):
+            nonlocal value
+            value = x
+        self.fmap(mapper)
+        return value
+
     @abstractmethod
     def __eq__(self, other) -> bool:
         return NotImplemented
@@ -53,12 +53,12 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 class Just(Maybe):
 
     def __init__(self, value: Any):
-        self._value = lambda: value
+        self._get_value = lambda: value
 
     def fmap(self, mapper) -> Maybe:
         # fmap f (Just x) = Just (f x)
 
-        value = self._value()
+        value = self._get_value()
         try:
             result = mapper(value)
         except TypeError:
@@ -67,17 +67,17 @@ class Just(Maybe):
         return Just(result)
 
     def apply(self, something: Maybe) -> Maybe:
-        return something.fmap(self._value())
+        return something.fmap(self._get_value())
 
     def mappend(self, other: Maybe) -> Maybe:
         # m `mappend` Nothing = m
         if isinstance(other, Nothing):
             return self
 
-        other_value = get_value(other)
+        other_value = other.value
 
         # Use + for append if no mappend
-        value = self._value()
+        value = self._get_value()
         if not hasattr(other_value, "mappend"):
             return Just(value + other_value)
 
@@ -87,16 +87,16 @@ class Just(Maybe):
     def bind(self, func) -> "Maybe":
         """Just x >>= f = f x"""
 
-        value = self._value()
+        value = self._get_value()
         return func(value)
 
     def __eq__(self: 'Just', other: Maybe) -> bool:
-        other_value = get_value(other)
-        result = self._value() == other_value
+        other_value = other.value
+        result = self._get_value() == other_value
         return result
 
     def __str__(self) -> str:
-        return "Just %s" % self._value()
+        return "Just %s" % self._get_value()
 
     def __repr__(self) -> str:
         return self.__str__()
