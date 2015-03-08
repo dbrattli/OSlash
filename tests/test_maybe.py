@@ -1,6 +1,6 @@
 import unittest
 
-from ø.maybe import Just, Nothing
+from ø.maybe import Maybe, Just, Nothing
 
 
 class TestMaybe(unittest.TestCase):
@@ -27,17 +27,33 @@ class TestMaybe(unittest.TestCase):
         )
 
     def test_just_applicative_1(self):
-        a = Just.pure(lambda x, y: x+y).apply(Just(2)).apply(Just(40))
+        a = Just(lambda x, y: x+y).apply(Just(2)).apply(Just(40))
         self.assertNotEquals(a, Nothing())
         self.assertEquals(a, Just(42))
 
     def test_just_applicative_2(self):
-        a = Just.pure(lambda x, y: x+y).apply(Nothing()).apply(Just(42))
+        a = Just(lambda x, y: x+y).apply(Nothing()).apply(Just(42))
         self.assertEquals(a, Nothing())
 
     def test_just_applicative_3(self):
-        a = Just.pure(lambda x, y: x+y).apply(Just(42)).apply(Nothing())
+        a = Just(lambda x, y: x+y).apply(Just(42)).apply(Nothing())
         self.assertEquals(a, Nothing())
+
+    def test_maybe_monoid_nothing_mappend_just(self):
+        a = Nothing().mappend(Just("Python"))
+        self.assertEquals(a, Just("Python"))
+
+    def test_maybe_monoid_just_mappend_nothing(self):
+        a = Just("Python").mappend(Nothing())
+        self.assertEquals(a, Just("Python"))
+
+    def test_maybe_monoid_just_mappend_just(self):
+        a = Just("Python").mappend(Just(" rocks!"))
+        self.assertEquals(a, Just("Python rocks!"))
+
+    def test_maybe_monoid_mconcat(self):
+        a = Maybe.mconcat([Just(2), Just(40)])
+        self.assertEquals(a, Just(42))
 
     def test_nothing_fmap(self):
         a = Nothing().fmap(lambda x: x+2)
@@ -60,3 +76,4 @@ class TestMaybe(unittest.TestCase):
             Nothing().fmap(g).fmap(f),
             Nothing().fmap(lambda x: g(f(x)))
         )
+

@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class IApplicative(metaclass=ABCMeta):
+class Applicative(metaclass=ABCMeta):
 
     @abstractmethod
     def apply(self, something) -> "IApplicative":

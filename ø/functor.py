@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class IFunctor(metaclass=ABCMeta):
+class Functor(metaclass=ABCMeta):
 
     @abstractmethod
     def fmap(self, _) -> "IFunctor":
