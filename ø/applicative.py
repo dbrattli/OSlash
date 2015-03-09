@@ -11,4 +11,10 @@ class Applicative(metaclass=ABCMeta):
 
     @classmethod
     def pure(cls, x) -> "Applicative":
+        """Applicative constructor
+
+        Use pure if you’re dealing with values in an applicative context
+        (using them with <*>); otherwise, stick to the default class
+        constructor."""
+
         return cls(x)

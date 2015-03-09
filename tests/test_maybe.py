@@ -27,16 +27,16 @@ class TestMaybe(unittest.TestCase):
         )
 
     def test_just_applicative_1(self):
-        a = Just(lambda x, y: x+y).apply(Just(2)).apply(Just(40))
+        a = Just.pure(lambda x, y: x+y).apply(Just(2)).apply(Just(40))
         self.assertNotEquals(a, Nothing())
         self.assertEquals(a, Just(42))
 
     def test_just_applicative_2(self):
-        a = Just(lambda x, y: x+y).apply(Nothing()).apply(Just(42))
+        a = Just.pure(lambda x, y: x+y).apply(Nothing()).apply(Just(42))
         self.assertEquals(a, Nothing())
 
     def test_just_applicative_3(self):
-        a = Just(lambda x, y: x+y).apply(Just(42)).apply(Nothing())
+        a = Just.pure(lambda x, y: x+y).apply(Just(42)).apply(Nothing())
         self.assertEquals(a, Nothing())
 
     def test_maybe_monoid_nothing_mappend_just(self):
