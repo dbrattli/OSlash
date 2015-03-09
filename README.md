@@ -4,12 +4,18 @@
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
 Python 3. The project currently contains implementations for:
 
- - Functors
- - Applicatives
- - Monoids
- - Monads
+## Abstract Base Classes
+
+ - Functor
+ - Applicative
+ - Monoid
+ - Monad
+
+## Monads
+ 
  - Maybe (Just | Nothing)
  - Either (Right | Left)
+ - List
 
 Yes, I know there are other projects out there, but I'm simply doing this in 
 order to better understand the book.
