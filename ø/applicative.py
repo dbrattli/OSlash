@@ -6,6 +6,7 @@ class Applicative(metaclass=ABCMeta):
     @abstractmethod
     def apply(self, something) -> "Applicative":
         """(<*>) :: f (a -> b) -> f a -> f b"""
+
         return NotImplemented
 
     @classmethod
