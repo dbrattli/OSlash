@@ -28,7 +28,6 @@ class TestList(unittest.TestCase):
         self.assertEquals(
             List([1,2,3]).fmap(f).fmap(g),
             List([1,2,3]).fmap(lambda x: g(f(x)))
-
         )
 
     def test_list_monad_bind(self):

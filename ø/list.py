@@ -1,4 +1,4 @@
-from functools import partial, reduce
+from functools import partial
 
 from .applicative import Applicative
 from .functor import Functor
@@ -24,35 +24,13 @@ class List(list, Monad, Monoid, Applicative, Functor):
     def apply(self, something) -> "List":
         pass
 
+    @classmethod
     def mempty(cls) -> "List":
         return List([])
 
     def mappend(self, other: "List"):
-        # m `mappend` Nothing = m
-
-        other_value = other.value
-
-        # Use + for append if no mappend
-        value = self._get_value()
-        if not hasattr(other_value, "mappend"):
-            return List(value + other_value)
-
-        # List m1 `mappend` List m2 = List (m1 `mappend` m2)
-        return List(value.mappend(other_value))
+        return List(list(self) + list(other))
 
     def bind(self, func) -> "List":
         # xs >>= f = concat (map f xs)
-
-        xs = self.fmap(func).concat() # aka flat_map
-        return xs
-
-    def concat(self):
-        if self == List([]):
-            return self
-
-        def reducer(x, y):
-            if isinstance(y, List):
-                return x.mappend(y)
-            return x.mappend(List(y))
-
-        return List(reduce(reducer, self))
+        return List.mconcat(self.fmap(func)) # aka flat_map
