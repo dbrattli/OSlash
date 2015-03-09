@@ -9,6 +9,7 @@ from .monad import Monad
 class List(list, Monad, Monoid, Applicative, Functor):
 
     def __init__(self, x):
+        super().__init__()
         if isinstance(x, list):
             self.extend(x)
         else:
@@ -22,11 +23,17 @@ class List(list, Monad, Monoid, Applicative, Functor):
         return ret
 
     def apply(self, something) -> "List":
-        pass
+        # fs <*> xs = [f x | f <- fs, x <- xs]
+        try:
+            xs = [ f(x) for f in self for x in something]
+        except TypeError:
+            xs = [ partial(f, x) for f in self for x in something]
+
+        return List(xs)
 
     @classmethod
     def mempty(cls) -> "List":
-        return List([])
+        return cls([])
 
     def mappend(self, other: "List"):
         return List(list(self) + list(other))
