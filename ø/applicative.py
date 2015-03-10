@@ -1,24 +1,34 @@
 from abc import ABCMeta, abstractmethod
 
-
 class Applicative(metaclass=ABCMeta):
+    """Applicative functors are functors with some extra properties. Most
+    importantly, they allow you to apply functions inside the functor (hence
+    the name)."""
 
     @abstractmethod
     def apply(self, something) -> "Applicative":
-        """(<*>) :: f (a -> b) -> f a -> f b"""
+        """(<*>) :: f (a -> b) -> f a -> f b
+
+        Apply (<*>) is a beefed up fmap. It takes a functor value that has a
+        function in it and another functor, and extracts that function from the
+        first functor and then maps it over the second one.
+        """
 
         return NotImplemented
 
     def __mul__(self, something):
-        """Provide the * operator instead of the Haskell's <*> operator """
+        """"(<*>) :: f (a -> b) -> f a -> f b
+
+        Provide the * as an infix version of apply() since we cannot represent
+        the Haskell's <*> operator in Python."""
 
         return self.apply(something)
 
     @classmethod
     def pure(cls, x) -> "Applicative":
-        """Applicative constructor
+        """The Applicative functor constructor
 
-        Use pure if you’re dealing with values in an applicative context
+        Use pure if you're dealing with values in an applicative context
         (using them with <*>); otherwise, stick to the default class
         constructor."""
 

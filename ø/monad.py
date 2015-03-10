@@ -41,6 +41,16 @@ class Monad(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
+    def lift_m(self, func):
+        """liftM :: (Monad m) => (a -> b) -> m a -> m b
+
+        This is really the same function as Functor.fmap, but is instead
+        implemented using bind, and does not rely on us inheriting from
+        Functor.
+        """
+
+        return self.bind(lambda x: self.return_(func(x)))
+
     def __rshift__(self, other):
         """Provide the >> operator instead of the Haskell >>= operator"""
 
