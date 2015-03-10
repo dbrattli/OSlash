@@ -24,6 +24,11 @@ class Applicative(metaclass=ABCMeta):
 
         return self.apply(something)
 
+    def lift_a2(self, func, b):
+        """liftA2 :: (Applicative f) => (a -> b -> c) -> f a -> f b -> f c"""
+
+        return func % self * b
+
     @classmethod
     def pure(cls, x) -> "Applicative":
         """The Applicative functor constructor
