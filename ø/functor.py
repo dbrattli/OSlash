@@ -25,5 +25,7 @@ class Functor(metaclass=ABCMeta):
 
         return NotImplemented
 
-    def __rlshift__(self, other):
+    def __rmod__(self, other):
+        """Infix version of fmap. <$> in Haskell"""
+
         return self.fmap(other)
