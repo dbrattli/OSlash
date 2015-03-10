@@ -29,11 +29,13 @@ to have a projects name that uses unicode characters.
 
 ## Examples
 
+Haskell:
 ```haskell
 > fmap (+3) (Just 2)
 Just 5
 ```
 
+Python:
 ```python
 >>> Just(2).fmap(lambda x: x+3)
 Just 5

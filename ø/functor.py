@@ -24,3 +24,6 @@ class Functor(metaclass=ABCMeta):
         """
 
         return NotImplemented
+
+    def __rlshift__(self, other):
+        return self.fmap(other)

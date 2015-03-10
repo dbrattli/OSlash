@@ -6,10 +6,11 @@ from .monoid import Monoid
 from .monad import Monad
 
 
-class List(list, Monad, Monoid, Applicative, Functor):
+class List(Monad, Monoid, Applicative, Functor, list):
 
     def __init__(self, x):
         super().__init__()
+
         if isinstance(x, list):
             self.extend(x)
         else:
