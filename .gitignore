@@ -1,4 +1,6 @@
 __pycache__
+dist
+build
 .zedstate
 .idea
 *.egg-info
