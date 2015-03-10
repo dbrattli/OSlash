@@ -1,4 +1,4 @@
-# charset = utf-8
+# coding=utf-8
 try:
     from setuptools import setup
 except ImportError:
@@ -10,7 +10,7 @@ except ImportError:
 setup(
     name='Ø',
     version='0.1.0',
-    description="(Oslash) for Python 3",
+    description="oslash for Python 3.4",
     long_description=("is a library for playing with functors, "
                       "applicatives, and monads in Python."),
     author='Dag Brattli',
@@ -34,6 +34,6 @@ setup(
     ],
     test_suite='nose.collector',
 
-    packages=['ø'],
-    package_dir={'ø' : 'ø'}
+    packages=['oslash'],
+    package_dir={'oslash' : 'oslash'}
 )
