@@ -34,9 +34,6 @@ Haskell:
 > fmap (+3) (Just 2)
 Just 5
 
-> (+3) $ (Just 2)
-Just 5
-
 > (+3) <$> (Just 2)
 Just 5
 ```
