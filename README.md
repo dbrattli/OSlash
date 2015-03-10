@@ -25,7 +25,9 @@ but is quite different in implementation.
 
 Why is the project called Ø? Ø is the Norwegian character called 
 [Oslash](http://en.wikipedia.org/wiki/Ø). Just want to check if it's possible 
-to have a projects name that uses unicode characters.
+to have a projects name that uses unicode characters. 
+Q: How do I write an ø on an american or english keybord?
+A: Are you really sure you want to understand Monads? Copy/paste?
 
 ## Examples
 
