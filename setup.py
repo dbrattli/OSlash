@@ -8,7 +8,7 @@ except ImportError:
     from setuptools import setup
 
 setup(
-    name='Ø',
+    name='OSlash',
     version='0.1.0',
     description="Ø for Python 3.4",
     long_description=("is a library for playing with functors, "
