@@ -33,10 +33,25 @@ Haskell:
 ```haskell
 > fmap (+3) (Just 2)
 Just 5
+
+> (+3) $ (Just 2)
+Just 5
+
+> (+3) <$> (Just 2)
+Just 5
 ```
 
 Python:
 ```python
 >>> Just(2).fmap(lambda x: x+3)
 Just 5
+
+>>> (lambda x: x+3) % Just(2)
+Just 5
+
 ```
+
+For more information, check out 
+[Functors, Applicatives, And Monads In Pictures](adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html).
+How would that look if we translated it to Python? Well, here you have
+[Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
