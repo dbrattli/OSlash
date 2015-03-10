@@ -10,7 +10,7 @@ except ImportError:
 setup(
     name='Ø',
     version='0.1.0',
-    description="oslash for Python 3.4",
+    description="Ø for Python 3.4",
     long_description=("is a library for playing with functors, "
                       "applicatives, and monads in Python."),
     author='Dag Brattli',
