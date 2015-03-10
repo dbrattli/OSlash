@@ -25,6 +25,9 @@ class Monoid(metaclass=ABCMeta):
 
         return NotImplemented
 
+    def __add__(self, other):
+        return self.mappend(other)
+
     @classmethod
     def mconcat(cls, xs) -> "Monoid":
         """mconcat :: [m] -> m

@@ -40,3 +40,8 @@ class Monad(metaclass=ABCMeta):
         into the outer level."""
 
         raise NotImplementedError()
+
+    def __rshift__(self, other):
+        """Provide the >> operator instead of the Haskell >>= operator"""
+
+        return self.bind(other)

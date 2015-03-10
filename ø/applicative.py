@@ -9,6 +9,11 @@ class Applicative(metaclass=ABCMeta):
 
         return NotImplemented
 
+    def __mul__(self, something):
+        """Provide the * operator instead of the Haskell's <*> operator """
+
+        return self.apply(something)
+
     @classmethod
     def pure(cls, x) -> "Applicative":
         """Applicative constructor
