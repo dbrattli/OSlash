@@ -29,8 +29,31 @@ class TestList(unittest.TestCase):
         self.assertEquals(
             List([1,2,3]).fmap(f).fmap(g),
             List([1,2,3]).fmap(lambda x: g(f(x)))
-
         )
+
+    def test_list_applicative_1(self):
+        a = List.pure(lambda x, y: x+y).apply(List(2)).apply(List(40))
+        self.assertEquals(a, List(42))
+
+    def test_list_applicative_2(self):
+        a = List.pure(lambda x: x*2).apply(List([1, 2]))#.apply(List([3, 4]))
+        self.assertEquals(a, List([2, 4]))
+
+    def test_list_applicative_3(self):
+        a = List.pure(lambda x, y: x+y).apply(List([1, 2])).apply(List([4, 8]))
+        self.assertEquals(a, List([5, 9, 6, 10]))
+
+    def test_list_applicative_empty_func(self):
+        a = List.pure([]).apply(List(42)).apply(List([1,2,3]))
+        self.assertEquals(a, List([]))
+
+    def test_list_applicative_empty_arg_1(self):
+        a = List.pure(lambda x, y: x+y).apply([]).apply(List(42))
+        self.assertEquals(a, List([]))
+
+    def test_list_applicative_empty_arg_2(self):
+        a = List.pure(lambda x, y: x+y).apply(List(42)).apply(List([]))
+        self.assertEquals(a, List([]))
 
     def test_list_monad_bind(self):
         m = List([42]).bind(lambda x: List(x*10))

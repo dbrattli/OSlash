@@ -11,14 +11,18 @@ Python 3. The project currently contains implementations for:
  - Monoid
  - Monad
 
-## Monads
+## Some Monads
  
  - Maybe (Just | Nothing)
  - Either (Right | Left)
  - List
 
-Yes, I know there are other projects out there, but I'm simply doing this in 
-order to better understand the book.
+Yes, I know there are other projects out there like 
+[PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing 
+this in order to better understand the book. It's much easier to learn if you
+implement things yourself. The code may be similar to PyMonad in structure, but
+is different in implementation.
 
-Why is the project called Ø? Just want to check if it's possible to have a 
-projects name that uses unicode characters.
+Why is the project called Ø? Ø is the Norwegian character called 
+[Oslash](http://en.wikipedia.org/wiki/Ø). Just want to check if it's possible 
+to have a projects name that uses unicode characters.

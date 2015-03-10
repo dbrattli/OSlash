@@ -16,9 +16,17 @@ class Monoid(metaclass=ABCMeta):
     def mappend(self, other) -> "Monoid":
         """mappend :: m -> m -> m
 
-        An associative operation"""
+        An associative operation
+
+        :param self Monoid:
+        :param other Monoid:
+        :rtype: Monoid
+        """
 
         return NotImplemented
+
+    def __add__(self, other):
+        return self.mappend(other)
 
     @classmethod
     def mconcat(cls, xs) -> "Monoid":

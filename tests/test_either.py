@@ -49,16 +49,16 @@ class TestEither(unittest.TestCase):
         )
 
     def test_right_applicative_1(self):
-        a = Right(lambda x, y: x+y).apply(Right(2)).apply(Right(40))
+        a = Right.pure(lambda x, y: x+y).apply(Right(2)).apply(Right(40))
         self.assertNotEquals(a, Left(42))
         self.assertEquals(a, Right(42))
 
     def test_right_applicative_2(self):
-        a = Right(lambda x, y: x+y).apply(Left("error")).apply(Right(42))
+        a = Right.pure(lambda x, y: x+y).apply(Left("error")).apply(Right(42))
         self.assertEquals(a, Left("error"))
 
     def test_right_applicative_3(self):
-        a = Right(lambda x, y: x+y).apply(Right(42)).apply(Left("error"))
+        a = Right.pure(lambda x, y: x+y).apply(Right(42)).apply(Left("error"))
         self.assertEquals(a, Left("error"))
 
     def test_either_monad_right_bind_right(self):
