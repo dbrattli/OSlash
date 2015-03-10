@@ -24,18 +24,18 @@
     <Compile Include="tests\test_either.py" />
     <Compile Include="tests\test_list.py" />
     <Compile Include="tests\test_maybe.py" />
-    <Compile Include="ø\applicative.py" />
-    <Compile Include="ø\either.py" />
-    <Compile Include="ø\functor.py" />
-    <Compile Include="ø\list.py" />
-    <Compile Include="ø\maybe.py" />
-    <Compile Include="ø\monad.py" />
-    <Compile Include="ø\monoid.py" />
-    <Compile Include="ø\__init__.py" />
+    <Compile Include="oslash\applicative.py" />
+    <Compile Include="oslash\either.py" />
+    <Compile Include="oslash\functor.py" />
+    <Compile Include="oslash\list.py" />
+    <Compile Include="oslash\maybe.py" />
+    <Compile Include="oslash\monad.py" />
+    <Compile Include="oslash\monoid.py" />
+    <Compile Include="oslash\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="tests" />
-    <Folder Include="ø" />
+    <Folder Include="oslash" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
