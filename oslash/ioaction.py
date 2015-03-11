@@ -70,13 +70,14 @@ class Get(IOAction):
         """IOAction a -> (a -> IOAction b) -> IOAction b"""
 
         g = self._get_value()
-        return Get(lambda s: (g(s)).bind(func))
+        return Get(lambda s: g(s).bind(func))
 
     def __call__(self, *args, **kwargs):
         """Run IO action"""
-        g = self._get_value()
+
+        func = self._get_value()
         text = input()
-        action = g(text)
+        action = func(text)
         return action()
 
     def __str__(self) -> str:
