@@ -26,9 +26,10 @@ class IOAction(Monad, Applicative, Functor):
     def fmap(self, func) -> "IOAction":
         return IOAction(func(self._get_value()))
 
-
     def __call__(self, *args, **kwargs):
-        return self
+        """Run IO action. Nothing more to run."""
+
+        return
 
     def __str__(self):
         value = self._get_value()
@@ -42,18 +43,20 @@ class Put(IOAction):
         super().__init__()
         self._get_value = lambda: (text, action)
 
-    def bind(self, func) -> "IOAction":
+    def bind(self, func) -> IOAction:
         """IOAction a -> (a -> IOAction b) -> IOAction b"""
 
         text, a = self._get_value()
         return Put(text, a.bind(func))
 
     def __call__(self, *args, **kwargs):
+        """Run IO action"""
+
         text, action = self._get_value()
         print("output: %s" % text)
         return action()
 
-    def __str__(self):
+    def __str__(self) -> str:
         text, action = self._get_value()
         return "Put(%s, %s)" % (text, action)
 
@@ -63,19 +66,20 @@ class Get(IOAction):
         super().__init__(func)
         self._get_value = lambda: func
 
-    def bind(self, func) -> "IOAction":
+    def bind(self, func) -> IOAction:
         """IOAction a -> (a -> IOAction b) -> IOAction b"""
 
         g = self._get_value()
         return Get(lambda s: (g(s)).bind(func))
 
     def __call__(self, *args, **kwargs):
+        """Run IO action"""
         g = self._get_value()
         text = input()
         action = g(text)
         return action()
 
-    def __str__(self):
+    def __str__(self) -> str:
         g = self._get_value()
         return "Get(%s)" % str(g)
 
