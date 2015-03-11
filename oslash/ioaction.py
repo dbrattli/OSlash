@@ -1,10 +1,8 @@
-"""Implementation of IOActions - The Gods Must Be Crazy
+"""Implementation of IOActions - "The Gods Must Be Crazy"
 
-Many thanks to Chris Taylor and his blog post "IO Is Pure",
+Many thanks to Chris Taylor and his excellent blog post "IO Is Pure",
 http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 """
-
-from functools import partial
 
 from .applicative import Applicative
 from .functor import Functor
@@ -12,7 +10,7 @@ from .monoid import Monoid
 from .monad import Monad
 
 
-class IOAction(Monad, Monoid, Applicative, Functor, list):
+class IOAction(Monad, Monoid, Applicative, Functor):
 
     def __init__(self, value=None):
         super().__init__()
@@ -23,7 +21,20 @@ class IOAction(Monad, Monoid, Applicative, Functor, list):
 
         return func(self._get_value())
 
-    def run(self):
+    def mappend(self, other) -> "IOAction":
+        raise NotImplementedError()
+
+    def apply(self, something) -> "IOAction":
+        raise NotImplementedError()
+
+    def fmap(self, func) -> "IOAction":
+        raise NotImplementedError()
+
+    @classmethod
+    def mempty(cls) -> "IOAction":
+        raise NotImplementedError()
+
+    def __call__(self, *args, **kwargs):
         return self
 
     def __str__(self):
@@ -44,10 +55,10 @@ class Put(IOAction):
         text, a = self._get_value()
         return Put(text, a.bind(func))
 
-    def run(self):
+    def __call__(self, *args, **kwargs):
         text, action = self._get_value()
         print("output: %s" % text)
-        return action.run()
+        return action()
 
     def __str__(self):
         text, action = self._get_value()
@@ -65,10 +76,10 @@ class Get(IOAction):
         g = self._get_value()
         return Get(lambda s: (g(s)).bind(func))
 
-    def run(self):
+    def __call__(self, *args, **kwargs):
         g = self._get_value()
         text = input()
-        return (g(text)).run()
+        return (g(text))()
 
     def __str__(self):
         g = self._get_value()
@@ -81,3 +92,6 @@ def get():
 def put(string):
     return Put(string, IOAction(()))
 
+if __name__ == "__main__":
+    main = get().bind(put)
+    main()
