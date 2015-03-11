@@ -122,7 +122,11 @@ class Nothing(Maybe):
         return other
 
     def bind(self, func) -> Maybe:
-        """Nothing >>= f = Nothing"""
+        """Nothing >>= f = Nothing
+
+        Nothing in, Nothing out.
+        """
+
         return Nothing()
 
     def __eq__(self, other: Maybe) -> bool:

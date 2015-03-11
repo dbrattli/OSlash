@@ -16,6 +16,8 @@ class Monad(metaclass=ABCMeta):
     def bind(self, func) -> "Monad":
         """(>>=) :: m a -> (a -> m b) -> m b
 
+        Flat is better than nested.
+
         :param Monad[A] self:
         :param Callable[[A], Monad[B]] func:
         :rtype: Monad[B]
