@@ -6,11 +6,10 @@ http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 
 from .applicative import Applicative
 from .functor import Functor
-from .monoid import Monoid
 from .monad import Monad
 
 
-class IOAction(Monad, Monoid, Applicative, Functor):
+class IOAction(Monad, Applicative, Functor):
 
     def __init__(self, value=None):
         super().__init__()
@@ -21,18 +20,12 @@ class IOAction(Monad, Monoid, Applicative, Functor):
 
         return func(self._get_value())
 
-    def mappend(self, other) -> "IOAction":
-        raise NotImplementedError()
-
     def apply(self, something) -> "IOAction":
-        raise NotImplementedError()
+        return something.fmap(self._get_value())
 
     def fmap(self, func) -> "IOAction":
-        raise NotImplementedError()
+        return IOAction(func(self._get_value()))
 
-    @classmethod
-    def mempty(cls) -> "IOAction":
-        raise NotImplementedError()
 
     def __call__(self, *args, **kwargs):
         return self
@@ -79,11 +72,12 @@ class Get(IOAction):
     def __call__(self, *args, **kwargs):
         g = self._get_value()
         text = input()
-        return (g(text))()
+        action = g(text)
+        return action()
 
     def __str__(self):
         g = self._get_value()
-        return "Get(%s)" % g
+        return "Get(%s)" % str(g)
 
 
 def get():
