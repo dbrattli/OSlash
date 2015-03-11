@@ -1,4 +1,4 @@
-# A Project Called Ø (Oslash)
+# Ø (Oslash) - Functors, Applicatives, And Monads in Python
 
 Ø is an attempt to re-implement some of the code from 
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
