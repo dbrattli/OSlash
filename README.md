@@ -50,7 +50,10 @@ Just 5
 
 ```
 
-For more information, check out 
+## Tutorial
+
+You might already have checked out the excellent  
 [Functors, Applicatives, And Monads In Pictures](adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html).
-How would that look if we translated it to Python? Well, here you have
+
+How would that look if we translated it to Python? Well, here is
 [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
