@@ -1,3 +1,9 @@
+"""Implementation of IOActions - The Gods Must Be Crazy
+
+Many thanks to Chris Taylor and his blog post "IO Is Pure",
+http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
+"""
+
 from functools import partial
 
 from .applicative import Applicative
@@ -8,7 +14,7 @@ from .monad import Monad
 
 class IOAction(Monad, Monoid, Applicative, Functor, list):
 
-    def __init__(self, value):
+    def __init__(self, value=None):
         super().__init__()
         self._get_value = lambda: value
 
@@ -29,6 +35,7 @@ class IOAction(Monad, Monoid, Applicative, Functor, list):
 
 class Put(IOAction):
     def __init__(self, text: str, action: IOAction):
+        super().__init__()
         self._get_value = lambda: (text, action)
 
     def bind(self, func) -> "IOAction":
