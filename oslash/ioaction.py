@@ -34,11 +34,14 @@ class IOAction(Monad, Applicative, Functor):
         return
 
     def __str__(self):
-        value = self._get_value()
-        return "IOAction(%s)" % str(value)
+        return self.go(0, 0)
 
     def __repr__(self):
         return self.__str__()
+
+    def go(self, m, n):
+        a = self._get_value()
+        return " "*m + "Return " + str(a)
 
 class Put(IOAction):
     """A container holding a string to be printed to stdout, followed by
@@ -67,10 +70,9 @@ class Put(IOAction):
         print("output: %s" % text)
         return action()
 
-    def __str__(self) -> str:
-        text, action = self._get_value()
-        return "Put(%s, %s)" % (text, action)
-
+    def go(self, m, n):
+        s, io = self._get_value()
+        return ' '*m + 'Put "' + s + '" (\n' + io.go(m+2,n) + '\n' + ' '*m+ ')'
 
 class Get(IOAction):
     """A container holding a function from string -> IOAction, which can be
@@ -100,10 +102,10 @@ class Get(IOAction):
         action = func(text)
         return action()
 
-    def __str__(self) -> str:
+    def go(self, m, n):
         g = self._get_value()
-        return "Get(%s)" % str(g)
-
+        i = "$%s" % n
+        return " "*m + 'Get (' + i + ' -> \n' + (g(i)).go(m+2, n+1)  + '\n' + ' '*m+')'
 
 def get():
     return Get(lambda s: IOAction(s))
