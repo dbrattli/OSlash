@@ -12,6 +12,8 @@ from .monad import Monad
 class IOAction(Monad, Applicative, Functor):
 
     def __init__(self, value=None):
+        """A container for a value"""
+
         super().__init__()
         self._get_value = lambda: value
 
@@ -39,6 +41,10 @@ class IOAction(Monad, Applicative, Functor):
         return self.__str__()
 
 class Put(IOAction):
+    """A container holding a string to be printed to stdout, followed by
+    another IOAction.
+    """
+
     def __init__(self, text: str, action: IOAction):
         super().__init__()
         self._get_value = lambda: (text, action)
@@ -48,6 +54,11 @@ class Put(IOAction):
 
         text, a = self._get_value()
         return Put(text, a.bind(func))
+
+    def fmap(self, func) -> "IOAction":
+        # Put s (fmap f io)
+        text, action = self._get_value()
+        return Put(text, action.fmap(func))
 
     def __call__(self, *args, **kwargs):
         """Run IO action"""
@@ -62,6 +73,10 @@ class Put(IOAction):
 
 
 class Get(IOAction):
+    """A container holding a function from string -> IOAction, which can be
+    applied to whatever string is read from stdin.
+    """
+
     def __init__(self, func):
         super().__init__(func)
         self._get_value = lambda: func
@@ -71,6 +86,11 @@ class Get(IOAction):
 
         g = self._get_value()
         return Get(lambda s: g(s).bind(func))
+
+    def fmap(self, func) -> "IOAction":
+        # Get (\s -> fmap f (g s))
+        g = self._get_value()
+        return Get(lambda s: g(s).fmap(func))
 
     def __call__(self, *args, **kwargs):
         """Run IO action"""
@@ -90,7 +110,3 @@ def get():
 
 def put(string):
     return Put(string, IOAction(()))
-
-if __name__ == "__main__":
-    main = get().bind(put)
-    main()

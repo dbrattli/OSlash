@@ -4,3 +4,4 @@ build
 .zedstate
 .idea
 *.egg-info
+*.pyc
