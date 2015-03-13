@@ -21,6 +21,10 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="examples\hello.py" />
+    <Compile Include="examples\hello2.py" />
+    <Compile Include="oslash\ioaction.py" />
+    <Compile Include="setup.py" />
     <Compile Include="tests\test_either.py" />
     <Compile Include="tests\test_list.py" />
     <Compile Include="tests\test_maybe.py" />
@@ -34,11 +38,16 @@
     <Compile Include="oslash\__init__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="examples\" />
     <Folder Include="tests" />
     <Folder Include="oslash" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="LICENSE" />
+    <Content Include="README.md" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
