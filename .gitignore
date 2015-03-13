@@ -6,3 +6,4 @@ build
 *.suo
 *.egg-info
 *.pyc
+*.user
