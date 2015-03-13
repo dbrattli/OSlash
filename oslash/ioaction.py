@@ -48,6 +48,7 @@ class Put(IOAction):
 
     def __init__(self, text: str, action: IOAction):
         super().__init__()
+        self.print_func = print
         self._get_value = lambda: (text, action)
 
     def bind(self, func) -> IOAction:
@@ -65,7 +66,7 @@ class Put(IOAction):
         """Run IO action"""
 
         text, action = self._get_value()
-        print("output: %s" % text)
+        self.print_func("output: %s" % text)
         return action()
 
     def __str__(self, m=0, n=0):
@@ -81,6 +82,7 @@ class Get(IOAction):
 
     def __init__(self, func):
         super().__init__(func)
+        self.input_func = input
         self._get_value = lambda: func
 
     def bind(self, func) -> IOAction:
@@ -98,8 +100,7 @@ class Get(IOAction):
         """Run IO action"""
 
         func = self._get_value()
-        text = input()
-        action = func(text)
+        action = func(self.input_func())
         return action()
 
     def __str__(self, m=0, n=0):
