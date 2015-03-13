@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
-from typing import Any
 
 from .applicative import Applicative
 from .functor import Functor
@@ -9,6 +8,11 @@ from .monad import Monad
 
 
 class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
+    """The Maybe type encapsulates an optional value. A value of type Maybe a
+    either contains a value of (represented as Just a), or it is empty
+    (represented as Nothing). Using Maybe is a good way to deal with errors or
+    exceptional cases without resorting to drastic measures such as error.
+    """
 
     @abstractmethod
     def bind(self, func) -> "Maybe":
@@ -31,7 +35,7 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
         return NotImplemented
 
     @property
-    def value(self: 'Just') -> Any:
+    def value(self: 'Just'):
         """Uses fmap to gets internal value of Maybe object
         :param self: Just
         :return: :rtype: Any
@@ -53,8 +57,11 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 
 
 class Just(Maybe):
+    """Represents a value of type Maybe that contains a value (represented as
+    Just a).
+    """
 
-    def __init__(self, value: Any):
+    def __init__(self, value):
         self._get_value = lambda: value
 
     def fmap(self, mapper) -> Maybe:
@@ -100,6 +107,9 @@ class Just(Maybe):
 
 
 class Nothing(Maybe):
+    """Represents an empty Maybe that holds nothing (in which case it has the
+    value of Nothing).
+    """
 
     def fmap(self, _) -> Maybe:
         return Nothing()
@@ -111,7 +121,11 @@ class Nothing(Maybe):
         return other
 
     def bind(self, func) -> Maybe:
-        """Nothing >>= f = Nothing"""
+        """Nothing >>= f = Nothing
+
+        Nothing in, Nothing out.
+        """
+
         return Nothing()
 
     def __eq__(self, other: Maybe) -> bool:

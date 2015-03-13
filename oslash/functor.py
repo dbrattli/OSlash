@@ -24,3 +24,8 @@ class Functor(metaclass=ABCMeta):
         """
 
         return NotImplemented
+
+    def __rmod__(self, other):
+        """Infix version of fmap. <$> in Haskell"""
+
+        return self.fmap(other)

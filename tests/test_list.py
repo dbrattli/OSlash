@@ -1,7 +1,7 @@
 # coding=utf-8
 import unittest
 
-from ø.list import List
+from oslash.list import List
 
 
 class TestList(unittest.TestCase):

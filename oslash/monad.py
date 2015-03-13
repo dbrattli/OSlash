@@ -16,6 +16,8 @@ class Monad(metaclass=ABCMeta):
     def bind(self, func) -> "Monad":
         """(>>=) :: m a -> (a -> m b) -> m b
 
+        Flat is better than nested.
+
         :param Monad[A] self:
         :param Callable[[A], Monad[B]] func:
         :rtype: Monad[B]
@@ -40,6 +42,16 @@ class Monad(metaclass=ABCMeta):
         into the outer level."""
 
         raise NotImplementedError()
+
+    def lift_m(self, func):
+        """liftM :: (Monad m) => (a -> b) -> m a -> m b
+
+        This is really the same function as Functor.fmap, but is instead
+        implemented using bind, and does not rely on us inheriting from
+        Functor.
+        """
+
+        return self.bind(lambda x: self.return_(func(x)))
 
     def __rshift__(self, other):
         """Provide the >> operator instead of the Haskell >>= operator"""

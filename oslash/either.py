@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
-from typing import Any
 
 from .applicative import Applicative
 from .functor import Functor
@@ -22,7 +21,7 @@ class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
         return NotImplemented
 
     @property
-    def value(self: 'Just') -> Any:
+    def value(self: 'Just'):
         """Uses fmap to gets internal value of Either object
         :param self: Left|Right
         :return: :rtype: Any
@@ -42,7 +41,7 @@ class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
 
 
 class Right(Either):
-    def __init__(self, value: Any):
+    def __init__(self, value):
         self._get_value = lambda: value
 
     def fmap(self, mapper) -> Either:
@@ -71,7 +70,7 @@ class Left(Either):
     def apply(self, something) -> Either:
         return Left(self._get_value())
 
-    def __init__(self, value: Any):
+    def __init__(self, value):
         self._get_value = lambda: value
 
     def fmap(self, mapper) -> Either:

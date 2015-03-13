@@ -1,4 +1,8 @@
 __pycache__
+dist
+build
 .zedstate
 .idea
 *.suo
+*.egg-info
+*.pyc

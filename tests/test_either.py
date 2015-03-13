@@ -1,6 +1,6 @@
 import unittest
 
-from Ã¸.either import Right, Left
+from oslash¸.either import Right, Left
 
 
 class TestEither(unittest.TestCase):

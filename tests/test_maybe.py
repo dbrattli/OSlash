@@ -1,7 +1,7 @@
 # coding=utf-8
 import unittest
 
-from ø.maybe import Maybe, Just, Nothing
+from oslash.maybe import Maybe, Just, Nothing
 
 
 class TestMaybe(unittest.TestCase):
