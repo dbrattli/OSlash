@@ -1,12 +1,11 @@
-from oslash import put, get
+from oslash import put_line, get_line
 
-main = put("What is your name?") >> (lambda _:
-    get() >> (lambda name:
-    put("What is your age?") >> (lambda _:
-    get() >> (lambda age:
-    put("Hello " + name + "!") >> (lambda _:
-    put("You are " + age + " years old"))))))
+main = put_line("What is your name?") >> (lambda _:
+    get_line() >> (lambda name:
+    put_line("What is your age?") >> (lambda _:
+    get_line() >> (lambda age:
+    put_line("Hello " + name + "!") >> (lambda _:
+    put_line("You are " + age + " years old"))))))
 
 if __name__ == "__main__":
-    print(main)
     main()
