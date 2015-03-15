@@ -1,4 +1,4 @@
-# Ø - Functors, Applicatives, And Monads in Python
+# Functors, Applicatives, And Monads in Python
 
 Ø is an attempt to re-implement some of the code from 
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
@@ -16,7 +16,7 @@ Python 3.4. The project currently contains implementations for:
  - Maybe (Just | Nothing)
  - Either (Right | Left)
  - List
- - IOAction
+ - IO Action
 
 Yes, I know there are other projects out there like 
 [PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing 
