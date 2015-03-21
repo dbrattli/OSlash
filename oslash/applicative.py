@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+
 class Applicative(metaclass=ABCMeta):
     """Applicative functors are functors with some extra properties. Most
     importantly, they allow you to apply functions inside the functor (hence
@@ -17,7 +18,7 @@ class Applicative(metaclass=ABCMeta):
         return NotImplemented
 
     def __mul__(self, something):
-        """"(<*>) :: f (a -> b) -> f a -> f b
+        """(<*>) :: f (a -> b) -> f a -> f b
 
         Provide the * as an infix version of apply() since we cannot represent
         the Haskell's <*> operator in Python."""

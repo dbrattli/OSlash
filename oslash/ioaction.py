@@ -8,6 +8,7 @@ from .applicative import Applicative
 from .functor import Functor
 from .monad import Monad
 
+
 class IO(Monad, Applicative, Functor):
     """IO Actions specify something that can be done. They are not active in
     and of themselves. They need to be "run" to make something happen. Simply
@@ -74,7 +75,7 @@ class Put(IO):
 
     def __str__(self, m=0, n=0):
         s, io = self._get_value()
-        a = io.__str__(m+2,n)
+        a = io.__str__(m + 2, n)
         return '%sPut ("%s",\n%s\n%s)' % (ind(m), s, a, ind(m))
 
 
@@ -109,8 +110,9 @@ class Get(IO):
     def __str__(self, m=0, n=0):
         g = self._get_value()
         i = "$%s" % n
-        a = (g(i)).__str__(m+2, n+1)
+        a = (g(i)).__str__(m + 2, n + 1)
         return '%sGet (%s -> \n%s\n%s)' % (ind(m), i, a, ind(m))
+
 
 class ReadFile(IO):
     def __init__(self, filename, func):
@@ -140,18 +142,20 @@ class ReadFile(IO):
     def __str__(self, m=0, n=0):
         filename, g = self._get_value()
         i = "$%s" % n
-        a = (g(i)).__str__(m+2, n+1)
+        a = (g(i)).__str__(m + 2, n + 1)
         return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
 
 
 def get_line() -> IO:
     return Get(lambda s: IO(s))
 
+
 def put_line(string=None) -> IO:
     return Put(string, IO(()))
+
 
 def read_file(filename) -> IO:
     return ReadFile(filename, lambda s: IO(s))
 
 # Utility for indentation
-ind = lambda x: ' '*x
+ind = lambda x: ' ' * x

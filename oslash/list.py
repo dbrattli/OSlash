@@ -26,9 +26,9 @@ class List(Monad, Monoid, Applicative, Functor, list):
     def apply(self, something) -> "List":
         # fs <*> xs = [f x | f <- fs, x <- xs]
         try:
-            xs = [ f(x) for f in self for x in something]
+            xs = [f(x) for f in self for x in something]
         except TypeError:
-            xs = [ partial(f, x) for f in self for x in something]
+            xs = [partial(f, x) for f in self for x in something]
 
         return List(xs)
 
@@ -41,4 +41,4 @@ class List(Monad, Monoid, Applicative, Functor, list):
 
     def bind(self, func) -> "List":
         # xs >>= f = concat (map f xs)
-        return List.mconcat(self.fmap(func)) # aka flat_map
+        return List.mconcat(self.fmap(func))  # aka flat_map
