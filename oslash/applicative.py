@@ -8,7 +8,7 @@ class Applicative(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def apply(self, something) -> "Applicative":
+    def apply(self, something: "Applicative") -> "Applicative":
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Apply (<*>) is a beefed up fmap. It takes a functor value that
@@ -18,7 +18,7 @@ class Applicative(metaclass=ABCMeta):
         """
         return NotImplemented
 
-    def __mul__(self, something):
+    def __mul__(self, something: "Applicative"):
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Provide the * as an infix version of apply() since we cannot
@@ -32,7 +32,7 @@ class Applicative(metaclass=ABCMeta):
         return func % self * b
 
     @classmethod
-    def pure(cls, x) -> "Applicative":
+    def pure(cls, x: "Callable") -> "Applicative":
         """The Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context
