@@ -13,14 +13,16 @@ class Functor(metaclass=ABCMeta):
 
     @abstractmethod
     def fmap(self, func) -> "Functor":
-        """fmap knows how to apply functions to values that are wrapped in a
-        context.
+        """Map a function over wrapped values.
+
+        fmap knows how to apply functions to values that are wrapped in
+        a context.
 
         Keyword arguments:
         :param Functor[A] self: Functor to map
         :param Callable[[A], B] func: Mapper function
         :rtype: Functor[B]
-        :returns: New Functor[B]
+        :return: New Functor[B]
         """
 
         return NotImplemented

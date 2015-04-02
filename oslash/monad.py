@@ -12,11 +12,12 @@ from abc import ABCMeta, abstractmethod
 
 
 class Monad(metaclass=ABCMeta):
+
     @abstractmethod
     def bind(self, func) -> "Monad":
-        """(>>=) :: m a -> (a -> m b) -> m b
+        """Flat is better than nested.
 
-        Flat is better than nested.
+        Haskell: (>>=) :: m a -> (a -> m b) -> m b
 
         :param Monad[A] self:
         :param Callable[[A], Monad[B]] func:

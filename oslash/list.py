@@ -8,7 +8,10 @@ from .monad import Monad
 
 class List(Monad, Monoid, Applicative, Functor, list):
 
+    """The list monad."""
+
     def __init__(self, x):
+        """Initialize a new list."""
         super().__init__()
 
         if isinstance(x, list):
@@ -17,6 +20,7 @@ class List(Monad, Monoid, Applicative, Functor, list):
             self.append(x)
 
     def fmap(self, mapper) -> "List":
+        """Map a function over a List."""
         try:
             ret = List([mapper(x) for x in self])
         except TypeError:
@@ -34,9 +38,11 @@ class List(Monad, Monoid, Applicative, Functor, list):
 
     @classmethod
     def mempty(cls) -> "List":
+        """Create an empty list"""
         return cls([])
 
     def mappend(self, other: "List"):
+        """Append a list to this list"""
         return List(list(self) + list(other))
 
     def bind(self, func) -> "List":

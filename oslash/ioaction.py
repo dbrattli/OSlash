@@ -115,6 +115,10 @@ class Get(IO):
 
 
 class ReadFile(IO):
+    """A container holding a filename and a function from string -> IO, which
+    can be applied to whatever string is read from the file.
+    """
+
     def __init__(self, filename, func):
         super().__init__((filename, func))
         self.open_func = open
@@ -143,7 +147,8 @@ class ReadFile(IO):
         filename, g = self._get_value()
         i = "$%s" % n
         a = (g(i)).__str__(m + 2, n + 1)
-        return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
+        return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a,
+                                                     ind(m))
 
 
 def get_line() -> IO:

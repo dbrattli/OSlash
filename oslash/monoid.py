@@ -42,10 +42,10 @@ class Monoid(metaclass=ABCMeta):
     def mconcat(cls, xs) -> "Monoid":
         """mconcat :: [m] -> m
 
-        Fold a list using the monoid. For most types, the default definition
-        for mconcat will be used, but the function is included in the class
-        definition so that an optimized version can be provided for specific
-        types.
+        Fold a list using the monoid. For most types, the default
+        definition for mconcat will be used, but the function is
+        included in the class definition so that an optimized version
+        can be provided for specific types.
         """
 
         reducer = lambda a, b: a.mappend(b)
