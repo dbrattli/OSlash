@@ -28,19 +28,19 @@ class Monad(metaclass=ABCMeta):
         return NotImplemented
 
     @classmethod
-    def return_(cls, a) -> "Monad":
+    def return_(cls, *args) -> "Monad":
         """return :: a -> m a
 
         Inject a value into the monadic type."""
 
-        return cls(a)
+        return cls(*args)
 
     def join(self) -> "Monad":
         """join :: Monad m => m (m a) -> m a
 
-        The join function is the conventional monad join operator. It is used
-        to remove one level of monadic structure, projecting its bound argument
-        into the outer level."""
+        The join function is the conventional monad join operator. It is
+        used to remove one level of monadic structure, projecting its
+        bound argument into the outer level."""
 
         raise NotImplementedError()
 
