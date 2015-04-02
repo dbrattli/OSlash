@@ -52,7 +52,6 @@ class Put(IO):
 
     def __init__(self, text: str, action: IO):
         super().__init__()
-        self.print_func = print
         self._get_value = lambda: (text, action)
 
     def bind(self, func) -> IO:
@@ -70,7 +69,7 @@ class Put(IO):
         """Run IO action"""
 
         text, action = self._get_value()
-        self.print_func("%s" % text)
+        kwargs.get("print", print)("%s" % text)
         return action()
 
     def __str__(self, m=0, n=0):
@@ -84,7 +83,7 @@ class Get(IO):
     applied to whatever string is read from stdin.
     """
 
-    def __init__(self, func):
+    def __init__(self, func: "Callable[[str], IO]"):
         super().__init__(func)
         self.input_func = input
         self._get_value = lambda: func
@@ -147,8 +146,7 @@ class ReadFile(IO):
         filename, g = self._get_value()
         i = "$%s" % n
         a = (g(i)).__str__(m + 2, n + 1)
-        return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a,
-                                                     ind(m))
+        return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
 
 
 def get_line() -> IO:
