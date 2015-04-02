@@ -17,6 +17,7 @@ Python 3.4. The project currently contains implementations for:
  - Either (Right | Left)
  - List
  - IO Action
+ - Writer
 
 Yes, I know there are other projects out there like 
 [PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing 
