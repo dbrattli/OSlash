@@ -54,7 +54,7 @@ class Writer(Monad, Functor):
         return str(self)
 
     @classmethod
-    def return_(cls, value: "Any", monoid=str) -> "Writer":
+    def return_(cls, value: "Any", monoid: Monoid=str) -> "Writer":
         # Get default value for empty log monoid
         log = monoid.mempty() if hasattr(monoid, "mempty") else monoid()
         return cls(value, log)
