@@ -12,7 +12,7 @@ class Functor(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def fmap(self, func) -> "Functor":
+    def fmap(self, func: "Callable[[Any], Any]") -> "Functor":
         """Map a function over wrapped values.
 
         fmap knows how to apply functions to values that are wrapped in

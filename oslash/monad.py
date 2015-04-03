@@ -14,7 +14,7 @@ from abc import ABCMeta, abstractmethod
 class Monad(metaclass=ABCMeta):
 
     @abstractmethod
-    def bind(self, func) -> "Monad":
+    def bind(self, func: "Callable[[Any], Monad]") -> "Monad":
         """Flat is better than nested.
 
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
