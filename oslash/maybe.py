@@ -34,20 +34,6 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     def mappend(self, other) -> "Maybe":
         return NotImplemented
 
-    @property
-    def value(self: 'Just'):
-        """Uses fmap to gets internal value of Maybe object
-        :param self: Just
-        :return: :rtype: Any
-        """
-        value = None
-
-        def mapper(x):
-            nonlocal value
-            value = x
-        self.fmap(mapper)
-        return value
-
     @abstractmethod
     def __eq__(self, other) -> bool:
         return NotImplemented
