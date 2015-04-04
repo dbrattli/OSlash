@@ -7,6 +7,7 @@ http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 from .applicative import Applicative
 from .functor import Functor
 from .monad import Monad
+from .util import unit
 
 
 class IO(Monad, Applicative, Functor):
@@ -15,7 +16,7 @@ class IO(Monad, Applicative, Functor):
     having an action lying around doesn't make anything happen.
     """
 
-    def __init__(self, value=None):
+    def __init__(self, value=unit):
         """A container for a value"""
 
         super().__init__()
@@ -154,7 +155,7 @@ def get_line() -> IO:
 
 
 def put_line(string=None) -> IO:
-    return Put(string, IO(()))
+    return Put(string, IO(unit))
 
 
 def read_file(filename) -> IO:
