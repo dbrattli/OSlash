@@ -4,6 +4,9 @@ import unittest
 from oslash.identity import Identity
 from oslash.util import identity, compose, compose2
 
+pure = Identity.pure
+return_ = Identity.return_
+
 
 class TestIdentityFunctor(unittest.TestCase):
 
@@ -18,9 +21,11 @@ class TestIdentityFunctor(unittest.TestCase):
     def test_identity_functor_law_1(self):
         # fmap id = id
         x = Identity(42)
-        left = x.fmap(identity)
-        right = x
-        self.assertEqual(left, right)
+
+        self.assertEqual(
+            x.fmap(identity),
+            x
+        )
 
     def test_identity_functor_law2(self):
         # fmap (f . g) x = fmap f (fmap g x)
@@ -32,10 +37,10 @@ class TestIdentityFunctor(unittest.TestCase):
 
         x = Identity(42)
 
-        left = x.fmap(compose(f, g))
-        right = x.fmap(g).fmap(f)
-
-        self.assertEquals(left, right)
+        self.assertEquals(
+            x.fmap(compose(f, g)),
+            x.fmap(g).fmap(f)
+        )
 
 
 class TestIdentityApplicative(unittest.TestCase):
@@ -45,40 +50,41 @@ class TestIdentityApplicative(unittest.TestCase):
         f = lambda x: x * 42
         x = Identity(42)
 
-        left = Identity.pure(f).apply(x)
-        right = x.fmap(f)
-
-        self.assertEquals(left, right)
+        self.assertEquals(
+            pure(f).apply(x),
+            x.fmap(f)
+        )
 
     def test_identity_applicative_law_identity(self):
         # pure id <*> v = v
         v = Identity(42)
 
-        left = Identity.pure(identity).apply(v)
-        right = v
-
-        self.assertEquals(left, right)
+        self.assertEquals(
+            pure(identity).apply(v),
+            v
+        )
 
     def test_identity_applicative_law_composition(self):
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
-        u = Identity.pure(lambda x: x * 42)
-        v = Identity.pure(lambda x: x + 42)
+        u = pure(lambda x: x * 42)
+        v = pure(lambda x: x + 42)
         w = Identity(42)
 
-        left = Identity.pure(compose2).apply(u).apply(v).apply(w)
-        right = u.apply(v.apply(w))
-
-        self.assertEquals(left, right)
+        self.assertEquals(
+            pure(compose2).apply(u).apply(v).apply(w),
+            u.apply(v.apply(w))
+        )
 
     def test_identity_applicative_law_homomorphism(self):
         # pure f <*> pure x = pure (f x)
         f = lambda x: x * 42
         x = 42
 
-        left = Identity.pure(f).apply(Identity.pure(x))
-        right = Identity.pure(f(42))
-        self.assertEquals(left, right)
+        self.assertEquals(
+            pure(f).apply(pure(x)),
+            pure(f(x))
+        )
 
     def test_identity_applicative_law_interchange(self):
         # u <*> pure y = pure ($ y) <*> u
@@ -86,10 +92,10 @@ class TestIdentityApplicative(unittest.TestCase):
         y = 43
         u = Identity(lambda x: x*42)
 
-        left = (u).apply(Identity.pure(y))
-        right = Identity.pure(lambda f: f(y)).apply(u)
-
-        self.assertEquals(left, right)
+        self.assertEquals(
+            u.apply(pure(y)),
+            pure(lambda f: f(y)).apply(u)
+        )
 
 
 class TestIdentityMonad(unittest.TestCase):
@@ -119,7 +125,7 @@ class TestIdentityMonad(unittest.TestCase):
         m = Identity("move on up")
 
         self.assertEqual(
-            m.bind(Identity.return_),
+            m.bind(return_),
             m
         )
 
@@ -133,4 +139,3 @@ class TestIdentityMonad(unittest.TestCase):
             m.bind(f).bind(g),
             m.bind(lambda x: f(x).bind(g))
         )
-
