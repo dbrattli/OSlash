@@ -4,9 +4,9 @@ Many thanks to Chris Taylor and his excellent blog post "IO Is Pure",
 http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 """
 
-from .applicative import Applicative
-from .functor import Functor
-from .monad import Monad
+from oslash.abc import Applicative
+from oslash.abc import Functor
+from oslash.abc import Monad
 from .util import unit
 
 

@@ -1,8 +1,8 @@
 from functools import partial
 
-from .functor import Functor
-from .monad import Monad
-from .applicative import Applicative
+from oslash.abc import Functor
+from oslash.abc import Monad
+from oslash.abc import Applicative
 
 
 class Identity(Monad, Applicative, Functor):

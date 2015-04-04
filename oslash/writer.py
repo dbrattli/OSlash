@@ -1,6 +1,6 @@
-from .functor import Functor
-from .monad import Monad
-from .monoid import Monoid
+from oslash.abc import Functor
+from oslash.abc import Monad
+from oslash.abc import Monoid
 
 
 class Writer(Monad, Functor):

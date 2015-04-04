@@ -34,6 +34,6 @@ setup(
     ],
     test_suite='nose.collector',
 
-    packages=['oslash'],
-    package_dir={'oslash' : 'oslash'}
+    packages=['oslash', 'oslash.util', 'oslash.abc'],
+    package_dir={'oslash': 'oslash'}
 )

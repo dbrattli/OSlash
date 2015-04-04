@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
-from .applicative import Applicative
-from .functor import Functor
-from .monad import Monad
+from oslash.abc import Applicative
+from oslash.abc import Functor
+from oslash.abc import Monad
 
 
 class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
