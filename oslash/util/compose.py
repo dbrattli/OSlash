@@ -13,6 +13,8 @@ def compose(*funcs: "Tuple[Callable,...") -> "Callable":
     compose(g, f)(x) == g(f(x))
     compose(h, g, f)(x) == h(g(f(x)))
     ...
+
+    Returns the composed function.
     """
 
     def _(*args, **kw):
@@ -20,5 +22,7 @@ def compose(*funcs: "Tuple[Callable,...") -> "Callable":
                      lambda f: f(*args, **kw))
         return ret(lambda x: x)
     return _
+
+compose2 = lambda f, g: compose(f, g)  # To force partial application
 
 identity = compose()  # type: Callable

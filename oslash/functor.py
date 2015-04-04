@@ -31,3 +31,18 @@ class Functor(metaclass=ABCMeta):
         """Infix version of fmap. <$> in Haskell"""
 
         return self.fmap(other)
+
+    @property
+    def value(self: 'Functor'):
+        """Uses fmap to gets internal value of Functor
+        :param self: Functor
+        :return: :rtype: Any
+        """
+        value = None
+
+        def mapper(x):
+            nonlocal value
+            value = x
+        self.fmap(mapper)
+        return value
+

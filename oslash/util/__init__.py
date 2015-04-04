@@ -1,2 +1,3 @@
 # flake8: noqa
-from .compose import compose, identity
+from .compose import compose, compose2, identity
+from .basic import unit

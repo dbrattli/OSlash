@@ -29,3 +29,11 @@ class TestCompose(unittest.TestCase):
         i = compose(h, g, f)
         self.assertEqual(215, i(10))
 
+    def test_compose_composition(self):
+        u = lambda x: x * 42
+        v = lambda x: x + 42
+        w = 42
+
+        a = compose(u, v)(w)
+        b = u(v(w))
+        self.assertEquals(a, b)

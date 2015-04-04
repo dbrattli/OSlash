@@ -12,7 +12,8 @@ Python 3.4. The project currently contains implementations for:
  - Monad
 
 ## And Some Monads
- 
+
+ - Identity
  - Maybe (Just | Nothing)
  - Either (Right | Left)
  - List
