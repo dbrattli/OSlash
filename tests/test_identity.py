@@ -1,4 +1,16 @@
-# coding=utf-8
+"""
+Tests for the Identity Monad.
+
+Functor laws:
+    * http://learnyouahaskell.com/functors-applicative-functors-and-monoids
+
+Applicative laws:
+    * http://en.wikibooks.org/wiki/Haskell/Applicative_Functors
+
+Monad laws:
+    * http://learnyouahaskell.com/a-fistful-of-monads#monad-laws
+    * https://wiki.haskell.org/Monad_laws
+"""
 import unittest
 
 from oslash.identity import Identity
@@ -11,16 +23,17 @@ return_ = Identity.return_
 class TestIdentityFunctor(unittest.TestCase):
 
     def test_identity_functor_fmap(self):
-        x = Identity(42)
+        x = return_(42)
+        f = lambda x: x * 10
 
         self.assertEqual(
-            x.fmap(lambda x: x * 10),
-            Identity(420)
+            x.fmap(f),
+            return_(420)
         )
 
     def test_identity_functor_law_1(self):
         # fmap id = id
-        x = Identity(42)
+        x = return_(42)
 
         self.assertEqual(
             x.fmap(identity),
@@ -35,7 +48,7 @@ class TestIdentityFunctor(unittest.TestCase):
         def g(x):
             return x*10
 
-        x = Identity(42)
+        x = return_(42)
 
         self.assertEquals(
             x.fmap(compose(f, g)),
@@ -47,8 +60,8 @@ class TestIdentityApplicative(unittest.TestCase):
 
     def test_identity_applicative_law_functor(self):
         # pure f <*> x = fmap f x
+        x = return_(42)
         f = lambda x: x * 42
-        x = Identity(42)
 
         self.assertEquals(
             pure(f).apply(x),
@@ -57,7 +70,7 @@ class TestIdentityApplicative(unittest.TestCase):
 
     def test_identity_applicative_law_identity(self):
         # pure id <*> v = v
-        v = Identity(42)
+        v = return_(42)
 
         self.assertEquals(
             pure(identity).apply(v),
@@ -67,9 +80,9 @@ class TestIdentityApplicative(unittest.TestCase):
     def test_identity_applicative_law_composition(self):
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
+        w = return_(42)
         u = pure(lambda x: x * 42)
         v = pure(lambda x: x + 42)
-        w = Identity(42)
 
         self.assertEquals(
             pure(compose2).apply(u).apply(v).apply(w),
@@ -78,8 +91,8 @@ class TestIdentityApplicative(unittest.TestCase):
 
     def test_identity_applicative_law_homomorphism(self):
         # pure f <*> pure x = pure (f x)
-        f = lambda x: x * 42
         x = 42
+        f = lambda x: x * 42
 
         self.assertEquals(
             pure(f).apply(pure(x)),
@@ -90,7 +103,7 @@ class TestIdentityApplicative(unittest.TestCase):
         # u <*> pure y = pure ($ y) <*> u
 
         y = 43
-        u = Identity(lambda x: x*42)
+        u = return_(lambda x: x*42)
 
         self.assertEquals(
             u.apply(pure(y)),
@@ -101,28 +114,29 @@ class TestIdentityApplicative(unittest.TestCase):
 class TestIdentityMonad(unittest.TestCase):
 
     def test_identity_monad_bind(self):
-        m = Identity(42)
+        m = return_(42)
+        f = lambda x: return_(x*10)
 
         self.assertEqual(
-            m.bind(lambda x: Identity(x*10)),
-            Identity(420)
+            m.bind(f),
+            return_(420)
         )
 
     def test_identity_monad_law_left_identity(self):
-        # return x >>= f is the same damn thing as f x
+        # return x >>= f is the same thing as f x
 
-        f = lambda x: Identity(x+100000)
-        x = Identity(3)
+        f = lambda x: return_(x+100000)
+        x = 3
 
         self.assertEqual(
-            x.bind(f),
-            f(3)
+            return_(x).bind(f),
+            f(x)
         )
 
     def test_identity_monad_law_right_identity(self):
         # m >>= return is no different than just m.
 
-        m = Identity("move on up")
+        m = return_("move on up")
 
         self.assertEqual(
             m.bind(return_),
@@ -131,9 +145,9 @@ class TestIdentityMonad(unittest.TestCase):
 
     def test_identity_monad_law_associativity(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        f = lambda x: Identity(x+1000)
-        g = lambda y: Identity(y*42)
-        m = Identity(42)
+        m = return_(42)
+        f = lambda x: return_(x+1000)
+        g = lambda y: return_(y*42)
 
         self.assertEqual(
             m.bind(f).bind(g),

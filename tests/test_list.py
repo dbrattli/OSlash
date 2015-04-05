@@ -2,88 +2,199 @@
 import unittest
 
 from oslash.list import List
+from oslash.util import identity, compose, compose2
+
+pure = List.pure
+return_ = List.return_
 
 
 class TestListFunctor(unittest.TestCase):
 
-    def test_list_functor(self):
-        a = List([1, 2, 3, 4]).fmap(lambda x: x * 10)
-        self.assertEqual(a, List([10, 20, 30, 40]))
+    def test_list_functor_fmap(self):
+        # fmap f (return v) = return (f v)
+        x = return_([1, 2, 3, 4])
+        f = lambda x: x * 10
+
+        self.assertEqual(
+            x.fmap(f),
+            return_([10, 20, 30, 40])
+        )
 
     def test_list_functor_law_1(self):
-        # fmap id [1..5]
-        a = List([range(1, 5)]).fmap(lambda x: x)
-        self.assertEqual(a, List(range(1, 5)))
+        # fmap id = id
+        x = return_([range(1, 42)])
 
-        b = List([]).fmap(lambda x: x)
-        self.assertEqual(b, List([]))
+        self.assertEqual(
+            x.fmap(identity),
+            x
+        )
+
+        y = return_([])
+
+        self.assertEqual(
+            y.fmap(identity),
+            y
+        )
 
     def test_list_functor_law2(self):
-        """fmap (f . g) x = fmap f (fmap g x)"""
+        # fmap (f . g) x = fmap f (fmap g x)
         def f(x):
             return x+10
 
         def g(x):
             return x*10
 
+        x = return_([1, 2, 3])
+
         self.assertEquals(
-            List([1, 2, 3]).fmap(f).fmap(g),
-            List([1, 2, 3]).fmap(lambda x: g(f(x)))
+            x.fmap(compose(f, g)),
+            x.fmap(g).fmap(f)
         )
 
 
 class TestListApplicative(unittest.TestCase):
 
-    def test_list_applicative_1(self):
-        a = List.pure(lambda x, y: x+y).apply(List(2)).apply(List(40))
-        self.assertEquals(a, List(42))
+    def test_list_applicative_law_functor(self):
+        # pure f <*> x = fmap f x
+        x = return_(range(42))
+        f = lambda x: x * 42
 
-    def test_list_applicative_2(self):
-        a = List.pure(lambda x: x * 2).apply(List([1, 2]))  #.apply(List([3, 4]))
-        self.assertEquals(a, List([2, 4]))
+        self.assertEquals(
+            pure(f).apply(x),
+            x.fmap(f)
+        )
 
-    def test_list_applicative_3(self):
-        a = List.pure(lambda x, y: x+y).apply(List([1, 2])).apply(List([4, 8]))
-        self.assertEquals(a, List([5, 9, 6, 10]))
+    def test_list_applicative_law_identity(self):
+        # pure id <*> v = v
+        v = return_(range(42))
+
+        self.assertEquals(
+            pure(identity).apply(v),
+            v
+        )
+
+    def test_identity_applicative_law_composition(self):
+        # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
+
+        w = return_(range(42))
+        u = pure(lambda x: x * 42)
+        v = pure(lambda x: x + 42)
+
+        self.assertEquals(
+            pure(compose2).apply(u).apply(v).apply(w),
+            u.apply(v.apply(w))
+        )
+
+    def test_list_applicative_binary_func_singleton(self):
+        f = lambda x, y: x+y
+        v = return_(2)
+        w = return_(40)
+
+        self.assertEquals(
+            pure(f).apply(v).apply(w),
+            return_(42)
+        )
+
+    def test_list_applicative_unary_func(self):
+        f = lambda x: x * 2
+        v = return_([1, 2])
+
+        self.assertEquals(
+            pure(f).apply(v),
+            return_([2, 4])
+        )
+
+    def test_list_applicative_binary_func(self):
+        f = lambda x, y: x+y
+        v = return_([1, 2])
+        w = return_([4, 8])
+
+        self.assertEquals(
+            pure(f).apply(v).apply(w),
+            return_([5, 9, 6, 10])
+        )
 
     def test_list_applicative_empty_func(self):
-        a = List.pure([]).apply(List(42)).apply(List([1, 2, 3]))
-        self.assertEquals(a, List([]))
+        f = []
+        v = return_(42)
+        w = return_([1, 2, 3])
+        a = pure(f).apply(v).apply(w)
 
-    def test_list_applicative_empty_arg_1(self):
-        a = List.pure(lambda x, y: x+y).apply([]).apply(List(42))
-        self.assertEquals(a, List([]))
+        self.assertEquals(
+            a,
+            return_([])
+        )
 
-    def test_list_applicative_empty_arg_2(self):
-        a = List.pure(lambda x, y: x+y).apply(List(42)).apply(List([]))
-        self.assertEquals(a, List([]))
+    def test_list_applicative_binary_func_empty_arg_1(self):
+        f = lambda x, y: x+y
+        v = return_(42)
+        e = return_([])
+        a = pure(f).apply(e).apply(v)
+
+        self.assertEquals(
+            a,
+            return_([])
+        )
+
+    def test_list_applicative_binary_func_empty_arg_2(self):
+        f = lambda x, y: x+y
+        v = return_(42)
+        e = return_([])
+
+        self.assertEquals(
+            pure(f).apply(v).apply(e),
+            return_([])
+        )
 
 
 class TestListMonad(unittest.TestCase):
 
     def test_list_monad_bind(self):
-        m = List([42]).bind(lambda x: List(x*10))
-        self.assertEqual(m, List([420]))
+        m = return_([42])
+        f = lambda x: return_(x*10)
+
+        self.assertEqual(
+            m.bind(f),
+            return_([420])
+        )
 
     def test_list_monad_empty_bind(self):
-        """Nothing >>= \\x -> return (x*10)"""
-        m = List([]).bind(lambda x: List(x*10))
-        self.assertEqual(m, List([]))
+        m = return_([])
+        f = lambda x: return_(x*10)
+
+        self.assertEqual(
+            m.bind(f),
+            return_([])
+        )
 
     def test_list_monad_law_left_identity(self):
-        # return 3 >>= (\x -> Just (x+100000))
-        a = List([3]).bind(lambda x: List([x+100000]))
-        # (\x -> Just (x+100000)) 3
-        b = (lambda x: List(x+100000))(3)
-        self.assertEqual(a, b)
+        # return x >>= f is the same thing as f x
+
+        f = lambda x: return_(x+100000)
+        x = 42
+
+        self.assertEqual(
+            return_(x).bind(f),
+            f(x)
+        )
 
     def test_list_monad_law_right_identity(self):
-        # Just "move on up" >>= (\x -> return x)
-        a = List(["move on up"]).bind(List.return_)
-        self.assertEqual(a, List("move on up"))
+        # m >>= return is no different than just m.
+
+        m = return_("move on up")
+
+        self.assertEqual(
+            m.bind(return_),
+            m
+        )
 
     def test_list_monad_law_associativity(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        a = List(42).bind(lambda x: List(x+1000)).bind(lambda y: List(y*100))
-        b = List(42).bind(lambda x: List(x+1000).bind(lambda y: List(y*100)))
-        self.assertEqual(a, b)
+        m = return_(42)
+        f = lambda x: return_(x+1000)
+        g = lambda y: return_(y*42)
+
+        self.assertEqual(
+            m.bind(f).bind(g),
+            m.bind(lambda x: f(x).bind(g))
+        )
