@@ -27,7 +27,7 @@ class Identity(Monad, Applicative, Functor):
 
         return Identity(result)
 
-    def bind(self, func: "Callable[[Any], Identity]") -> "Monad":
+    def bind(self, func: "Callable[[Any], Identity]") -> "Identity":
         return func(self._get_value())
 
     def apply(self, something: "Identity") -> "Identity":
