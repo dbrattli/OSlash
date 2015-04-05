@@ -10,14 +10,11 @@ class List(Monad, Monoid, Applicative, Functor, list):
 
     """The list monad."""
 
-    def __init__(self, x):
-        """Initialize a new list."""
-        super().__init__()
-
-        if isinstance(x, list):
-            self.extend(x)
-        else:
-            self.append(x)
+    @classmethod
+    def return_(cls, *args):
+        """ Wraps a value within the singleton list"""
+        return cls(args)
+    pure = return_
 
     def fmap(self, mapper) -> "List":
         """Map a function over a List."""
