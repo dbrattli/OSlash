@@ -8,10 +8,14 @@ from oslash.abc import Monad
 
 
 class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
-    """The Maybe type encapsulates an optional value. A value of type Maybe a
-    either contains a value of (represented as Just a), or it is empty
-    (represented as Nothing). Using Maybe is a good way to deal with errors or
-    exceptional cases without resorting to drastic measures such as error.
+
+    """Encapsulates and optional value.
+
+    The Maybe type encapsulates an optional value. A value of type
+    Maybe a either contains a value of (represented as Just a), or it is
+    empty (represented as Nothing). Using Maybe is a good way to deal
+    with errors or exceptional cases without resorting to drastic
+    measures such as error.
     """
 
     @abstractmethod
@@ -43,8 +47,10 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 
 
 class Just(Maybe):
-    """Represents a value of type Maybe that contains a value (represented as
-    Just a).
+
+    """A Maybe that conains a value.
+
+    Represents a Maybe that contains a value (represented as Just a).
     """
 
     def __init__(self, value):
@@ -93,8 +99,11 @@ class Just(Maybe):
 
 
 class Nothing(Maybe):
-    """Represents an empty Maybe that holds nothing (in which case it has the
-    value of Nothing).
+
+    """Represents an empty Maybe.
+
+    Represents an empty Maybe that holds nothing (in which case it has
+    the value of Nothing).
     """
 
     def fmap(self, _) -> Maybe:

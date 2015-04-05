@@ -5,6 +5,9 @@ class Applicative(metaclass=ABCMeta):
     """Applicative functors are functors with some extra properties.
     Most importantly, they allow you to apply functions inside the
     functor (hence the name).
+
+    To learn more about Applicative functors:
+    * http://www.davesquared.net/2012/05/fp-newbie-learns-applicatives.html
     """
 
     @abstractmethod

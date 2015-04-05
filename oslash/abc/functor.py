@@ -34,7 +34,11 @@ class Functor(metaclass=ABCMeta):
 
     @property
     def value(self: 'Functor'):
-        """Uses fmap to gets internal value of Functor
+        """Get value of Functor.
+
+        Uses fmap to extract the internal value of the Functor.
+
+        Keyword arguments:
         :param self: Functor
         :return: :rtype: Any
         """
@@ -45,4 +49,3 @@ class Functor(metaclass=ABCMeta):
             value = x
         self.fmap(mapper)
         return value
-
