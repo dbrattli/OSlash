@@ -1,5 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
+from typing import Callable
+
 
 class Applicative(metaclass=ABCMeta):
     """Applicative functors are functors with some extra properties.
@@ -21,7 +23,7 @@ class Applicative(metaclass=ABCMeta):
         """
         return NotImplemented
 
-    def __mul__(self, something: "Applicative"):
+    def __mul__(self, something: "Applicative") -> "Applicative":
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Provide the * as an infix version of apply() since we cannot
@@ -35,7 +37,7 @@ class Applicative(metaclass=ABCMeta):
         return func % self * b
 
     @classmethod
-    def pure(cls, x: "Callable") -> "Applicative":
+    def pure(cls, x: Callable) -> "Applicative":
         """The Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context

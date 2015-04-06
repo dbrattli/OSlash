@@ -10,11 +10,13 @@ Associativity: (m >>= f) >>= g = m >>= (\\x -> f x >>= g)
 
 from abc import ABCMeta, abstractmethod
 
+from typing import Callable, Any
+
 
 class Monad(metaclass=ABCMeta):
 
     @abstractmethod
-    def bind(self, func: "Callable[[Any], Monad]") -> "Monad":
+    def bind(self, func: Callable[[Any], "Monad"]) -> "Monad":
         """Flat is better than nested.
 
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
@@ -44,7 +46,7 @@ class Monad(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def lift_m(self, func):
+    def lift_m(self, func) -> "Monad":
         """liftM :: (Monad m) => (a -> b) -> m a -> m b
 
         This is really the same function as Functor.fmap, but is instead
@@ -54,7 +56,7 @@ class Monad(metaclass=ABCMeta):
 
         return self.bind(lambda x: self.return_(func(x)))
 
-    def __rshift__(self, other):
+    def __rshift__(self, other) -> "Monad":
         """Provide the >> operator instead of the Haskell >>= operator"""
 
         return self.bind(other)

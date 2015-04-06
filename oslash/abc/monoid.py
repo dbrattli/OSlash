@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from functools import reduce
+from functools import reduce  # type: ignore
 
 
 class Monoid(metaclass=ABCMeta):

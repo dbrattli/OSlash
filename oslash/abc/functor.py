@@ -1,5 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
+from typing import Callable, Any
+
 
 class Functor(metaclass=ABCMeta):
     """The Functor class is used for types that can be mapped over. Instances
@@ -12,7 +14,7 @@ class Functor(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def fmap(self, func: "Callable[[Any], Any]") -> "Functor":
+    def fmap(self, func: Callable[[Any], Any]) -> "Functor":
         """Map a function over wrapped values.
 
         fmap knows how to apply functions to values that are wrapped in
@@ -27,13 +29,13 @@ class Functor(metaclass=ABCMeta):
 
         return NotImplemented
 
-    def __rmod__(self, other):
+    def __rmod__(self, other) -> "Functor":
         """Infix version of fmap. <$> in Haskell"""
 
         return self.fmap(other)
 
     @property
-    def value(self: 'Functor'):
+    def value(self: 'Functor') -> Any:
         """Get value of Functor.
 
         Uses fmap to extract the internal value of the Functor.
@@ -42,7 +44,7 @@ class Functor(metaclass=ABCMeta):
         :param self: Functor
         :return: :rtype: Any
         """
-        value = None
+        value = None  # type: Any
 
         def mapper(x):
             nonlocal value

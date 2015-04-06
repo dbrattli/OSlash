@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
+from typing import Any, Callable
+
 from oslash.abc import Applicative
 from oslash.abc import Functor
 from oslash.abc import Monad
@@ -13,30 +15,15 @@ class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
         return NotImplemented
 
     @abstractmethod
-    def apply(self, something) -> "Either":
+    def apply(self, something: "Either") -> "Either":
         return NotImplemented
 
     @abstractmethod
-    def bind(self, func) -> "Either":
+    def bind(self, func: Callable[[Any], "Either"]) -> "Either":
         return NotImplemented
 
-    @property
-    def value(self: 'Just'):
-        """Uses fmap to gets internal value of Either object
-        :param self: Left|Right
-        :return: :rtype: Any
-        """
-
-        value = None
-
-        def mapper(x):
-            nonlocal value
-            value = x
-        self.fmap(mapper)
-        return value
-
     @abstractmethod
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: "Either") -> bool:
         return NotImplemented
 
 
@@ -44,7 +31,7 @@ class Right(Either):
     def __init__(self, value):
         self._get_value = lambda: value
 
-    def fmap(self, mapper) -> Either:
+    def fmap(self, mapper: Callable[[Any], Any]) -> Either:
         value = self._get_value()
         try:
             result = mapper(value)
@@ -53,10 +40,10 @@ class Right(Either):
 
         return Right(result)
 
-    def apply(self, something) -> Either:
+    def apply(self, something: Either) -> Either:
         return something.fmap(self._get_value())
 
-    def bind(self, func) -> Either:
+    def bind(self, func: Callable[[Any], Either]) -> Either:
         return func(self._get_value())
 
     def __eq__(self, other) -> bool:
@@ -67,23 +54,23 @@ class Right(Either):
 
 
 class Left(Either):
-    def apply(self, something) -> Either:
+    def apply(self, something: Either) -> Either:
         return Left(self._get_value())
 
-    def __init__(self, value):
+    def __init__(self, value: Any):
         self._get_value = lambda: value
 
-    def fmap(self, mapper) -> Either:
+    def fmap(self, mapper: Callable[[Any], Any]) -> Either:
         try:
             mapper(self._get_value())  # TODO: fixme
         except TypeError:
             pass
         return Left(self._get_value())
 
-    def bind(self, func) -> "Either":
+    def bind(self, func: Callable[[Any], Either]) -> Either:
         return Left(self._get_value())
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Either) -> bool:
         return isinstance(other, Left) and self._get_value() == other.value
 
     def __str__(self) -> str:

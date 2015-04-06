@@ -1,13 +1,15 @@
-from oslash.abc import Functor
-from oslash.abc import Monad
-from oslash.abc import Monoid
+from typing import Any, Callable, Tuple
+
+from .abc import Functor
+from .abc import Monad
+from .abc import Monoid
 
 
 class Writer(Monad, Functor):
 
     """The writer monad."""
 
-    def __init__(self, value: "Any", log: Monoid):
+    def __init__(self, value: Any, log: Monoid):
         """Initialize a new writer.
 
         :param value Any: Value to
@@ -16,7 +18,7 @@ class Writer(Monad, Functor):
 
         self._get_value = lambda: (value, log)
 
-    def fmap(self, func: "Callable[[Any], Any]") -> "Writer":
+    def fmap(self, func: Callable[[Any], Any]) -> "Writer":
         """Map a function func over the Writer value.
 
         Haskell:
@@ -28,17 +30,12 @@ class Writer(Monad, Functor):
         value, log = self.run_writer()
         return Writer(func(value), log)
 
-    def bind(self, func: "Callable[[Any], Writer]") -> "Writer":
+    def bind(self, func: Callable[[Any], "Writer"]) -> "Writer":
         """Flat is better than nested.
 
         Haskell:
         (Writer (x, v)) >>= f = let
             (Writer (y, v')) = f x in Writer (y, v `mappend` v')
-
-        Keyword Arguments:
-        :param func Callable[[Any], Writer[Any, Monoid]]
-        :return: New Writer
-        :rtype: Writer
         """
         a, w = self.run_writer()
         b, w_ = func(a).run_writer()
@@ -60,11 +57,15 @@ class Writer(Monad, Functor):
         return cls(value, log)
 
     def run_writer(self) -> tuple:
-        """Convert Writer to s simple tuple."""
+        """Extract value from Writer.
+
+        This is the inverse function of the constructor and converts the
+        Writer to s simple tuple.
+        """
         return self._get_value()
 
     @staticmethod
-    def apply_log(a: tuple, func: "Callabe[[Any], Tuple[Any, Monoid]]") -> tuple:
+    def apply_log(a: tuple, func: Callable[[Any], Tuple[Any, Monoid]]) -> tuple:
         """Apply a function to a value with a log.
 
         Helper function to apply a function to a value with a log tuple.

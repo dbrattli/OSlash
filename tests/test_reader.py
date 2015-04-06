@@ -53,7 +53,7 @@ class TestReaderFunctor(unittest.TestCase):
 
 class TestReaderApplicative(unittest.TestCase):
 
-    def test_identity_applicative_law_functor(self):
+    def test_reader_applicative_law_functor(self):
         # pure f <*> x = fmap f x
         x = return_(42)
         f = lambda e: e * 42
@@ -63,7 +63,7 @@ class TestReaderApplicative(unittest.TestCase):
             x.fmap(f)
         )
 
-    def test_identity_applicative_law_identity(self):
+    def test_reader_applicative_law_identity(self):
         # pure id <*> v = v
         v = return_(42)
 
@@ -72,7 +72,7 @@ class TestReaderApplicative(unittest.TestCase):
             v
         )
 
-    def test_identity_applicative_law_composition(self):
+    def test_reader_applicative_law_composition(self):
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
         w = return_(42)
@@ -84,7 +84,7 @@ class TestReaderApplicative(unittest.TestCase):
             u.apply(v.apply(w))
         )
 
-    def test_identity_applicative_law_homomorphism(self):
+    def test_reader_applicative_law_homomorphism(self):
         # pure f <*> pure x = pure (f x)
         x = 42
         f = lambda x: x * 42
@@ -94,7 +94,7 @@ class TestReaderApplicative(unittest.TestCase):
             return_(f(x))
         )
 
-    def test_identity_applicative_law_interchange(self):
+    def test_reader_applicative_law_interchange(self):
         # u <*> pure y = pure ($ y) <*> u
 
         y = 43
@@ -106,19 +106,45 @@ class TestReaderApplicative(unittest.TestCase):
         )
 
 
-# class TestReaderMonad(unittest.TestCase):
-#     def test_reader_return(self):
-#         v = 45
-#         r = Reader.return_(v)
-#         self.assertEqual(
-#             r(42),
-#             v
-#         )
+class TestReaderMonad(unittest.TestCase):
 
-#     def test_reader_monad_bind(self):
-#         v = 62
-#         m = Reader.return_(v).bind(lambda x: Reader(lambda y: y+x))
-#         self.assertEqual(
-#             m(10),
-#             v+10
-#         )
+    def test_reader_monad_bind(self):
+        m = return_(42)
+        f = lambda x: return_(x*10)
+
+        self.assertEqual(
+            m.bind(f),
+            return_(420)
+        )
+
+    def test_reader_monad_law_left_identity(self):
+        # return x >>= f is the same thing as f x
+
+        f = lambda x: return_(x+100000)
+        x = 3
+
+        self.assertEqual(
+            return_(x).bind(f),
+            f(x)
+        )
+
+    def test_reader_monad_law_right_identity(self):
+        # m >>= return is no different than just m.
+
+        m = return_("move on up")
+
+        self.assertEqual(
+            m.bind(return_),
+            m
+        )
+
+    def test_reader_monad_law_associativity(self):
+        # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
+        m = return_(42)
+        f = lambda x: return_(x+1000)
+        g = lambda y: return_(y*42)
+
+        self.assertEqual(
+            m.bind(f).bind(g),
+            m.bind(lambda x: f(x).bind(g))
+        )

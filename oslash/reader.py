@@ -1,10 +1,12 @@
 from functools import partial
 
-from oslash.abc import Functor
-from oslash.abc import Monad
-from oslash.abc import Applicative
+from typing import Any, Callable
 
-from oslash.util import compose
+from .abc import Functor
+from .abc import Monad
+from .abc import Applicative
+
+from .util import compose
 
 
 class Reader(Monad, Applicative, Functor):
@@ -16,7 +18,7 @@ class Reader(Monad, Applicative, Functor):
     lets us access shared immutable state within a monadic context.
     """
 
-    def __init__(self, func: "Callable"):
+    def __init__(self, func: Callable):
         """Initialize a new reader.
 
         return a = Reader $ \\_ -> a
@@ -31,7 +33,7 @@ class Reader(Monad, Applicative, Functor):
         return cls(lambda _: value)
     pure = return_
 
-    def fmap(self, mapper: "Callable[[Any], Any]") -> "Reader":
+    def fmap(self, mapper: Callable[[Any], Any]) -> "Reader":
         """fmap f m = Reader $ \\r -> f (runReader m r)."""
         func = self.run_reader()
 
@@ -72,10 +74,10 @@ class Reader(Monad, Applicative, Functor):
 
         return Reader(_)  # lambda env: f(env)(x(env)))
 
-    def asks(self, func: "Callable") -> "Reader":
+    def asks(self, func: Callable) -> "Reader":
         pass
 
-    def run_reader(self) -> "Callable":
+    def run_reader(self) -> Callable:
         """The inverse of the Reader constructor
 
         runReader :: Reader r a -> r -> a
@@ -87,8 +89,7 @@ class Reader(Monad, Applicative, Functor):
         return func(*args, **kwargs)
 
     def __eq__(self, other) -> bool:
-        environment = 0
-        print(self(environment), other(environment))
+        environment = 0  # TODO: can we do better?
         return self(environment) == other(environment)
 
     def __str__(self) -> str:
@@ -110,4 +111,4 @@ class MonadReader(Reader):
     def local(self, func):
         """local f c = Reader $ \e -> runReader c (f e)
         """
-        return Reader(lambda e: self.run_reader(func(e)))
+        return Reader(lambda e: self.run_reader()(func(e)))

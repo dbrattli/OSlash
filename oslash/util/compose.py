@@ -1,7 +1,9 @@
 from functools import reduce
 
+from typing import Tuple, Callable
 
-def compose(*funcs: "Tuple[Callable,...") -> "Callable":
+
+def compose(*funcs: "Tuple[Callable, ...]") -> Callable:
     """Compose multiple functions right to left.
 
     Composes zero or more functions into a functional composition. The

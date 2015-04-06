@@ -19,7 +19,7 @@ setup(
     url='https://github.com/dbrattli/oslash',
     download_url='https://github.com/dbrattli/oslash',
     zip_safe=True,
-
+    install_requires=["mypy-lang"],
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         'Development Status :: 3 - Alpha',

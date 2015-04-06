@@ -1,10 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
-from oslash.abc import Applicative
-from oslash.abc import Functor
-from oslash.abc import Monoid
-from oslash.abc import Monad
+from .abc import Applicative
+from .abc import Functor
+from .abc import Monoid
+from .abc import Monad
 
 
 class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
