@@ -194,20 +194,36 @@ class TestMaybeApplicative(unittest.TestCase):
 class TestMaybeMonoid(unittest.TestCase):
 
     def test_maybe_monoid_nothing_mappend_just(self):
-        a = Nothing().mappend(Just("Python"))
-        self.assertEquals(a, Just("Python"))
+        m = Just("Python")
+
+        self.assertEquals(
+            Nothing().mappend(m),
+            m
+        )
 
     def test_maybe_monoid_just_mappend_nothing(self):
-        a = Just("Python").mappend(Nothing())
-        self.assertEquals(a, Just("Python"))
+        m = Just("Python")
+
+        self.assertEquals(
+            m.mappend(Nothing()),
+            m
+        )
 
     def test_maybe_monoid_just_mappend_just(self):
-        a = Just("Python").mappend(Just(" rocks!"))
-        self.assertEquals(a, Just("Python rocks!"))
+        m = Just("Python")
+        n = Just(" rocks!")
+
+        self.assertEquals(
+            m.mappend(n),
+            Just("Python rocks!")
+        )
 
     def test_maybe_monoid_mconcat(self):
-        a = Maybe.mconcat([Just(2), Just(40)])
-        self.assertEquals(a, Just(42))
+
+        self.assertEquals(
+            Maybe.mconcat([Just(2), Just(40)]),
+            Just(42)
+        )
 
 
 class TestMaybeMonad(unittest.TestCase):
