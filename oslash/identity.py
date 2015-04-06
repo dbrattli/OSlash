@@ -1,8 +1,10 @@
-from functools import partial
+from functools import partial  # type: ignore
 
-from oslash.abc import Functor
-from oslash.abc import Monad
-from oslash.abc import Applicative
+from typing import Any, Callable
+
+from .abc import Functor
+from .abc import Monad
+from .abc import Applicative
 
 
 class Identity(Monad, Applicative, Functor):
@@ -17,7 +19,7 @@ class Identity(Monad, Applicative, Functor):
         """Initialize a new reader."""
         self._get_value = lambda: value
 
-    def fmap(self, mapper: "Callable[[Any], Any]") -> "Identity":
+    def fmap(self, mapper: Callable[[Any], Any]) -> "Identity":
         """Map a function over wrapped values."""
         value = self._get_value()
         try:
@@ -27,26 +29,25 @@ class Identity(Monad, Applicative, Functor):
 
         return Identity(result)
 
-    def bind(self, func: "Callable[[Any], Identity]") -> "Identity":
+    def bind(self, func: Callable[[Any], "Identity"]) -> "Identity":
         return func(self._get_value())
 
     def apply(self, something: "Identity") -> "Identity":
         func = self._get_value()
-        x = something.fmap(func)
-        return x
+        return something.fmap(func)
 
-    def run_identity(self) -> "Any":
+    def run_identity(self) -> Any:
         return self._get_value()
 
-    def __call__(self) -> "Any":
+    def __call__(self) -> Any:
         return self.run_identity()
 
-    def __eq__(self, other):
+    def __eq__(self, other: "Identity") -> bool:
         value = self._get_value()
         return value == other.value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Identity(%s)" % self._get_value()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
