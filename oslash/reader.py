@@ -6,15 +6,13 @@ from .abc import Functor
 from .abc import Monad
 from .abc import Applicative
 
-from .util import compose
-
 
 class Reader(Monad, Applicative, Functor):
 
     """The Reader monad.
 
-    The Reader monad pass the data you want to share between functions.
-    Functions may read that data, but can't change it. The reader monad
+    The Reader monad pass the state you want to share between functions.
+    Functions may read that state, but can't change it. The reader monad
     lets us access shared immutable state within a monadic context.
     """
 
@@ -74,9 +72,6 @@ class Reader(Monad, Applicative, Functor):
 
         return Reader(_)  # lambda env: f(env)(x(env)))
 
-    def asks(self, func: Callable) -> "Reader":
-        pass
-
     def run_reader(self) -> Callable:
         """The inverse of the Reader constructor
 
@@ -100,15 +95,40 @@ class Reader(Monad, Applicative, Functor):
 
 
 class MonadReader(Reader):
+
+    """The MonadReader class.
+
+    The MonadReader class provides a number of convenience functions
+    that are very useful when working with a Reader monad.
+    """
+
     @classmethod
     def ask(cls):
-        """Reader $ \\x -> x
+        r"""Reader $ \x -> x
 
         Provides a way to easily access the environment.
+        ask lets us read the environment and then play with it
         """
         return cls(lambda x: x)
 
+    @classmethod
+    def asks(cls, func: Callable) -> "Reader":
+        """
+        Given a function it returns a Reader which evaluates that
+        function and returns the result.
+
+        asks :: (e -> a) -> R e a
+        asks f = do
+            e <- ask
+            return $ f e
+
+        asks sel = ask >>= return . sel
+        """
+        return cls.ask().bind(Reader(lambda e: cls.return_(func(e))))
+
     def local(self, func):
-        """local f c = Reader $ \e -> runReader c (f e)
+        r"""local transforms the environment a Reader sees.
+
+        local f c = Reader $ \e -> runReader c (f e)
         """
         return Reader(lambda e: self.run_reader()(func(e)))
