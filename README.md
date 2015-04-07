@@ -72,5 +72,5 @@ if __name__ == "__main__":
 ## Tutorial
 
 Please take a look at the [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) 
-in Python. It's a translation of the excellent [Functors, Applicatives, And Monads In Pictures](adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html) 
+in Python. It's a translation of the excellent [Functors, Applicatives, And Monads In Pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)
 in Haskell.

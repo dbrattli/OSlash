@@ -23,14 +23,10 @@ class Monoid(metaclass=ABCMeta):
         return NotImplemented
 
     @abstractmethod
-    def mappend(self, other) -> "Monoid":
+    def mappend(self, other: "Monoid") -> "Monoid":
         """mappend :: m -> m -> m
 
         An associative operation
-
-        :param self Monoid:
-        :param other Monoid:
-        :rtype: Monoid
         """
 
         return NotImplemented

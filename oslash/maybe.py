@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
+from typing import Any, Callable
+
 from .abc import Applicative
 from .abc import Functor
 from .abc import Monoid
@@ -19,15 +21,15 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def bind(self, func) -> "Maybe":
+    def bind(self, func: Callable[[Any], "Maybe"]) -> "Maybe":
         return NotImplemented
 
     @abstractmethod
-    def fmap(self, _) -> "Maybe":
+    def fmap(self, mapper: Callable[[Any], Any]) -> "Maybe":
         return NotImplemented
 
     @abstractmethod
-    def apply(self, something) -> "Maybe":
+    def apply(self, something: "Maybe") -> "Maybe":
         return NotImplemented
 
     @classmethod
@@ -35,11 +37,11 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
         return Nothing()
 
     @abstractmethod
-    def mappend(self, other) -> "Maybe":
+    def mappend(self, other: "Maybe") -> "Maybe":
         return NotImplemented
 
     @abstractmethod
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: "Maybe") -> bool:
         return NotImplemented
 
     def __repr__(self) -> str:
@@ -56,7 +58,7 @@ class Just(Maybe):
     def __init__(self, value):
         self._get_value = lambda: value
 
-    def fmap(self, mapper) -> Maybe:
+    def fmap(self, mapper: Callable[[Any], Any]) -> "Just":
         # fmap f (Just x) = Just (f x)
 
         value = self._get_value()
@@ -85,7 +87,7 @@ class Just(Maybe):
         # Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
         return Just(value.mappend(other_value))
 
-    def bind(self, func) -> Maybe:
+    def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
         """Just x >>= f = f x"""
 
         value = self._get_value()
@@ -106,16 +108,16 @@ class Nothing(Maybe):
     the value of Nothing).
     """
 
-    def fmap(self, _) -> Maybe:
+    def fmap(self, mapper: Callable[[Any], Any]) -> Maybe:
         return Nothing()
 
-    def apply(self, _) -> Maybe:
+    def apply(self, other: Maybe) -> Maybe:
         return Nothing()
 
     def mappend(self, other: Maybe) -> Maybe:
         return other
 
-    def bind(self, func) -> Maybe:
+    def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
         """Nothing >>= f = Nothing
 
         Nothing in, Nothing out.

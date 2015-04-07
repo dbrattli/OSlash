@@ -4,6 +4,8 @@ Many thanks to Chris Taylor and his excellent blog post "IO Is Pure",
 http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 """
 
+from typing import Any, Callable
+
 from oslash.abc import Applicative
 from oslash.abc import Functor
 from oslash.abc import Monad
@@ -55,13 +57,13 @@ class Put(IO):
         super().__init__()
         self._get_value = lambda: (text, action)
 
-    def bind(self, func) -> IO:
+    def bind(self, func: Callable[[Any], "Put"]) -> IO:
         """IO a -> (a -> IO b) -> IO b"""
 
         text, a = self._get_value()
         return Put(text, a.bind(func))
 
-    def fmap(self, func) -> "IO":
+    def fmap(self, func: Callable[[Any], Any]) -> IO:
         # Put s (fmap f io)
         text, action = self._get_value()
         return Put(text, action.fmap(func))
@@ -89,13 +91,13 @@ class Get(IO):
         self.input_func = input
         self._get_value = lambda: func
 
-    def bind(self, func) -> IO:
+    def bind(self, func: Callable[[Any], "Get"]) -> IO:
         """IO a -> (a -> IO b) -> IO b"""
 
         g = self._get_value()
         return Get(lambda s: g(s).bind(func))
 
-    def fmap(self, func) -> "IO":
+    def fmap(self, func: Callable[[Any], Any]) -> IO:
         # Get (\s -> fmap f (g s))
         g = self._get_value()
         return Get(lambda s: g(s).fmap(func))
@@ -107,7 +109,7 @@ class Get(IO):
         action = func(self.input_func())
         return action()
 
-    def __str__(self, m=0, n=0):
+    def __str__(self, m=0, n=0) -> str:
         g = self._get_value()
         i = "$%s" % n
         a = (g(i)).__str__(m + 2, n + 1)
@@ -115,8 +117,8 @@ class Get(IO):
 
 
 class ReadFile(IO):
-    """A container holding a filename and a function from string -> IO, which
-    can be applied to whatever string is read from the file.
+    """A container holding a filename and a function from string -> IO,
+    which can be applied to whatever string is read from the file.
     """
 
     def __init__(self, filename, func):
@@ -124,13 +126,13 @@ class ReadFile(IO):
         self.open_func = open
         self._get_value = lambda: (filename, func)
 
-    def bind(self, func) -> IO:
+    def bind(self, func: Callable[[Any], "ReadFile"]) -> IO:
         """IO a -> (a -> IO b) -> IO b"""
 
         filename, g = self._get_value()
         return ReadFile(filename, lambda s: g(s).bind(func))
 
-    def fmap(self, func) -> "IO":
+    def fmap(self, func: Callable[[Any], Any]) -> IO:
         # Get (\s -> fmap f (g s))
         filename, g = self._get_value()
         return Get(lambda s: g(s).fmap(func))
@@ -143,7 +145,7 @@ class ReadFile(IO):
         action = func(f.read())
         return action()
 
-    def __str__(self, m=0, n=0):
+    def __str__(self, m=0, n=0) -> str:
         filename, g = self._get_value()
         i = "$%s" % n
         a = (g(i)).__str__(m + 2, n + 1)

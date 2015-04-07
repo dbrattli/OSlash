@@ -1,11 +1,11 @@
-"""
+r"""
 All instances of the Monad typeclass should obey the three monad laws:
 
 Left identity: return a >>= f = f a
 
 Right identity: m >>= return = m
 
-Associativity: (m >>= f) >>= g = m >>= (\\x -> f x >>= g)
+Associativity: (m >>= f) >>= g = m >>= (\x -> f x >>= g)
 """
 
 from abc import ABCMeta, abstractmethod
@@ -46,7 +46,7 @@ class Monad(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def lift_m(self, func) -> "Monad":
+    def lift_m(self, func: Callable[[Any], Any]) -> "Monad":
         """liftM :: (Monad m) => (a -> b) -> m a -> m b
 
         This is really the same function as Functor.fmap, but is instead
@@ -56,7 +56,7 @@ class Monad(metaclass=ABCMeta):
 
         return self.bind(lambda x: self.return_(func(x)))
 
-    def __rshift__(self, other) -> "Monad":
+    def __rshift__(self, func: Callable[[Any], "Monad"]) -> "Monad":
         """Provide the >> operator instead of the Haskell >>= operator"""
 
-        return self.bind(other)
+        return self.bind(func)

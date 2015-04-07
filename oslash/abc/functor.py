@@ -4,8 +4,8 @@ from typing import Callable, Any
 
 
 class Functor(metaclass=ABCMeta):
-    """The Functor class is used for types that can be mapped over. Instances
-    of Functor should satisfy the following laws:
+    """The Functor class is used for types that can be mapped over.
+    Instances of Functor should satisfy the following laws:
 
     fmap id  ==  id
     fmap (f . g)  ==  fmap f . fmap g
@@ -19,12 +19,6 @@ class Functor(metaclass=ABCMeta):
 
         fmap knows how to apply functions to values that are wrapped in
         a context.
-
-        Keyword arguments:
-        :param Functor[A] self: Functor to map
-        :param Callable[[A], B] func: Mapper function
-        :rtype: Functor[B]
-        :return: New Functor[B]
         """
 
         return NotImplemented
@@ -35,14 +29,10 @@ class Functor(metaclass=ABCMeta):
         return self.fmap(other)
 
     @property
-    def value(self: 'Functor') -> Any:
+    def value(self) -> Any:
         """Get value of Functor.
 
         Uses fmap to extract the internal value of the Functor.
-
-        Keyword arguments:
-        :param self: Functor
-        :return: :rtype: Any
         """
         value = None  # type: Any
 
