@@ -1,10 +1,12 @@
 import unittest
 
 from oslash import Reader
+from oslash.reader import MonadReader
 from oslash.util import identity, compose, compose2
 
 pure = Reader.pure
 return_ = Reader.return_
+asks = MonadReader.asks
 
 
 class TestReader(unittest.TestCase):
@@ -13,6 +15,10 @@ class TestReader(unittest.TestCase):
         r = Reader(lambda name: "Hello, %s!" % name)
         greeting = r.run_reader()("adit")
         self.assertEqual(greeting, "Hello, adit!")
+
+    def test_reader_asks(self):
+        a = asks(len).run_reader()("Banana")
+        self.assertEqual(6, a)
 
 
 class TestReaderFunctor(unittest.TestCase):
