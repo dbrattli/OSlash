@@ -25,7 +25,7 @@ class Writer(Monad, Functor):
         fmap f m = Writer $ let (a, w) = runWriter m in (f a, w)
 
         Keyword arguments:
-        :param Callable[[Any], Any] func:
+        func -- Mapper function:
         """
         value, log = self.run_writer()
         return Writer(func(value), log)
