@@ -16,28 +16,34 @@ from typing import Callable, Any
 class Monad(metaclass=ABCMeta):
 
     @abstractmethod
-    def bind(self, func: Callable[[Any], "Monad"]) -> "Monad":
-        """Flat is better than nested.
+    def bind(self, func: Callable[[Any], 'Monad']) -> 'Monad':
+        """Monad bind method.
 
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
 
-        :param Monad[A] self:
-        :param Callable[[A], Monad[B]] func:
-        :rtype: Monad[B]
-        :returns: New Monad wrapping B
+        This is the mother of all methods. It's hard to describe what it
+        does, because it can be used for anything:
+
+        * Transformation, for projecting Monadic values and functions.
+        * Composition, for composing and combining monadic values and
+          functions.
+        * Sequencing, of Monadic functions.
+        * Flattening, of nested Monadic values.
+
+        Returns a new Monad.
         """
 
         return NotImplemented
 
     @classmethod
-    def return_(cls, *args) -> "Monad":
+    def return_(cls, *args) -> 'Monad':
         """return :: a -> m a
 
         Inject a value into the monadic type."""
 
         return cls(*args)
 
-    def join(self) -> "Monad":
+    def join(self) -> 'Monad':
         """join :: Monad m => m (m a) -> m a
 
         The join function is the conventional monad join operator. It is
@@ -46,7 +52,7 @@ class Monad(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def lift_m(self, func: Callable[[Any], Any]) -> "Monad":
+    def lift_m(self, func: Callable[[Any], Any]) -> 'Monad':
         """liftM :: (Monad m) => (a -> b) -> m a -> m b
 
         This is really the same function as Functor.fmap, but is instead
@@ -56,7 +62,18 @@ class Monad(metaclass=ABCMeta):
 
         return self.bind(lambda x: self.return_(func(x)))
 
-    def __rshift__(self, func: Callable[[Any], "Monad"]) -> "Monad":
+    def __rshift__(self, func: Callable[[Any], 'Monad']) -> 'Monad':
         """Provide the >> operator instead of the Haskell >>= operator"""
 
         return self.bind(func)
+
+
+def compose(f: Callable[[Any], Monad], g: Callable[[Any], Monad]) -> Callable[[Any], Monad]:
+    r"""Monadic compose function.
+
+    Right-to-left Kleisli composition of monads.
+
+    (<=<) :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+    f <=< g = \x -> g x >>= f
+    """
+    return lambda x: g(x).bind(f)
