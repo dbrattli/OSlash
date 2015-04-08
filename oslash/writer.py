@@ -3,6 +3,7 @@ from typing import Any, Callable, Tuple
 from .abc import Functor
 from .abc import Monad
 from .abc import Monoid
+from .util import unit
 
 
 class Writer(Monad, Functor):
@@ -73,3 +74,9 @@ class Writer(Monad, Functor):
         value, log = a
         new, entry = func(value)
         return new, log + entry
+
+
+class MonadWriter(Writer):
+        @classmethod
+        def tell(cls, monoid):
+            return cls(unit, monoid)
