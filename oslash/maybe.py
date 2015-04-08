@@ -50,7 +50,7 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 
 class Just(Maybe):
 
-    """A Maybe that conains a value.
+    """A Maybe that contains a value.
 
     Represents a Maybe that contains a value (represented as Just a).
     """
