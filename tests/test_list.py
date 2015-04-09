@@ -2,7 +2,7 @@
 import unittest
 
 from oslash.list import List
-from oslash.util import identity, compose, compose2, UNIT
+from oslash.util import identity, compose, compose2, Unit
 
 pure = List.pure
 unit = List.unit
@@ -207,7 +207,7 @@ class TestListApplicative(unittest.TestCase):
 
         self.assertEquals(
             List(f).apply(v).apply(w),
-            List(UNIT)
+            List(Unit)
         )
 
     def test_list_applicative_binary_func_empty_arg_1(self):

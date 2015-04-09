@@ -9,7 +9,7 @@ from typing import Any, Callable
 from oslash.abc import Applicative
 from oslash.abc import Functor
 from oslash.abc import Monad
-from .util import UNIT
+from .util import Unit
 
 
 class IO(Monad, Applicative, Functor):
@@ -18,7 +18,7 @@ class IO(Monad, Applicative, Functor):
     having an action lying around doesn't make anything happen.
     """
 
-    def __init__(self, value=UNIT):
+    def __init__(self, value=Unit):
         """A container for a value"""
 
         super().__init__()
@@ -157,7 +157,7 @@ def get_line() -> IO:
 
 
 def put_line(string=None) -> IO:
-    return Put(string, IO(UNIT))
+    return Put(string, IO(Unit))
 
 
 def read_file(filename) -> IO:
