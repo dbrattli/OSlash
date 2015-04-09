@@ -8,9 +8,13 @@ from .abc import Monoid
 from .abc import Monad
 
 
-class List(Monad, Monoid, Applicative, Functor, list):
+class List(Monad, Monoid, Applicative, Functor, tuple):
 
-    """The list monad."""
+    """The list monad.
+
+    Wraps an immutable list. This is why it inherits from the Python
+    tuple and not list.
+    """
 
     @classmethod
     def return_(cls, *args):
@@ -18,7 +22,7 @@ class List(Monad, Monoid, Applicative, Functor, list):
         return cls(args)
     pure = return_
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> "List":
+    def fmap(self, mapper: Callable[[Any], Any]) -> 'List':
         """Map a function over a List."""
         try:
             ret = List([mapper(x) for x in self])
