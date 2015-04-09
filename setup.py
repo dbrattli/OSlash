@@ -9,10 +9,10 @@ except ImportError:
 
 setup(
     name='OSlash',
-    version='0.2.0',
+    version='0.3.0',
     description="Ø for Python 3.4",
-    long_description=("is a library for playing with functors, "
-                      "applicatives, and monads in Python."),
+    long_description=("is a functional library for playing with "
+                      "Functors, Applicatives, and Monads in Python."),
     author='Dag Brattli',
     author_email='dag@brattli.net',
     license='Apache License',
