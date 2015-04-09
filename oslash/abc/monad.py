@@ -36,10 +36,12 @@ class Monad(metaclass=ABCMeta):
         return NotImplemented
 
     @classmethod
-    def return_(cls, *args) -> 'Monad':
+    def unit(cls, *args) -> 'Monad':
         """return :: a -> m a .
 
-        Inject a value into the monadic type.
+        Inject a value into the monadic type. Since return is a reserved
+        word in Python, we align with Scala and use the name unit
+        instead.
         """
         return cls(*args)
 

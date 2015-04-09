@@ -3,7 +3,7 @@ from typing import Any, Callable, Tuple
 from .abc import Functor
 from .abc import Monad
 from .abc import Monoid
-from .util import unit
+from .util import UNIT
 
 
 class Writer(Monad, Functor):
@@ -52,7 +52,7 @@ class Writer(Monad, Functor):
         return str(self)
 
     @classmethod
-    def return_(cls, value: "Any", monoid: Monoid=str) -> "Writer":
+    def unit(cls, value: "Any", monoid: Monoid=str) -> "Writer":
         # Get default value for empty log monoid
         log = monoid.mempty() if hasattr(monoid, "mempty") else monoid()
         return cls(value, log)
@@ -79,4 +79,4 @@ class Writer(Monad, Functor):
 class MonadWriter(Writer):
         @classmethod
         def tell(cls, monoid):
-            return cls(unit, monoid)
+            return cls(UNIT, monoid)

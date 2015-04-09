@@ -24,12 +24,12 @@ class Reader(Monad, Applicative, Functor):
         self._get_value = lambda: func
 
     @classmethod
-    def return_(cls, value: "Any") -> "Reader":
+    def unit(cls, value: "Any") -> "Reader":
         """The return function creates a Reader that ignores the
         environment and produces the given value.
         """
         return cls(lambda _: value)
-    pure = return_
+    pure = unit
 
     def fmap(self, mapper: Callable[[Any], Any]) -> "Reader":
         """fmap f m = Reader $ \\r -> f (runReader m r)."""
@@ -124,7 +124,7 @@ class MonadReader(Reader):
 
         asks sel = ask >>= return . sel
         """
-        return cls.ask().bind(Reader(lambda e: cls.return_(func(e))))
+        return cls.ask().bind(Reader(lambda e: cls.unit(func(e))))
 
     def local(self, func):
         r"""local transforms the environment a Reader sees.

@@ -2,22 +2,22 @@
 import unittest
 
 from oslash.list import List
-from oslash.util import identity, compose, compose2, unit
+from oslash.util import identity, compose, compose2, UNIT
 
 pure = List.pure
-return_ = List.return_
+unit = List.unit
 
 
 class TestListFunctor(unittest.TestCase):
 
     def test_list_functor_fmap(self):
         # fmap f (return v) = return (f v)
-        x = return_(42)
+        x = unit(42)
         f = lambda x: x * 10
 
         self.assertEqual(
             x.fmap(f),
-            return_(420)
+            unit(420)
         )
 
         y = List([1, 2, 3, 4])
@@ -32,7 +32,7 @@ class TestListFunctor(unittest.TestCase):
         # fmap id = id
 
         # Singleton list using return
-        x = return_(42)
+        x = unit(42)
         self.assertEqual(
             x.fmap(identity),
             x
@@ -61,7 +61,7 @@ class TestListFunctor(unittest.TestCase):
             return x*10
 
         # Singleton list
-        x = return_(42)
+        x = unit(42)
         self.assertEquals(
             x.fmap(compose(f, g)),
             x.fmap(g).fmap(f)
@@ -88,7 +88,7 @@ class TestListApplicative(unittest.TestCase):
         # pure f <*> x = fmap f x
         f = lambda x: x * 42
 
-        x = return_(42)
+        x = unit(42)
         self.assertEquals(
             pure(f).apply(x),
             x.fmap(f)
@@ -112,7 +112,7 @@ class TestListApplicative(unittest.TestCase):
         # pure id <*> v = v
 
         # Singleton list
-        x = return_(42)
+        x = unit(42)
         self.assertEquals(
             pure(identity).apply(x),
             x
@@ -139,7 +139,7 @@ class TestListApplicative(unittest.TestCase):
         v = pure(lambda x: x + 42)
 
         # Singleton list
-        w = return_(42)
+        w = unit(42)
         self.assertEquals(
             pure(compose2).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
@@ -173,21 +173,21 @@ class TestListApplicative(unittest.TestCase):
 
     def test_list_applicative_binary_func_singleton(self):
         f = lambda x, y: x+y
-        v = return_(2)
-        w = return_(40)
+        v = unit(2)
+        w = unit(40)
 
         self.assertEquals(
             pure(f).apply(v).apply(w),
-            return_(42)
+            unit(42)
         )
 
     def test_list_applicative_unary_func(self):
         f = lambda x: x * 2
-        v = return_(21)
+        v = unit(21)
 
         self.assertEquals(
             pure(f).apply(v),
-            return_(42)
+            unit(42)
         )
 
     def test_list_applicative_binary_func(self):
@@ -202,17 +202,17 @@ class TestListApplicative(unittest.TestCase):
 
     def test_list_applicative_empty_func(self):
         f = []
-        v = return_(42)
+        v = unit(42)
         w = List([1, 2, 3])
 
         self.assertEquals(
             List(f).apply(v).apply(w),
-            List(unit)
+            List(UNIT)
         )
 
     def test_list_applicative_binary_func_empty_arg_1(self):
         f = lambda x, y: x+y
-        v = return_(42)
+        v = unit(42)
         e = List()
 
         self.assertEquals(
@@ -222,7 +222,7 @@ class TestListApplicative(unittest.TestCase):
 
     def test_list_applicative_binary_func_empty_arg_2(self):
         f = lambda x, y: x+y
-        v = return_(42)
+        v = unit(42)
         e = List()
 
         self.assertEquals(
@@ -234,17 +234,17 @@ class TestListApplicative(unittest.TestCase):
 class TestListMonad(unittest.TestCase):
 
     def test_list_monad_bind(self):
-        m = return_(42)
-        f = lambda x: return_(x*10)
+        m = unit(42)
+        f = lambda x: unit(x*10)
 
         self.assertEqual(
             m.bind(f),
-            return_(420)
+            unit(420)
         )
 
     def test_list_monad_empty_bind(self):
         m = List()
-        f = lambda x: return_(x*10)
+        f = lambda x: unit(x*10)
 
         self.assertEqual(
             m.bind(f),
@@ -254,30 +254,30 @@ class TestListMonad(unittest.TestCase):
     def test_list_monad_law_left_identity(self):
         # return x >>= f is the same thing as f x
 
-        f = lambda x: return_(x+100000)
+        f = lambda x: unit(x+100000)
         v = 42
 
         self.assertEqual(
-            return_(v).bind(f),
+            unit(v).bind(f),
             f(v)
         )
 
     def test_list_monad_law_right_identity(self):
         # m >>= return is no different than just m.
 
-        m = return_("move on up")
+        m = unit("move on up")
 
         self.assertEqual(
-            m.bind(return_),
+            m.bind(unit),
             m
         )
 
     def test_list_monad_law_associativity(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        f = lambda x: return_(x+1000)
-        g = lambda y: return_(y*42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
 
-        m = return_(42)
+        m = unit(42)
         self.assertEqual(
             m.bind(f).bind(g),
             m.bind(lambda x: f(x).bind(g))
@@ -285,8 +285,8 @@ class TestListMonad(unittest.TestCase):
 
     def test_list_monad_law_associativity_empty(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        f = lambda x: return_(x+1000)
-        g = lambda y: return_(y*42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
 
         # Empty list
         m = List()
@@ -297,8 +297,8 @@ class TestListMonad(unittest.TestCase):
 
     def test_list_monad_law_associativity_range(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        f = lambda x: return_(x+1000)
-        g = lambda y: return_(y*42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
 
         # Long list
         m = List(range(42))

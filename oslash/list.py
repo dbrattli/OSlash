@@ -17,10 +17,10 @@ class List(Monad, Monoid, Applicative, Functor, tuple):
     """
 
     @classmethod
-    def return_(cls, *args):
+    def unit(cls, *args):
         """ Wraps a value within the singleton list"""
         return cls(args)
-    pure = return_
+    pure = unit
 
     def fmap(self, mapper: Callable[[Any], Any]) -> 'List':
         """Map a function over a List."""

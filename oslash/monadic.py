@@ -30,7 +30,7 @@ def lift(self, func: Callable[[Any], Any]) -> 'Monad':
     Functor.
     """
 
-    return self.bind(lambda x: self.return_(func(x)))
+    return self.bind(lambda x: self.unit(func(x)))
 
 
 @extensionmethod(Monad, decorator=staticmethod)

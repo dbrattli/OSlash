@@ -5,7 +5,7 @@ from oslash.maybe import Maybe, Just, Nothing
 from oslash.util import identity, compose, compose2
 
 pure = Just.pure
-return_ = Just.return_
+unit = Just.unit
 
 
 class TestMaybeFunctor(unittest.TestCase):
@@ -77,7 +77,7 @@ class TestMaybeApplicative(unittest.TestCase):
 
     def test_just_applicative_law_functor(self):
         # pure f <*> x = fmap f x
-        x = return_(42)
+        x = unit(42)
         f = lambda x: x * 42
 
         self.assertEquals(
@@ -97,7 +97,7 @@ class TestMaybeApplicative(unittest.TestCase):
 
     def test_just_applicative_law_identity(self):
         # pure id <*> v = v
-        v = return_(42)
+        v = unit(42)
 
         self.assertEquals(
             pure(identity).apply(v),
@@ -116,7 +116,7 @@ class TestMaybeApplicative(unittest.TestCase):
     def test_just_applicative_law_composition(self):
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
-        w = return_(42)
+        w = unit(42)
         u = pure(lambda x: x * 42)
         v = pure(lambda x: x + 42)
 
@@ -160,7 +160,7 @@ class TestMaybeApplicative(unittest.TestCase):
         # u <*> pure y = pure ($ y) <*> u
 
         y = 43
-        u = return_(lambda x: x*42)
+        u = unit(lambda x: x*42)
 
         self.assertEquals(
             u.apply(pure(y)),
@@ -170,7 +170,7 @@ class TestMaybeApplicative(unittest.TestCase):
     def test_nothing_applicative_law_interchange(self):
         # u <*> pure y = pure ($ y) <*> u
 
-        u = return_(lambda x: x*42)
+        u = unit(lambda x: x*42)
 
         self.assertEquals(
             u.apply(Nothing()),
@@ -229,17 +229,17 @@ class TestMaybeMonoid(unittest.TestCase):
 class TestMaybeMonad(unittest.TestCase):
 
     def test_just_monad_bind(self):
-        m = return_(42)
-        f = lambda x: return_(x*10)
+        m = unit(42)
+        f = lambda x: unit(x*10)
 
         self.assertEqual(
             m.bind(f),
-            return_(420)
+            unit(420)
         )
 
     def test_nothing_monad_bind(self):
         m = Nothing()
-        f = lambda x: return_(x*10)
+        f = lambda x: unit(x*10)
 
         self.assertEqual(
             m.bind(f),
@@ -249,18 +249,18 @@ class TestMaybeMonad(unittest.TestCase):
     def test_just_monad_law_left_identity(self):
         # return x >>= f is the same thing as f x
 
-        f = lambda x: return_(x+100000)
+        f = lambda x: unit(x+100000)
         x = 3
 
         self.assertEqual(
-            return_(x).bind(f),
+            unit(x).bind(f),
             f(x)
         )
 
     def test_nothing_monad_law_left_identity(self):
         # return x >>= f is the same thing as f x
 
-        f = lambda x: return_(x+100000)
+        f = lambda x: unit(x+100000)
 
         self.assertEqual(
             Nothing().bind(f),
@@ -270,10 +270,10 @@ class TestMaybeMonad(unittest.TestCase):
     def test_just_monad_law_right_identity(self):
         # m >>= return is no different than just m.
 
-        m = return_("move on up")
+        m = unit("move on up")
 
         self.assertEqual(
-            m.bind(return_),
+            m.bind(unit),
             m
         )
 
@@ -283,15 +283,15 @@ class TestMaybeMonad(unittest.TestCase):
         m = Nothing()
 
         self.assertEqual(
-            m.bind(return_),
+            m.bind(unit),
             m
         )
 
     def test_just_monad_law_associativity(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        m = return_(42)
-        f = lambda x: return_(x+1000)
-        g = lambda y: return_(y*42)
+        m = unit(42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
 
         self.assertEqual(
             m.bind(f).bind(g),
@@ -301,8 +301,8 @@ class TestMaybeMonad(unittest.TestCase):
     def test_nothing_monad_law_associativity(self):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
         m = Nothing()
-        f = lambda x: return_(x+1000)
-        g = lambda y: return_(y*42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
 
         self.assertEqual(
             m.bind(f).bind(g),
