@@ -1,6 +1,7 @@
 # Functors, Applicatives, And Monads in Python
 
-Ø is an attempt to re-implement some of the code from 
+Ø is a library for playing with functional programming in Python. It's
+an attempt to re-implement some of the code from
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
 Python 3.4. The project currently contains implementations for:
 
@@ -69,8 +70,8 @@ if __name__ == "__main__":
     main()
 ```
 
-## Tutorial
+## Tutorials
 
-Please take a look at the [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) 
+Please take a look at the [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures)
 in Python. It's a translation of the excellent [Functors, Applicatives, And Monads In Pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)
 in Haskell.

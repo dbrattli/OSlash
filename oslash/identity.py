@@ -12,7 +12,7 @@ class Identity(Monad, Applicative, Functor):
     """The Identity monad.
 
     The Identity monad is the simplest monad, which attaches no
-    information to values..
+    information to values.
     """
 
     def __init__(self, value: "Any"):
