@@ -21,16 +21,16 @@ Python 3.4. The project currently contains implementations for:
  - Writer
  - Reader
 
-Yes, I know there are other projects out there like 
-[PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing 
-this in order to better understand the book. It's so much easier to learn when 
-you implement things yourself. The code may be similar to PyMonad in structure, 
+Yes, I know there are other projects out there like
+[PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing
+this in order to better understand the book. It's so much easier to learn when
+you implement things yourself. The code may be similar to PyMonad in structure,
 but is quite different in implementation.
 
-Why is the project called OSlash? OSlash is the Norwegian character called 
-[Oslash](http://en.wikipedia.org/wiki/Ø). Initially I wanted to create a 
-project that used Ø and ø (unicode) for the project name and modules. It didn't 
-work out well, so I renamed it to Oslash. 
+Why is the project called OSlash? OSlash is the Norwegian character called
+[Oslash](http://en.wikipedia.org/wiki/Ø). Initially I wanted to create a
+project that used Ø and ø (unicode) for the project name and modules. It didn't
+work out well, so I renamed it to Oslash.
 
 ## Examples
 
