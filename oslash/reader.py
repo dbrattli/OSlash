@@ -17,9 +17,9 @@ class Reader(Monad, Applicative, Functor):
     """
 
     def __init__(self, func: Callable):
-        """Initialize a new reader.
+        r"""Initialize a new reader.
 
-        return a = Reader $ \\_ -> a
+        return a = Reader $ \_ -> a
         """
         self._get_value = lambda: func
 
@@ -44,12 +44,12 @@ class Reader(Monad, Applicative, Functor):
         return Reader(_)  # lambda r: mapper(func(r)))
 
     def bind(self, func: "Callable[[Any], Reader]") -> "Reader":
-        """m >>= k  = Reader $ \\r -> runReader (k (runReader m r)) r
+        r"""m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r
         """
         return Reader(lambda r: (func(self.run_reader()(r))).run_reader()(r))
 
     def apply(self, something: "Reader") -> "Reader":
-        """(<*>) :: f (a -> b) -> f a -> f b.
+        r"""(<*>) :: f (a -> b) -> f a -> f b.
 
         (R f) <*> (R x) = R $ \e -> (f e) (x e)
 
