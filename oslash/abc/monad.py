@@ -45,9 +45,9 @@ class Monad(metaclass=ABCMeta):
         """
         return cls(*args)
 
-    def __rshift__(self, func: Callable[[Any], 'Monad']) -> 'Monad':
+    def __or__(self, func: Callable[[Any], 'Monad']) -> 'Monad':
         """Use >> as operator for bind.
 
-        Provide the >> operator instead of the Haskell >>= operator
+        Provide the | operator instead of the Haskell >>= operator
         """
         return self.bind(func)
