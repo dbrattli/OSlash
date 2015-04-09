@@ -11,7 +11,7 @@ from oslash.abc import Monad
 class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
 
     @abstractmethod
-    def fmap(self, _) -> "Either":
+    def map(self, _) -> "Either":
         return NotImplemented
 
     @abstractmethod
@@ -31,7 +31,7 @@ class Right(Either):
     def __init__(self, value):
         self._get_value = lambda: value
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> Either:
+    def map(self, mapper: Callable[[Any], Any]) -> Either:
         value = self._get_value()
         try:
             result = mapper(value)
@@ -41,7 +41,7 @@ class Right(Either):
         return Right(result)
 
     def apply(self, something: Either) -> Either:
-        return something.fmap(self._get_value())
+        return something.map(self._get_value())
 
     def bind(self, func: Callable[[Any], Either]) -> Either:
         return func(self._get_value())
@@ -60,7 +60,7 @@ class Left(Either):
     def __init__(self, value: Any):
         self._get_value = lambda: value
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> Either:
+    def map(self, mapper: Callable[[Any], Any]) -> Either:
         try:
             mapper(self._get_value())  # TODO: fixme
         except TypeError:

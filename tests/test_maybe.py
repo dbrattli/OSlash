@@ -9,28 +9,28 @@ unit = Just.unit
 
 
 class TestMaybeFunctor(unittest.TestCase):
-    def test_just_functor_fmap(self):
+    def test_just_functor_map(self):
         f = lambda x: x*2
         x = Just(21)
 
         self.assertEquals(
-            x.fmap(f),
+            x.map(f),
             Just(42)
         )
 
-    def test_nothing_functor_fmap(self):
+    def test_nothing_functor_map(self):
         f = lambda x: x+2
         x = Nothing()
 
         self.assertEquals(
-            x.fmap(f),
+            x.map(f),
             x
         )
 
     def test_nothing_functor_law1(self):
         # fmap id = id
         self.assertEquals(
-            Nothing().fmap(identity),
+            Nothing().map(identity),
             Nothing()
         )
 
@@ -38,7 +38,7 @@ class TestMaybeFunctor(unittest.TestCase):
         # fmap id = id
         x = Just(3)
         self.assertEquals(
-            x.fmap(identity),
+            x.map(identity),
             x
         )
 
@@ -53,8 +53,8 @@ class TestMaybeFunctor(unittest.TestCase):
         x = Just(42)
 
         self.assertEquals(
-            x.fmap(compose(f, g)),
-            x.fmap(g).fmap(f)
+            x.map(compose(f, g)),
+            x.map(g).map(f)
         )
 
     def test_nothing_functor_law2(self):
@@ -68,8 +68,8 @@ class TestMaybeFunctor(unittest.TestCase):
         x = Nothing()
 
         self.assertEquals(
-            x.fmap(compose(f, g)),
-            x.fmap(g).fmap(f)
+            x.map(compose(f, g)),
+            x.map(g).map(f)
         )
 
 
@@ -82,7 +82,7 @@ class TestMaybeApplicative(unittest.TestCase):
 
         self.assertEquals(
             pure(f).apply(x),
-            x.fmap(f)
+            x.map(f)
         )
 
     def test_nothing_applicative_law_functor(self):
@@ -92,7 +92,7 @@ class TestMaybeApplicative(unittest.TestCase):
 
         self.assertEquals(
             pure(f).apply(x),
-            x.fmap(f)
+            x.map(f)
         )
 
     def test_just_applicative_law_identity(self):
@@ -193,35 +193,35 @@ class TestMaybeApplicative(unittest.TestCase):
 
 class TestMaybeMonoid(unittest.TestCase):
 
-    def test_maybe_monoid_nothing_mappend_just(self):
+    def test_maybe_monoid_nothing_append_just(self):
         m = Just("Python")
 
         self.assertEquals(
-            Nothing().mappend(m),
+            Nothing().append(m),
             m
         )
 
-    def test_maybe_monoid_just_mappend_nothing(self):
+    def test_maybe_monoid_just_append_nothing(self):
         m = Just("Python")
 
         self.assertEquals(
-            m.mappend(Nothing()),
+            m.append(Nothing()),
             m
         )
 
-    def test_maybe_monoid_just_mappend_just(self):
+    def test_maybe_monoid_just_append_just(self):
         m = Just("Python")
         n = Just(" rocks!")
 
         self.assertEquals(
-            m.mappend(n),
+            m.append(n),
             Just("Python rocks!")
         )
 
-    def test_maybe_monoid_mconcat(self):
+    def test_maybe_monoid_concat(self):
 
         self.assertEquals(
-            Maybe.mconcat([Just(2), Just(40)]),
+            Maybe.concat([Just(2), Just(40)]),
             Just(42)
         )
 

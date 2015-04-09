@@ -46,7 +46,7 @@ Just 5
 
 Python:
 ```python
->>> Just(2).fmap(lambda x: x+3)
+>>> Just(2).map(lambda x: x+3)
 Just 5
 
 >>> (lambda x: x+3) % Just(2)

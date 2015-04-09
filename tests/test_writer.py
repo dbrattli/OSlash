@@ -6,12 +6,12 @@ from oslash import Writer
 class TestWriterMonad(unittest.TestCase):
     def test_writer_return(self):
         w = Writer.unit(42)
-        self.assertEqual(w.run_writer(), (42, ""))
+        self.assertEqual(w.run(), (42, ""))
 
     def test_writer_unitint_log(self):
         IntWriter = Writer.factory("IntWriter", int)
         w = IntWriter.unit(42)
-        self.assertEqual(w.run_writer(), (42, 0))
+        self.assertEqual(w.run(), (42, 0))
 
     def test_writer_monad_bind(self):
         entry = "Multiplied by 10"
@@ -34,6 +34,11 @@ class TestWriterMonad(unittest.TestCase):
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
         add1000 = "Added 1000 to %s"
         mul100 = "Multiplied %s by 100"
-        a = Writer.unit(42).bind(lambda x: Writer(x+1000, add1000 % x)).bind(lambda y: Writer(y*100, mul100 % y))
-        b = Writer.unit(42).bind(lambda x: Writer(x+1000, add1000 % x).bind(lambda y: Writer(y*100, mul100 % y)))
+        a = Writer.unit(42).bind(
+            lambda x: Writer(x+1000, add1000 % x)).bind(
+            lambda y: Writer(y*100, mul100 % y))
+        b = Writer.unit(42).bind(
+            lambda x: Writer(x+1000, add1000 % x).bind(
+                lambda y: Writer(y*100, mul100 % y)
+            ))
         self.assertEqual(a, b)

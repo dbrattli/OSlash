@@ -22,12 +22,12 @@ unit = Identity.unit
 
 class TestIdentityFunctor(unittest.TestCase):
 
-    def test_identity_functor_fmap(self):
+    def test_identity_functor_map(self):
         x = unit(42)
         f = lambda x: x * 10
 
         self.assertEqual(
-            x.fmap(f),
+            x.map(f),
             unit(420)
         )
 
@@ -36,7 +36,7 @@ class TestIdentityFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEqual(
-            x.fmap(identity),
+            x.map(identity),
             x
         )
 
@@ -51,8 +51,8 @@ class TestIdentityFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEquals(
-            x.fmap(compose(f, g)),
-            x.fmap(g).fmap(f)
+            x.map(compose(f, g)),
+            x.map(g).map(f)
         )
 
 
@@ -65,7 +65,7 @@ class TestIdentityApplicative(unittest.TestCase):
 
         self.assertEquals(
             pure(f).apply(x),
-            x.fmap(f)
+            x.map(f)
         )
 
     def test_identity_applicative_law_identity(self):

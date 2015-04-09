@@ -10,13 +10,13 @@ unit = List.unit
 
 class TestListFunctor(unittest.TestCase):
 
-    def test_list_functor_fmap(self):
+    def test_list_functor_map(self):
         # fmap f (return v) = return (f v)
         x = unit(42)
         f = lambda x: x * 10
 
         self.assertEqual(
-            x.fmap(f),
+            x.map(f),
             unit(420)
         )
 
@@ -24,7 +24,7 @@ class TestListFunctor(unittest.TestCase):
         g = lambda x: x * 10
 
         self.assertEqual(
-            y.fmap(g),
+            y.map(g),
             List([10, 20, 30, 40])
         )
 
@@ -34,21 +34,21 @@ class TestListFunctor(unittest.TestCase):
         # Singleton list using return
         x = unit(42)
         self.assertEqual(
-            x.fmap(identity),
+            x.map(identity),
             x
         )
 
         # Empty list
         y = List()
         self.assertEqual(
-            y.fmap(identity),
+            y.map(identity),
             y
         )
 
         # Long list
         z = List(range(42))
         self.assertEqual(
-            z.fmap(identity),
+            z.map(identity),
             z
         )
 
@@ -63,22 +63,22 @@ class TestListFunctor(unittest.TestCase):
         # Singleton list
         x = unit(42)
         self.assertEquals(
-            x.fmap(compose(f, g)),
-            x.fmap(g).fmap(f)
+            x.map(compose(f, g)),
+            x.map(g).map(f)
         )
 
         # Empty list
         y = List([])
         self.assertEquals(
-            y.fmap(compose(f, g)),
-            y.fmap(g).fmap(f)
+            y.map(compose(f, g)),
+            y.map(g).map(f)
         )
 
         # Long list
         z = List(range(42))
         self.assertEquals(
-            z.fmap(compose(f, g)),
-            z.fmap(g).fmap(f)
+            z.map(compose(f, g)),
+            z.map(g).map(f)
         )
 
 
@@ -91,21 +91,21 @@ class TestListApplicative(unittest.TestCase):
         x = unit(42)
         self.assertEquals(
             pure(f).apply(x),
-            x.fmap(f)
+            x.map(f)
         )
 
         # Empty list
         z = List()
         self.assertEquals(
             pure(f).apply(z),
-            z.fmap(f)
+            z.map(f)
         )
 
         # Long list
         z = List(range(42))
         self.assertEquals(
             pure(f).apply(z),
-            z.fmap(f)
+            z.map(f)
         )
 
     def test_list_applicative_law_identity(self):

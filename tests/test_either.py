@@ -5,18 +5,18 @@ from oslash.either import Right, Left
 
 class TestEither(unittest.TestCase):
 
-    def test_either_right_fmap(self):
-        a = Right(42).fmap(lambda x: x*10)
+    def test_either_right_map(self):
+        a = Right(42).map(lambda x: x*10)
         self.assertEqual(a, Right(420))
 
-    def test_either_left_fmap(self):
-        a = Left(42).fmap(lambda x: x*10)
+    def test_either_left_map(self):
+        a = Left(42).map(lambda x: x*10)
         self.assertEqual(a, Left(42))
 
     def test_either_right_functor_law1(self):
         """fmap id = id"""
 
-        self.assertEquals(Right(3).fmap(lambda x: x), Right(3))
+        self.assertEquals(Right(3).map(lambda x: x), Right(3))
 
     def test_either_right_functor_law2(self):
         """fmap (f . g) x = fmap f (fmap g x)"""
@@ -27,14 +27,14 @@ class TestEither(unittest.TestCase):
             return x*10
 
         self.assertEquals(
-            Right(42).fmap(f).fmap(g),
-            Right(42).fmap(lambda x: g(f(x)))
+            Right(42).map(f).map(g),
+            Right(42).map(lambda x: g(f(x)))
         )
 
     def test_either_left_functor_law1(self):
         """fmap id = id"""
 
-        self.assertEquals(Left(3).fmap(lambda x: x), Left(3))
+        self.assertEquals(Left(3).map(lambda x: x), Left(3))
 
     def test_either_left_functor_law2(self):
         """fmap (f . g) x = fmap f (fmap g x)"""
@@ -45,8 +45,8 @@ class TestEither(unittest.TestCase):
             return x*10
 
         self.assertEquals(
-            Left(42).fmap(f).fmap(g),
-            Left(42).fmap(lambda x: g(f(x)))
+            Left(42).map(f).map(g),
+            Left(42).map(lambda x: g(f(x)))
         )
 
     def test_right_applicative_1(self):

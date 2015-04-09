@@ -14,16 +14,16 @@ class Monoid(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def mempty(cls) -> "Monoid":
+    def empty(cls) -> "Monoid":
         """mempty :: m
 
-        The empty element and identity of mappend.
+        The empty element and identity of append.
         """
 
         return NotImplemented
 
     @abstractmethod
-    def mappend(self, other: "Monoid") -> "Monoid":
+    def append(self, other: "Monoid") -> "Monoid":
         """mappend :: m -> m -> m
 
         An associative operation
@@ -32,10 +32,10 @@ class Monoid(metaclass=ABCMeta):
         return NotImplemented
 
     def __add__(self, other):
-        return self.mappend(other)
+        return self.append(other)
 
     @classmethod
-    def mconcat(cls, xs) -> "Monoid":
+    def concat(cls, xs) -> "Monoid":
         """mconcat :: [m] -> m
 
         Fold a list using the monoid. For most types, the default
@@ -44,5 +44,5 @@ class Monoid(metaclass=ABCMeta):
         can be provided for specific types.
         """
 
-        reducer = lambda a, b: a.mappend(b)
-        return reduce(reducer, xs, cls.mempty())
+        reducer = lambda a, b: a.append(b)
+        return reduce(reducer, xs, cls.empty())

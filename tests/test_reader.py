@@ -11,24 +11,24 @@ asks = MonadReader.asks
 
 class TestReader(unittest.TestCase):
 
-    def test_reader_run_reader(self):
+    def test_reader_run(self):
         r = Reader(lambda name: "Hello, %s!" % name)
-        greeting = r.run_reader()("adit")
+        greeting = r.run()("adit")
         self.assertEqual(greeting, "Hello, adit!")
 
     def test_reader_asks(self):
-        a = asks(len).run_reader()("Banana")
+        a = asks(len).run()("Banana")
         self.assertEqual(6, a)
 
 
 class TestReaderFunctor(unittest.TestCase):
 
-    def test_reader_functor_fmap(self):
+    def test_reader_functor_map(self):
         x = unit(42)
         f = lambda x: x * 10
 
         self.assertEqual(
-            x.fmap(f),
+            x.map(f),
             unit(420)
         )
 
@@ -37,7 +37,7 @@ class TestReaderFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEqual(
-            x.fmap(identity),
+            x.map(identity),
             x
         )
 
@@ -52,8 +52,8 @@ class TestReaderFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEquals(
-            x.fmap(compose(f, g)),
-            x.fmap(g).fmap(f)
+            x.map(compose(f, g)),
+            x.map(g).map(f)
         )
 
 
@@ -66,7 +66,7 @@ class TestReaderApplicative(unittest.TestCase):
 
         self.assertEquals(
             pure(f).apply(x),
-            x.fmap(f)
+            x.map(f)
         )
 
     def test_reader_applicative_law_identity(self):

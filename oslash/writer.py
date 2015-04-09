@@ -19,7 +19,7 @@ class Writer(Monad, Functor):
 
         self._get_value = lambda: (value, log)
 
-    def fmap(self, func: Callable[[Any], Any]) -> "Writer":
+    def map(self, func: Callable[[Any], Any]) -> "Writer":
         """Map a function func over the Writer value.
 
         Haskell:
@@ -28,7 +28,7 @@ class Writer(Monad, Functor):
         Keyword arguments:
         func -- Mapper function:
         """
-        value, log = self.run_writer()
+        value, log = self.run()
         return Writer(func(value), log)
 
     def bind(self, func: Callable[[Any], "Writer"]) -> "Writer":
@@ -36,17 +36,17 @@ class Writer(Monad, Functor):
 
         Haskell:
         (Writer (x, v)) >>= f = let
-            (Writer (y, v')) = f x in Writer (y, v `mappend` v')
+            (Writer (y, v')) = f x in Writer (y, v `append` v')
         """
-        a, w = self.run_writer()
-        b, w_ = func(a).run_writer()
+        a, w = self.run()
+        b, w_ = func(a).run()
         return Writer(b, w + w_)
 
     def __eq__(self, other: "Writer") -> bool:
-        return self.run_writer() == other.run_writer()
+        return self.run() == other.run()
 
     def __str__(self) -> str:
-        return "%s :: %s" % self.run_writer()
+        return "%s :: %s" % self.run()
 
     def __repr__(self) -> str:
         return str(self)
@@ -61,7 +61,7 @@ class Writer(Monad, Functor):
         """
         return cls(value, log="")
 
-    def run_writer(self) -> tuple:
+    def run(self) -> tuple:
         """Extract value from Writer.
 
         This is the inverse function of the constructor and converts the
@@ -95,8 +95,8 @@ def factory(cls, class_name, monoid_type=str):
     """
 
     def unit(cls, value):
-        if hasattr(monoid_type, "mempty"):
-            log = monoid_type.mempty()
+        if hasattr(monoid_type, "empty"):
+            log = monoid_type.empty()
         else:
             log = monoid_type()
 

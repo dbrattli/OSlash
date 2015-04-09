@@ -14,7 +14,7 @@ class Functor(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def fmap(self, func: Callable[[Any], Any]) -> "Functor":
+    def map(self, func: Callable[[Any], Any]) -> "Functor":
         """Map a function over wrapped values.
 
         fmap knows how to apply functions to values that are wrapped in
@@ -26,7 +26,7 @@ class Functor(metaclass=ABCMeta):
     def __rmod__(self, other) -> "Functor":
         """Infix version of fmap. <$> in Haskell"""
 
-        return self.fmap(other)
+        return self.map(other)
 
     @property
     def value(self) -> Any:
@@ -39,5 +39,5 @@ class Functor(metaclass=ABCMeta):
         def mapper(x):
             nonlocal value
             value = x
-        self.fmap(mapper)
+        self.map(mapper)
         return value

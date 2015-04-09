@@ -31,9 +31,9 @@ class Reader(Monad, Applicative, Functor):
         return cls(lambda _: value)
     pure = unit
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> "Reader":
+    def map(self, mapper: Callable[[Any], Any]) -> "Reader":
         """fmap f m = Reader $ \\r -> f (runReader m r)."""
-        func = self.run_reader()
+        func = self.run()
 
         def _(env):
             try:
@@ -46,7 +46,7 @@ class Reader(Monad, Applicative, Functor):
     def bind(self, func: "Callable[[Any], Reader]") -> "Reader":
         r"""m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r
         """
-        return Reader(lambda r: (func(self.run_reader()(r))).run_reader()(r))
+        return Reader(lambda r: (func(self.run()(r))).run()(r))
 
     def apply(self, something: "Reader") -> "Reader":
         r"""(<*>) :: f (a -> b) -> f a -> f b.
@@ -59,8 +59,8 @@ class Reader(Monad, Applicative, Functor):
         one.
         """
 
-        func = self.run_reader()
-        x = something.run_reader()
+        func = self.run()
+        x = something.run()
 
         def _(env):
             f = func(env)
@@ -72,7 +72,7 @@ class Reader(Monad, Applicative, Functor):
 
         return Reader(_)  # lambda env: f(env)(x(env)))
 
-    def run_reader(self) -> Callable:
+    def run(self) -> Callable:
         """The inverse of the Reader constructor
 
         runReader :: Reader r a -> r -> a
@@ -80,7 +80,7 @@ class Reader(Monad, Applicative, Functor):
         return self._get_value()
 
     def __call__(self, *args, **kwargs) -> "Any":
-        func = self.run_reader()
+        func = self.run()
         return func(*args, **kwargs)
 
     def __eq__(self, other) -> bool:
@@ -131,4 +131,4 @@ class MonadReader(Reader):
 
         local f c = Reader $ \e -> runReader c (f e)
         """
-        return Reader(lambda e: self.run_reader()(func(e)))
+        return Reader(lambda e: self.run()(func(e)))

@@ -25,7 +25,7 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
         return NotImplemented
 
     @abstractmethod
-    def fmap(self, mapper: Callable[[Any], Any]) -> "Maybe":
+    def map(self, mapper: Callable[[Any], Any]) -> "Maybe":
         return NotImplemented
 
     @abstractmethod
@@ -33,11 +33,11 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
         return NotImplemented
 
     @classmethod
-    def mempty(cls) -> "Maybe":
+    def empty(cls) -> "Maybe":
         return Nothing()
 
     @abstractmethod
-    def mappend(self, other: "Maybe") -> "Maybe":
+    def append(self, other: "Maybe") -> "Maybe":
         return NotImplemented
 
     @abstractmethod
@@ -58,7 +58,7 @@ class Just(Maybe):
     def __init__(self, value):
         self._get_value = lambda: value
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> "Just":
+    def map(self, mapper: Callable[[Any], Any]) -> "Just":
         # fmap f (Just x) = Just (f x)
 
         value = self._get_value()
@@ -70,22 +70,22 @@ class Just(Maybe):
         return Just(result)
 
     def apply(self, something: Maybe) -> Maybe:
-        return something.fmap(self._get_value())
+        return something.map(self._get_value())
 
-    def mappend(self, other: Maybe) -> Maybe:
-        # m `mappend` Nothing = m
+    def append(self, other: Maybe) -> Maybe:
+        # m `append` Nothing = m
         if isinstance(other, Nothing):
             return self
 
         other_value = other.value
 
-        # Use + for append if no mappend
+        # Use + for append if no append
         value = self._get_value()
-        if not hasattr(other_value, "mappend"):
+        if not hasattr(other_value, "append"):
             return Just(value + other_value)
 
-        # Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
-        return Just(value.mappend(other_value))
+        # Just m1 `append` Just m2 = Just (m1 `append` m2)
+        return Just(value.append(other_value))
 
     def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
         """Just x >>= f = f x"""
@@ -108,13 +108,13 @@ class Nothing(Maybe):
     the value of Nothing).
     """
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> Maybe:
+    def map(self, mapper: Callable[[Any], Any]) -> Maybe:
         return Nothing()
 
     def apply(self, other: Maybe) -> Maybe:
         return Nothing()
 
-    def mappend(self, other: Maybe) -> Maybe:
+    def append(self, other: Maybe) -> Maybe:
         return other
 
     def bind(self, func: Callable[[Any], Maybe]) -> Maybe:

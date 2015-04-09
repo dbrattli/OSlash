@@ -19,7 +19,7 @@ class Identity(Monad, Applicative, Functor):
         """Initialize a new reader."""
         self._get_value = lambda: value
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> "Identity":
+    def map(self, mapper: Callable[[Any], Any]) -> "Identity":
         """Map a function over wrapped values."""
         value = self._get_value()
         try:
@@ -34,13 +34,13 @@ class Identity(Monad, Applicative, Functor):
 
     def apply(self, something: "Identity") -> "Identity":
         func = self._get_value()
-        return something.fmap(func)
+        return something.map(func)
 
-    def run_identity(self) -> Any:
+    def run(self) -> Any:
         return self._get_value()
 
     def __call__(self) -> Any:
-        return self.run_identity()
+        return self.run()
 
     def __eq__(self, other: "Identity") -> bool:
         value = self._get_value()

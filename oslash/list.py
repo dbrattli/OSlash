@@ -22,7 +22,7 @@ class List(Monad, Monoid, Applicative, Functor, tuple):
         return cls(args)
     pure = unit
 
-    def fmap(self, mapper: Callable[[Any], Any]) -> 'List':
+    def map(self, mapper: Callable[[Any], Any]) -> 'List':
         """Map a function over a List."""
         try:
             ret = List([mapper(x) for x in self])
@@ -40,14 +40,14 @@ class List(Monad, Monoid, Applicative, Functor, tuple):
         return List(xs)
 
     @classmethod
-    def mempty(cls) -> "List":
+    def empty(cls) -> "List":
         """Create an empty list"""
         return cls([])
 
-    def mappend(self, other: "List"):
+    def append(self, other: "List"):
         """Append a list to this list"""
         return List(list(self) + list(other))
 
     def bind(self, func: Callable[[Any], "List"]) -> "List":
         # xs >>= f = concat (map f xs)
-        return List.mconcat(self.fmap(func))  # aka flat_map
+        return List.concat(self.map(func))  # aka flat_map

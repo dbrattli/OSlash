@@ -6,9 +6,9 @@ http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 
 from typing import Any, Callable
 
-from oslash.abc import Applicative
-from oslash.abc import Functor
-from oslash.abc import Monad
+from .abc import Applicative
+from .abc import Functor
+from .abc import Monad
 from .util import Unit
 
 
@@ -30,9 +30,9 @@ class IO(Monad, Applicative, Functor):
         return func(self._get_value())
 
     def apply(self, something) -> "IO":
-        return something.fmap(self._get_value())
+        return something.map(self._get_value())
 
-    def fmap(self, func) -> "IO":
+    def map(self, func) -> "IO":
         return IO(func(self._get_value()))
 
     def __call__(self, *args, **kwargs):
@@ -63,10 +63,10 @@ class Put(IO):
         text, a = self._get_value()
         return Put(text, a.bind(func))
 
-    def fmap(self, func: Callable[[Any], Any]) -> IO:
+    def map(self, func: Callable[[Any], Any]) -> IO:
         # Put s (fmap f io)
         text, action = self._get_value()
-        return Put(text, action.fmap(func))
+        return Put(text, action.map(func))
 
     def __call__(self, *args, **kwargs):
         """Run IO action"""
@@ -97,10 +97,10 @@ class Get(IO):
         g = self._get_value()
         return Get(lambda s: g(s).bind(func))
 
-    def fmap(self, func: Callable[[Any], Any]) -> IO:
+    def map(self, func: Callable[[Any], Any]) -> IO:
         # Get (\s -> fmap f (g s))
         g = self._get_value()
-        return Get(lambda s: g(s).fmap(func))
+        return Get(lambda s: g(s).map(func))
 
     def __call__(self, *args, **kwargs):
         """Run IO Action"""
@@ -132,10 +132,10 @@ class ReadFile(IO):
         filename, g = self._get_value()
         return ReadFile(filename, lambda s: g(s).bind(func))
 
-    def fmap(self, func: Callable[[Any], Any]) -> IO:
+    def map(self, func: Callable[[Any], Any]) -> IO:
         # Get (\s -> fmap f (g s))
         filename, g = self._get_value()
-        return Get(lambda s: g(s).fmap(func))
+        return Get(lambda s: g(s).map(func))
 
     def __call__(self, *args, **kwargs):
         """Run IO Action"""
