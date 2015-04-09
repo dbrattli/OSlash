@@ -1,7 +1,8 @@
 import unittest
 
-from oslash import Writer, MonadWriter
-from oslash.abc.monad import compose
+from oslash import Monad, Writer, MonadWriter
+
+compose = Monad.compose
 
 
 class TestMonadMonadic(unittest.TestCase):

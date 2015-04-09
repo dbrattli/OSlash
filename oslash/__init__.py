@@ -8,4 +8,6 @@ from .writer import Writer, MonadWriter
 from .reader import Reader, MonadReader
 from .identity import Identity
 
+from .monadic import *
+
 from .util import compose
