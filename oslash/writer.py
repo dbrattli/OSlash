@@ -3,7 +3,7 @@ from typing import Any, Callable, Tuple
 from .abc import Functor
 from .abc import Monad
 from .abc import Monoid
-from .util import UNIT
+from .util import Unit, extensionclassmethod
 
 
 class Writer(Monad, Functor):
@@ -52,10 +52,14 @@ class Writer(Monad, Functor):
         return str(self)
 
     @classmethod
-    def unit(cls, value: "Any", monoid: Monoid=str) -> "Writer":
-        # Get default value for empty log monoid
-        log = monoid.mempty() if hasattr(monoid, "mempty") else monoid()
-        return cls(value, log)
+    def unit(cls, value: "Any") -> "Writer":
+        """Wrap a single value in a Writer.
+
+        Use the factory method to create *Writer classes that
+        uses a different monoid than str, or use the constructor
+        directly.
+        """
+        return cls(value, log="")
 
     def run_writer(self) -> tuple:
         """Extract value from Writer.
@@ -78,5 +82,24 @@ class Writer(Monad, Functor):
 
 class MonadWriter(Writer):
         @classmethod
-        def tell(cls, monoid):
-            return cls(UNIT, monoid)
+        def tell(cls, log):
+            return cls(Unit, log)
+
+
+@extensionclassmethod(Writer)
+def factory(cls, class_name, monoid_type=str):
+    """Create Writer subclass using specified monoid type.
+
+    lets us create a Writer that uses a different monoid than str for
+    the log.
+    """
+
+    def unit(cls, value):
+        if hasattr(monoid_type, "mempty"):
+            log = monoid_type.mempty()
+        else:
+            log = monoid_type()
+
+        return cls(value, log)
+
+    return type(class_name, (Writer,), dict(unit=classmethod(unit)))
