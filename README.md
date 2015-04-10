@@ -3,7 +3,9 @@
 Ø is a library for playing with functional programming in Python. It's
 an attempt to re-implement some of the code from
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
-Python 3.4. The project currently contains implementations for:
+Python 3.4.
+
+The project currently contains implementations for:
 
 ## Abstract Base Classes
 
@@ -21,6 +23,16 @@ Python 3.4. The project currently contains implementations for:
  - IO Action
  - Writer
  - Reader
+
+## Monadic functions
+
+- lift
+- join, for removing one level of monadic structure
+- compose, for composing monadic functions
+
+## Utility functions
+
+ - compose, for composing 0 to n functions
 
 Yes, I know there are other projects out there like
 [PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing
@@ -72,6 +84,5 @@ if __name__ == "__main__":
 
 ## Tutorials
 
-Please take a look at the [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures)
-in Python. It's a translation of the excellent [Functors, Applicatives, And Monads In Pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)
-in Haskell.
+* [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
+* [Three Useful Monads](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads)_(in progress)_
