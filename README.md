@@ -23,6 +23,7 @@ The project currently contains implementations for:
  - IO Action
  - Writer
  - Reader
+ - State
 
 ## Monadic functions
 
@@ -85,4 +86,4 @@ if __name__ == "__main__":
 ## Tutorials
 
 * [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
-* [Three Useful Monads](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads)_(in progress)_
+* [Three Useful Monads](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads) _(in progress)_

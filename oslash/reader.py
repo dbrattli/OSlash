@@ -16,20 +16,23 @@ class Reader(Monad, Applicative, Functor):
     lets us access shared immutable state within a monadic context.
     """
 
-    def __init__(self, func: Callable):
+    def __init__(self, fn: Callable):
         r"""Initialize a new reader.
 
         return a = Reader $ \_ -> a
         """
-        self._get_value = lambda: func
+        self._get_value = lambda: fn
 
     @classmethod
-    def unit(cls, value: "Any") -> "Reader":
+    def unit(cls, value: Any) -> "Reader":
         """The return function creates a Reader that ignores the
         environment and produces the given value.
         """
         return cls(lambda _: value)
-    pure = unit
+
+    @classmethod
+    def pure(cls, fn: Callable) -> 'Reader':
+        return cls.unit(fn)
 
     def map(self, mapper: Callable[[Any], Any]) -> "Reader":
         """fmap f m = Reader $ \\r -> f (runReader m r)."""
