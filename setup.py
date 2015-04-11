@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
     name='OSlash',
-    version='0.3.0',
+    version='0.4.0',
     description="Ø for Python 3.4",
     long_description=("is a functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),
@@ -22,8 +22,8 @@ setup(
     install_requires=["mypy-lang"],
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: 3 - Alpha',
-        # 'Development Status :: 4 - Beta',
+        # 'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         # 'Development Status :: 5 - Production/Stable',
         'Environment :: Other Environment',
         'Intended Audience :: Developers',

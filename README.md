@@ -9,10 +9,10 @@ The project currently contains implementations for:
 
 ## Abstract Base Classes
 
- - Functor
- - Applicative
- - Monoid
- - Monad
+ - **Functor**, for stuff that can be mapped
+ - **Applicative**, for callable stuff
+ - **Monoid**, for stuff that is associative
+ - **Monad**, for monadic stuff
 
 ## And Some Monads
 
@@ -27,14 +27,14 @@ The project currently contains implementations for:
 
 ## Monadic functions
 
-- >>, for sequencing monadic actions
-- lift, for mapping a function over a monadic value
-- join, for removing one level of monadic structure
-- compose, for composing monadic functions
+- **>>**, for sequencing monadic actions
+- **lift**, for mapping a function over a monadic value
+- **join**, for removing one level of monadic structure
+- **compose**, for composing monadic functions
 
 ## Utility functions
 
- - compose, for composing 0 to n functions
+ - **compose**, for composing 0 to n functions
 
 Yes, I know there are other projects out there like
 [PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing
