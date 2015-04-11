@@ -26,7 +26,7 @@ class TestPut(unittest.TestCase):
 
     def test_put_return(self):
         pm = MyMock()
-        p = Put.unit("hello, world!", IO(()))
+        p = Put("hello, world!", IO(()))
         p(print=pm.print)
         self.assertEqual(pm.value, "hello, world!")
 

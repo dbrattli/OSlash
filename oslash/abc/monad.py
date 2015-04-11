@@ -26,24 +26,30 @@ class Monad(metaclass=ABCMeta):
         does, because it can be used for anything:
 
         * Transformation, for projecting Monadic values and functions.
-        * Composition, for composing and combining monadic values and
-          functions.
+        * Composition, for composing monadic functions.
+        * Combining, for combining monadic values.
         * Sequencing, of Monadic functions.
         * Flattening, of nested Monadic values.
+        * Variable substitution, assign values to variables.
+
+        The Monad doesn’t specify what is happening, only that whatever
+        is happening satisfies the laws of associativity and identity.
 
         Returns a new Monad.
         """
         return NotImplemented
 
     @classmethod
-    def unit(cls, *args) -> 'Monad':
-        """return :: a -> m a .
+    def unit(cls, value) -> 'Monad':
+        """Wrap a value in a default context.
+
+        Haskell: return :: a -> m a .
 
         Inject a value into the monadic type. Since return is a reserved
         word in Python, we align with Scala and use the name unit
         instead.
         """
-        return cls(*args)
+        return cls(value)
 
     def __or__(self, func: Callable[[Any], 'Monad']) -> 'Monad':
         """Use >> as operator for bind.
