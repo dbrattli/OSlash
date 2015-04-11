@@ -19,8 +19,8 @@ The project currently contains implementations for:
 
 ## And Some Monads
 
- - **Identity**, simply boxed stuff
- - **Maybe (Just | Nothing)**, for optional stuff
+ - **Identity**, boxed stuff in its simplest form
+ - **[Maybe (Just | Nothing)](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures)**, for optional stuff
  - **Either (Right | Left)**, for possible failures
  - **List**, for listing stuff
  - **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
