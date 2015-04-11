@@ -12,10 +12,10 @@ The project currently contains implementations for:
 
 ## Abstract Base Classes
 
- - **Functor**, for stuff that can be mapped
- - **Applicative**, for callable stuff
+ - **[Functor](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#functors)**, for stuff that can be mapped
+ - **[Applicative](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#applicatives)**, for callable stuff
  - **Monoid**, for stuff that is associative
- - **Monad**, for monadic stuff
+ - **[Monad](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#monads)**, for monadic stuff
 
 ## And Some Monads
 
@@ -24,8 +24,8 @@ The project currently contains implementations for:
  - **Either (Right | Left)**, for possible failures
  - **List**, for listing stuff
  - **IO Action**, for impure stuff
- - **Writer**, for logging stuff
- - **Reader**, for global stuff
+ - **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
+ - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for global stuff
  - **State**, for stateful computations
 
 ## Monadic functions
