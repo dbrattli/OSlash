@@ -3,14 +3,16 @@ from typing import Any, Callable, Tuple
 from .util import Unit
 from .abc import Functor
 from .abc import Monad
-# from .monoid import Monoid
 
 
 class State(Monad, Functor):
 
     """The state monad.
 
-    Wraps stateful computations.
+    Wraps stateful computations. A stateful computation is a function
+    that takes a state and returns a result and new state:
+
+        state -> (result, state')
     """
 
     def __init__(self, fn: Callable[[Any], Tuple[Any, Any]]):
@@ -24,7 +26,10 @@ class State(Monad, Functor):
 
     @classmethod
     def unit(cls, value: Any) -> 'State':
-        """The return function creates a State.
+        r"""Create new State.
+
+        The unit function creates a new State object wrapping a stateful
+        computation.
 
         State $ \s -> (x, s)
         """
@@ -37,23 +42,23 @@ class State(Monad, Functor):
         return State(lambda state: _(*self.run()(state)))
 
     def bind(self, fn: Callable[[Any], 'State']) -> 'State':
-        """m >>= k = State $ \s -> let (a, s') = runState m s
+        r"""m >>= k = State $ \s -> let (a, s') = runState m s
                          in runState (k a) s'
         """
 
-        def _(a, state):
-            return fn(a).run()(state)
+        def _(result, state):
+            return fn(result).run()(state)
 
         return State(lambda state: _(*self.run()(state)))
 
     @classmethod
     def get(cls) -> 'State':
-        """get = state $ \s -> (s, s)"""
+        r"""get = state $ \s -> (s, s)"""
         return State(lambda state: (state, state))
 
     @classmethod
     def put(cls, new_state: Any) -> 'State':
-        """put newState = state $ \s -> ((), newState)"""
+        r"""put newState = state $ \s -> ((), newState)"""
         return State(lambda state: (Unit, new_state))
 
     def run(self):
@@ -63,5 +68,10 @@ class State(Monad, Functor):
         return self.run()(state)
 
     def __eq__(self, other) -> bool:
-        state = 42  # Default state
+        """Test if two stateful computations are equal.
+
+        Not really possible unless we give both computations the same
+        state to chew on."""
+
+        state = 42  # Default state. Can't be wrong.
         return self(state) == other(state)
