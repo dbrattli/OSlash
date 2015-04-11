@@ -49,7 +49,7 @@ class Reader(Monad, Applicative, Functor):
     def bind(self, func: "Callable[[Any], Reader]") -> "Reader":
         r"""m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r
         """
-        return Reader(lambda r: (func(self.run()(r))).run()(r))
+        return Reader(lambda r: (func(self.run(r))).run(r))
 
     def apply(self, something: "Reader") -> "Reader":
         r"""(<*>) :: f (a -> b) -> f a -> f b.
@@ -75,12 +75,16 @@ class Reader(Monad, Applicative, Functor):
 
         return Reader(_)  # lambda env: f(env)(x(env)))
 
-    def run(self) -> Callable:
-        """The inverse of the Reader constructor
+    def run(self, *args) -> Callable:
+        """Return wrapped reader.
 
-        runReader :: Reader r a -> r -> a
+        Haskell: runReader :: Reader r a -> r -> a
+
+        This is the inverse of unit and returns the wrapped function.
+        If we receive args, we call the function directly to avoid the
+        ugly `run()(args)` pattern.
         """
-        return self._get_value()
+        return self._get_value()(*args) if args else self._get_value()
 
     def __call__(self, *args, **kwargs) -> "Any":
         func = self.run()
@@ -134,4 +138,4 @@ class MonadReader(Reader):
 
         local f c = Reader $ \e -> runReader c (f e)
         """
-        return Reader(lambda e: self.run()(func(e)))
+        return Reader(lambda e: self.run(func(e)))

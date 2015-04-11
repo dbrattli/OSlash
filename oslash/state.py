@@ -39,7 +39,7 @@ class State(Monad, Functor):
         def _(a, state):
             return mapper(a), state
 
-        return State(lambda state: _(*self.run()(state)))
+        return State(lambda state: _(*self.run(state)))
 
     def bind(self, fn: Callable[[Any], 'State']) -> 'State':
         r"""m >>= k = State $ \s -> let (a, s') = runState m s
@@ -47,9 +47,9 @@ class State(Monad, Functor):
         """
 
         def _(result, state):
-            return fn(result).run()(state)
+            return fn(result).run(state)
 
-        return State(lambda state: _(*self.run()(state)))
+        return State(lambda state: _(*self.run(state)))
 
     @classmethod
     def get(cls) -> 'State':
@@ -61,11 +61,17 @@ class State(Monad, Functor):
         r"""put newState = state $ \s -> ((), newState)"""
         return State(lambda state: (Unit, new_state))
 
-    def run(self):
-        return self._get_value()
+    def run(self, *args):
+        """Return wrapped state computation.
+
+        This is the inverse of unit and returns the wrapped function.
+        If we receive args, we call the function directly to avoid the
+        ugly `run()(args)` pattern.
+        """
+        return self._get_value()(*args) if args else self._get_value()
 
     def __call__(self, state):
-        return self.run()(state)
+        return self.run(state)
 
     def __eq__(self, other) -> bool:
         """Test if two stateful computations are equal.
