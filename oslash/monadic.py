@@ -10,6 +10,17 @@ from .util import extensionmethod, identity
 from .abc import Monad
 
 
+@extensionmethod(Monad, alias="sequence")
+def __rshift__(self, next):
+    """Sequentially compose two actions, discarding any value produced
+    by the first, like sequencing operators (such as the semicolon) in
+    imperative languages.
+
+    Haskell: (>>) :: m a -> m b -> m b
+    """
+    return self.bind(lambda _: next)
+
+
 @extensionmethod(Monad)
 def join(self) -> 'Monad':
     """join :: Monad m => m (m a) -> m a
@@ -21,9 +32,14 @@ def join(self) -> 'Monad':
     return self.bind(identity)
 
 
-@extensionmethod(Monad, alias="liftM")
+@extensionmethod(Monad)
 def lift(self, func: Callable[[Any], Any]) -> 'Monad':
-    """liftM :: (Monad m) => (a -> b) -> m a -> m b
+    """Map function over monadic value.
+
+    Takes a function and a monadic value and maps the function over the
+    monadic value
+
+    Haskell: liftM :: (Monad m) => (a -> b) -> m a -> m b
 
     This is really the same function as Functor.fmap, but is instead
     implemented using bind, and does not rely on us inheriting from

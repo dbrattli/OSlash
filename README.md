@@ -27,7 +27,8 @@ The project currently contains implementations for:
 
 ## Monadic functions
 
-- lift
+- >>, for sequencing monadic actions
+- lift, for mapping a function over a monadic value
 - join, for removing one level of monadic structure
 - compose, for composing monadic functions
 
