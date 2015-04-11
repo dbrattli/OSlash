@@ -8,6 +8,12 @@ grouping related functions within classes. Objects are never used to
 store any values or mutable data, and data only lives within the
 function closures.
 
+## Install
+
+```bash
+> pip3 install oslash
+```
+
 The project currently contains implementations for:
 
 ## Abstract Base Classes
