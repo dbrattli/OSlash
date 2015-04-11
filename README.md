@@ -14,7 +14,7 @@ The project currently contains implementations for:
 
  - **[Functor](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#functors)**, for stuff that can be mapped
  - **[Applicative](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#applicatives)**, for callable stuff
- - **Monoid**, for stuff that is associative
+ - **Monoid**, for associative stuff
  - **[Monad](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#monads)**, for monadic stuff
 
 ## And Some Monads
@@ -23,7 +23,7 @@ The project currently contains implementations for:
  - **Maybe (Just | Nothing)**, for optional stuff
  - **Either (Right | Left)**, for possible failures
  - **List**, for listing stuff
- - **IO Action**, for impure stuff
+ - **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
  - **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
  - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for global stuff
  - **State**, for stateful computations
