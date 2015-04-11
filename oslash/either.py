@@ -10,6 +10,12 @@ from oslash.abc import Monad
 
 class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
 
+    """The Either Monad.
+
+    Represents either a successful computation, or a computation that
+    has failed.
+    """
+
     @abstractmethod
     def map(self, _) -> "Either":
         return NotImplemented
@@ -28,6 +34,9 @@ class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
 
 
 class Right(Either):
+
+    """Represents a successful computation."""
+
     def __init__(self, value):
         self._get_value = lambda: value
 
@@ -54,6 +63,9 @@ class Right(Either):
 
 
 class Left(Either):
+
+    """Represents a computation that has failed."""
+
     def apply(self, something: Either) -> Either:
         return Left(self._get_value())
 

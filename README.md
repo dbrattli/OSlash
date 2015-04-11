@@ -3,7 +3,10 @@
 Ø is a library for playing with functional programming in Python. It's
 an attempt to re-implement some of the code from
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
-Python 3.4.
+Python 3.4. Ø unifies purely functional and object oriented paradigms by
+grouping related functions within classes. Objects are never used to
+store any values or mutable data, and data only lives within the
+function closures.
 
 The project currently contains implementations for:
 
@@ -16,19 +19,19 @@ The project currently contains implementations for:
 
 ## And Some Monads
 
- - Identity
- - Maybe (Just | Nothing)
- - Either (Right | Left)
- - List
- - IO Action
- - Writer
- - Reader
- - State
+ - **Identity**, simply boxed stuff
+ - **Maybe (Just | Nothing)**, for optional stuff
+ - **Either (Right | Left)**, for possible failures
+ - **List**, for listing stuff
+ - **IO Action**, for impure stuff
+ - **Writer**, for logging stuff
+ - **Reader**, for global stuff
+ - **State**, for stateful computations
 
 ## Monadic functions
 
 - **>>**, for sequencing monadic actions
-- **lift**, for mapping a function over a monadic value
+- **lift**, for mapping a function over monadic values
 - **join**, for removing one level of monadic structure
 - **compose**, for composing monadic functions
 
