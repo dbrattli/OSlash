@@ -4,8 +4,8 @@
 an attempt to re-implement some of the code from
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
 Python 3.4. Ø unifies purely functional and object oriented paradigms by
-grouping related functions within classes. Objects are never used to
-store any values or mutable data, and data only lives within the
+grouping related functions within classes. Objects are however never
+used for storing values or mutable data, and data only lives within
 function closures.
 
 ## Install
@@ -28,7 +28,7 @@ The project currently contains implementations for:
  - **Identity**, boxed stuff in its simplest form
  - **[Maybe (Just | Nothing)](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures)**, for optional stuff
  - **Either (Right | Left)**, for possible failures
- - **List**, for listing stuff
+ - **List**, purely functional list of stuff
  - **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
  - **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
  - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for global stuff
@@ -45,11 +45,15 @@ The project currently contains implementations for:
 
  - **compose**, for composing 0 to n functions
 
+
+# But why?
+
 Yes, I know there are other projects out there like
-[PyMonad](https://bitbucket.org/jason_delaat/pymonad/), but I'm simply doing
-this in order to better understand the book. It's so much easier to learn when
-you implement things yourself. The code may be similar to PyMonad in structure,
-but is quite different in implementation.
+[PyMonad](https://bitbucket.org/jason_delaat/pymonad/),
+[fn.py](https://github.com/kachayev/fn.py). I'm simply doing this in order to
+better understand the book. It's so much easier to learn when you implement
+things yourself. The code may be similar to PyMonad in structure, but is
+quite different in implementation.
 
 Why is the project called OSlash? OSlash is the Norwegian character called
 [Oslash](http://en.wikipedia.org/wiki/Ø). Initially I wanted to create a

@@ -8,6 +8,37 @@ pure = List.pure
 unit = List.unit
 
 
+class TestList(unittest.TestCase):
+    def test_list_null(self):
+        xs = List()
+        assert(xs.null())
+
+    def test_list_not_null_after_cons_and_tail(self):
+        xs = List().cons(1).tail()
+        assert(xs.null())
+
+    def test_list_not_null_after_cons(self):
+        xs = List().cons(1)
+        assert(not xs.null())
+
+    def test_list_head(self):
+        x = List().cons(42).head()
+        self.assertEqual(42, x)
+
+    def test_list_tail_head(self):
+        xs = List().cons("b").cons("a")
+        self.assertEqual("a", xs.head())
+
+    def test_list_tail_tail_null(self):
+        xs = List().cons("b").cons("a")
+        assert(xs.tail().tail().null())
+
+    def test_list_list(self):
+        xs = List().cons(List().cons(42))
+        print(xs)
+        self.assertEqual(42, xs.head().head())
+
+
 class TestListFunctor(unittest.TestCase):
 
     def test_list_functor_map(self):
