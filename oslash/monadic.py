@@ -12,9 +12,9 @@ from .abc import Monad
 
 @extensionmethod(Monad, alias="sequence")
 def __rshift__(self, next):
-    """Sequentially compose two actions, discarding any value produced
-    by the first, like sequencing operators (such as the semicolon) in
-    imperative languages.
+    """Sequentially compose two monadic actions, discarding any value
+    produced by the first, like sequencing operators (such as the
+    semicolon) in imperative languages.
 
     Haskell: (>>) :: m a -> m b -> m b
     """

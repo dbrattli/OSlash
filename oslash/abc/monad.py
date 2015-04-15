@@ -52,7 +52,7 @@ class Monad(metaclass=ABCMeta):
         return cls(value)
 
     def __or__(self, func: Callable[[Any], 'Monad']) -> 'Monad':
-        """Use >> as operator for bind.
+        """Use | as operator for bind.
 
         Provide the | operator instead of the Haskell >>= operator
         """
