@@ -18,6 +18,7 @@ class List(Monad, Monoid, Applicative, Functor):
 
     def __init__(self, lambda_list: Callable[[Callable], Any]=None):
         """Initialize List."""
+
         # Accept building List from a Python iterable
         if isinstance(lambda_list, collections.Iterable):
             # Partially build List from iterable using cons only
@@ -28,8 +29,8 @@ class List(Monad, Monoid, Applicative, Functor):
 
     def cons(self, element: Any) -> 'List':
         """Append element to List."""
-        lambda_list = self._get_value()
-        return List(lambda sel: sel(element, lambda_list))
+        tail = self._get_value()
+        return List(lambda sel: sel(element, tail))
 
     def head(self) -> Any:
         """Retrive first element in List."""
@@ -93,6 +94,10 @@ class List(Monad, Monoid, Applicative, Functor):
 
             head, xs = xs.head(), xs.tail()
             yield head
+
+    def __len__(self) -> int:
+        """Return length of List."""
+        return 0 if self.null() else (1 + len(self.tail()))
 
     def __str__(self) -> str:
         return "[%s]" % ", ".join([str(x) for x in self])

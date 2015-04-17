@@ -37,6 +37,18 @@ class TestList(unittest.TestCase):
         xs = List().cons(List().cons(42))
         self.assertEqual(42, xs.head().head())
 
+    def test_list_length_empty(self):
+        xs = List()
+        self.assertEqual(0, len(xs))
+
+    def test_list_length_non_empty(self):
+        xs = List.unit(42)
+        self.assertEqual(1, len(xs))
+
+    def test_list_length_multiple(self):
+        xs = List(range(42))
+        self.assertEqual(42, len(xs))
+
 
 class TestListFunctor(unittest.TestCase):
 
