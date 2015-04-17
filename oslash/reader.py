@@ -35,7 +35,7 @@ class Reader(Monad, Applicative, Functor):
         return cls.unit(fn)
 
     def map(self, mapper: Callable[[Any], Any]) -> "Reader":
-        """fmap f m = Reader $ \\r -> f (runReader m r)."""
+        r"""fmap f m = Reader $ \r -> f (runReader m r)."""
         func = self.run()
 
         def _(env):
@@ -44,7 +44,7 @@ class Reader(Monad, Applicative, Functor):
             except TypeError:
                 ret = partial(mapper, func(env))
             return ret
-        return Reader(_)  # lambda r: mapper(func(r)))
+        return Reader(_)
 
     def bind(self, func: "Callable[[Any], Reader]") -> "Reader":
         r"""m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r

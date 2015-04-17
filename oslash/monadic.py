@@ -11,8 +11,10 @@ from .abc import Monad
 
 
 @extensionmethod(Monad, alias="sequence")
-def __rshift__(self, next):
-    """Sequentially compose two monadic actions, discarding any value
+def __rshift__(self, next) -> Monad:
+    """The "Then" operator.
+
+    Sequentially compose two monadic actions, discarding any value
     produced by the first, like sequencing operators (such as the
     semicolon) in imperative languages.
 
@@ -22,7 +24,7 @@ def __rshift__(self, next):
 
 
 @extensionmethod(Monad)
-def join(self) -> 'Monad':
+def join(self) -> Monad:
     """join :: Monad m => m (m a) -> m a
 
     The join function is the conventional monad join operator. It is
@@ -33,7 +35,7 @@ def join(self) -> 'Monad':
 
 
 @extensionmethod(Monad)
-def lift(self, func: Callable[[Any], Any]) -> 'Monad':
+def lift(self, func: Callable[[Any], Any]) -> Monad:
     """Map function over monadic value.
 
     Takes a function and a monadic value and maps the function over the

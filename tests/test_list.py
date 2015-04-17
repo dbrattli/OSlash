@@ -35,7 +35,6 @@ class TestList(unittest.TestCase):
 
     def test_list_list(self):
         xs = List().cons(List().cons(42))
-        print(xs)
         self.assertEqual(42, xs.head().head())
 
 
