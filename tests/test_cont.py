@@ -1,7 +1,7 @@
 import unittest
 
 from oslash.cont import Cont
-from oslash.util import identity  # , compose, compose2, Unit
+from oslash.util import identity, compose  # , compose2, Unit
 
 # pure = Cont.pure
 unit = Cont.unit
@@ -91,6 +91,41 @@ class TestCont(unittest.TestCase):
             do_c(4).run(final_c)
         )
 
+
+class TestContFunctor(unittest.TestCase):
+
+    def test_cont_functor_map(self):
+        x = unit(42)
+        f = lambda x: x * 10
+
+        self.assertEqual(
+            x.map(f),
+            unit(420)
+        )
+
+    def test_cont_functor_law_1(self):
+        # fmap id = id
+        x = unit(42)
+
+        self.assertEqual(
+            x.map(identity),
+            x
+        )
+
+    def test_cont_functor_law2(self):
+        # fmap (f . g) x = fmap f (fmap g x)
+        def f(x):
+            return x+10
+
+        def g(x):
+            return x*10
+
+        x = unit(42)
+
+        self.assertEquals(
+            x.map(compose(f, g)),
+            x.map(g).map(f)
+        )
 
 class TestContMonad(unittest.TestCase):
 
