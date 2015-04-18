@@ -86,7 +86,7 @@ class Reader(Monad, Applicative, Functor):
         """
         return self._get_value()(*args) if args else self._get_value()
 
-    def __call__(self, *args, **kwargs) -> "Any":
+    def __call__(self, *args, **kwargs) -> Any:
         func = self.run()
         return func(*args, **kwargs)
 
@@ -110,7 +110,7 @@ class MonadReader(Reader):
     """
 
     @classmethod
-    def ask(cls):
+    def ask(cls) -> Reader:
         r"""Reader $ \x -> x
 
         Provides a way to easily access the environment.
@@ -119,7 +119,7 @@ class MonadReader(Reader):
         return cls(lambda x: x)
 
     @classmethod
-    def asks(cls, func: Callable) -> "Reader":
+    def asks(cls, func: Callable) -> Reader:
         """
         Given a function it returns a Reader which evaluates that
         function and returns the result.
@@ -133,7 +133,7 @@ class MonadReader(Reader):
         """
         return cls.ask().bind(Reader(lambda e: cls.unit(func(e))))
 
-    def local(self, func):
+    def local(self, func) -> Reader:
         r"""local transforms the environment a Reader sees.
 
         local f c = Reader $ \e -> runReader c (f e)
