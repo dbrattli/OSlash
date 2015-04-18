@@ -3,7 +3,7 @@
 Ø is a library for playing with functional programming in Python. It's
 an attempt to re-implement some of the code from
 [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
-Python 3.4. Ø unifies purely functional and object oriented paradigms by
+Python 3.4. Ø unifies functional and object oriented paradigms by
 grouping related functions within classes. Objects are however never
 used for storing values or mutable data, and data only lives within
 function closures.
@@ -32,7 +32,8 @@ The project currently contains implementations for:
  - **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
  - **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
  - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for global stuff
- - **State**, for stateful computations
+ - **State**, for stateful computations of stuff
+ - **Cont**, for continuation of stuff
 
 ## Monadic functions
 
