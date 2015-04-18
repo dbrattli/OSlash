@@ -5,7 +5,7 @@
 
 """
 
-from typing import Callable
+from typing import Any, Callable
 
 from .util import identity
 from .abc import Monad
@@ -22,20 +22,23 @@ class Cont(Monad):
         self._get_value = lambda: fn
 
     @classmethod
-    def unit(cls, fn: Callable) -> 'Cont':
-        return cls(lambda k: k(fn))
+    def unit(cls, a: Any) -> 'Cont':
+        return cls(lambda k: k(a))
 
     def bind(self, fn: Callable) -> 'Cont':
         r"""m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c"""
-        #return Cont(lambda c: self.run(lambda a: fn(a).run(c)))
 
         s = lambda c: self.run(c)
         t = lambda c: lambda a: fn(a).run(c)
         return Cont(lambda c: s(t(c)))
 
-    def call_cc(self):
-        """call-with-current-continuation."""
-        raise NotImplementedError()
+    @staticmethod
+    def call_cc(fn: Callable):
+        """call-with-current-continuation.
+
+        Haskell: callCC f = Cont $ \c -> runCont (f (\a -> Cont $ \_ -> c a )) c
+        """
+        return Cont(lambda c: fn(lambda a: Cont(lambda _: c(a))).run(c))
 
     def run(self, *args):
         return self._get_value()(*args) if args else self._get_value()
