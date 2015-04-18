@@ -49,6 +49,24 @@ class TestList(unittest.TestCase):
         xs = List(range(42))
         self.assertEqual(42, len(xs))
 
+    def test_list_append_empty(self):
+        xs = List()
+        ys = List.unit(42)
+        zs = xs.append(ys)
+        self.assertEqual(ys, zs)
+
+    def test_list_append_empty_other(self):
+        xs = List.unit(42)
+        ys = List()
+        zs = xs.append(ys)
+        self.assertEqual(xs, zs)
+
+    def test_list_append_non_empty(self):
+        xs = List(range(5))
+        ys = List(range(5, 10))
+        zs = xs.append(ys)
+        self.assertEqual(List(range(10)), zs)
+
 
 class TestListFunctor(unittest.TestCase):
 

@@ -17,13 +17,14 @@ class List(Monad, Monoid, Applicative, Functor):
     """
 
     def __init__(self, lambda_list: Callable[[Callable], Any]=None):
-        """Initialize List."""
-
+        """Initialize List.
+        """
         # Accept building List from a Python iterable
         if isinstance(lambda_list, collections.Iterable):
-            # Partially build List from iterable using cons only
-            l = List(lambda_list[1:]).cons(lambda_list[0]) if lambda_list else List()
-            lambda_list = l._get_value()
+            iterable = lambda_list
+            # Recursivly build List from iterable using cons only
+            lst = List(iterable[1:]).cons(iterable[0]) if iterable else List()
+            lambda_list = lst._get_value()
 
         self._get_value = lambda: lambda_list
 
@@ -48,7 +49,7 @@ class List(Monad, Monoid, Applicative, Functor):
 
     @classmethod
     def unit(cls, value: Any):
-        """ Wraps a value within the singleton list"""
+        """Wrap a value within the singleton list."""
         return cls().cons(value)
     pure = unit
 
@@ -75,8 +76,13 @@ class List(Monad, Monoid, Applicative, Functor):
         return cls()
 
     def append(self, other: 'List'):
-        """Append a list to this list."""
-        return List(list(self) + list(other))
+        """Append a list to this list.
+        """
+
+        if self.null():
+            return other
+        head, tail = self.head(), self.tail()
+        return (tail.append(other)).cons(head)
 
     def bind(self, fn: Callable[[Any], 'List']) -> 'List':
         """Flatten and map the List.
@@ -86,7 +92,8 @@ class List(Monad, Monoid, Applicative, Functor):
         return List.concat(self.map(fn))
 
     def __iter__(self) -> Iterator:
-        """Return iterator for List."""
+        """Return iterator for List.
+        """
         xs = self  # Don't think we can avoid this mutable local
         while True:
             if xs.null():
@@ -96,15 +103,23 @@ class List(Monad, Monoid, Applicative, Functor):
             yield head
 
     def __len__(self) -> int:
-        """Return length of List."""
+        """Return length of List.
+        """
         return 0 if self.null() else (1 + len(self.tail()))
 
     def __str__(self) -> str:
+        """Return string representation of List.
+        """
         return "[%s]" % ", ".join([str(x) for x in self])
 
     def __repr__(self) -> str:
+        """Return string representation of List.
+        """
         return str(self)
 
     def __eq__(self, other: 'List') -> bool:
-        """Compare if List is equal to other List."""
-        return [x for x in self] == [y for y in other]
+        """Compare if List is equal to other List.
+        """
+        if self.null() or other.null():
+            return True if self.null() and other.null() else False
+        return self.head() == other.head() and self.tail() == other.tail()
