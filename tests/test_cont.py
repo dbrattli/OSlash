@@ -1,10 +1,9 @@
-# coding=utf-8
 import unittest
 
 from oslash.cont import Cont
-from oslash.util import identity, compose, compose2, Unit
+from oslash.util import identity  # , compose, compose2, Unit
 
-#pure = Cont.pure
+# pure = Cont.pure
 unit = Cont.unit
 
 
@@ -82,23 +81,56 @@ class TestCont(unittest.TestCase):
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
         do_c = lambda n: unit(n) | (
-            lambda x: Cont.call_cc((lambda abort: h(x, abort)) | (
+            lambda x: Cont.call_cc(lambda abort: h(x, abort) | (
                 lambda y: g(y))))
 
         final_c = lambda x: "Done: %s" % x
 
         self.assertEqual(
-            "Done: -3",
+            "Done: -1",
             do_c(4).run(final_c)
         )
 
-class TestReaderMonad(unittest.TestCase):
 
-    def test_reader_monad_bind(self):
+class TestContMonad(unittest.TestCase):
+
+    def test_cont_monad_bind(self):
         m = unit(42)
         f = lambda x: unit(x*10)
 
         self.assertEqual(
             m.bind(f),
             unit(420)
+        )
+
+    def test_cont_monad_law_left_identity(self):
+        # return x >>= f is the same thing as f x
+
+        f = lambda x: unit(x+100000)
+        x = 3
+
+        self.assertEqual(
+            unit(x).bind(f),
+            f(x)
+        )
+
+    def test_cont_monad_law_right_identity(self):
+        # m >>= return is no different than just m.
+
+        m = unit("move on up")
+
+        self.assertEqual(
+            m.bind(unit),
+            m
+        )
+
+    def test_cont_monad_law_associativity(self):
+        # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
+        m = unit(42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
+
+        self.assertEqual(
+            m.bind(f).bind(g),
+            m.bind(lambda x: f(x).bind(g))
         )
