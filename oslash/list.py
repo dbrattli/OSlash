@@ -29,7 +29,7 @@ class List(Monad, Monoid, Applicative, Functor):
         self._get_value = lambda: lambda_list
 
     def cons(self, element: Any) -> 'List':
-        """Append element to List."""
+        """Add element to fron of List."""
         tail = self._get_value()
         return List(lambda sel: sel(element, tail))
 
@@ -76,13 +76,12 @@ class List(Monad, Monoid, Applicative, Functor):
         return cls()
 
     def append(self, other: 'List'):
-        """Append a list to this list.
+        """Append other list to this list.
         """
 
         if self.null():
             return other
-        head, tail = self.head(), self.tail()
-        return (tail.append(other)).cons(head)
+        return (self.tail().append(other)).cons(self.head())
 
     def bind(self, fn: Callable[[Any], 'List']) -> 'List':
         """Flatten and map the List.
@@ -99,8 +98,8 @@ class List(Monad, Monoid, Applicative, Functor):
             if xs.null():
                 raise StopIteration
 
-            head, xs = xs.head(), xs.tail()
-            yield head
+            yield xs.head()
+            xs = xs.tail()
 
     def __len__(self) -> int:
         """Return length of List.
