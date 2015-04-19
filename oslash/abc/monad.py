@@ -23,10 +23,11 @@ class Monad(metaclass=ABCMeta):
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
 
         This is the mother of all methods. It's hard to describe what it
-        does, because it can be used for anything:
+        does, because it can be used for pretty much anything:
 
         * Transformation, for projecting Monadic values and functions.
-        * Composition, for composing monadic functions.
+        * Composition, for composing and monadic functions.
+        * Chaining, for chaining of functions as a monadic value.
         * Combining, for combining monadic values.
         * Sequencing, of Monadic functions.
         * Flattening, of nested Monadic values.
