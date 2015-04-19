@@ -38,9 +38,7 @@ class Cont(Monad, Functor):
 
         Haskell: m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c
         """
-        s = lambda c: self.run(c)
-        t = lambda c: lambda a: fn(a).run(c)
-        return Cont(lambda c: s(t(c)))
+        return Cont(lambda c: self.run(lambda a: (fn(a).run(c))))
 
     @staticmethod
     def call_cc(fn: Callable) -> 'Cont':
@@ -58,3 +56,4 @@ class Cont(Monad, Functor):
 
     def __eq__(self, other) -> bool:
         return self(identity) == other(identity)
+
