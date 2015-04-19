@@ -1,6 +1,6 @@
 from functools import reduce
 
-from typing import Tuple, Callable
+from typing import Tuple, Callable  # noqa
 
 
 def compose(*funcs: "Tuple[Callable, ...]") -> Callable:
@@ -20,7 +20,8 @@ def compose(*funcs: "Tuple[Callable, ...]") -> Callable:
     """
 
     def _(*args, **kw):
-        ret = reduce(lambda acc, f: lambda g: g(acc(f)), funcs[::-1],
+        ret = reduce(lambda acc, x: lambda f: f(acc(x)),
+                     funcs[::-1],
                      lambda f: f(*args, **kw))
         return ret(lambda x: x)
     return _

@@ -9,7 +9,7 @@ from typing import Any, Callable
 from .abc import Applicative
 from .abc import Functor
 from .abc import Monad
-from .util import Unit
+from .util import Unit, indent as ind
 
 
 class IO(Monad, Applicative, Functor):
@@ -77,7 +77,7 @@ class Put(IO):
 
     def __str__(self, m=0, n=0):
         s, io = self._get_value()
-        a = io.__str__(m + 2, n)
+        a = io.__str__(m + 1, n)
         return '%sPut ("%s",\n%s\n%s)' % (ind(m), s, a, ind(m))
 
 
@@ -102,17 +102,21 @@ class Get(IO):
         g = self._get_value()
         return Get(lambda s: g(s).map(func))
 
-    def __call__(self, *args, **kwargs):
-        """Run IO Action"""
+    def run(self, *args, **kwargs):
+        return self._get_value()(*args) if args else self._get_value()
 
         func = self._get_value()
-        action = func(self.input_func())
+        action = func(self.input_func(*args, **kwargs))
         return action()
+
+    def __call__(self, *args, **kwargs):
+        """Run IO Action"""
+        return self.run(*args, **kwargs)
 
     def __str__(self, m=0, n=0) -> str:
         g = self._get_value()
         i = "$%s" % n
-        a = (g(i)).__str__(m + 2, n + 1)
+        a = (g(i)).__str__(m + 1, n + 1)
         return '%sGet (%s -> \n%s\n%s)' % (ind(m), i, a, ind(m))
 
 
@@ -162,6 +166,3 @@ def put_line(string=None) -> IO:
 
 def read_file(filename) -> IO:
     return ReadFile(filename, lambda s: IO(s))
-
-# Utility for indentation
-ind = lambda x: ' ' * x
