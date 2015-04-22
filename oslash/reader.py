@@ -75,7 +75,7 @@ class Reader(Monad, Applicative, Functor):
 
         return Reader(_)  # lambda env: f(env)(x(env)))
 
-    def run(self, *args) -> Callable:
+    def run(self, *args, **kwargs) -> Callable:
         """Return wrapped reader.
 
         Haskell: runReader :: Reader r a -> r -> a
@@ -84,11 +84,10 @@ class Reader(Monad, Applicative, Functor):
         If we receive args, we call the function directly to avoid the
         ugly `run()(args)` pattern.
         """
-        return self._get_value()(*args) if args else self._get_value()
+        return self._get_value()(*args, **kwargs) if args else self._get_value()
 
     def __call__(self, *args, **kwargs) -> Any:
-        func = self.run()
-        return func(*args, **kwargs)
+        return self.run(*args, **kwargs)
 
     def __eq__(self, other) -> bool:
         environment = 0  # TODO: can we do better?
