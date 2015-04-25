@@ -1,4 +1,4 @@
 # flake8: noqa
 from .basic import Unit, indent
-from .compose import compose, compose2, identity
+from .fn import compose, identity, fmap
 from .extensionmethod import extensionmethod, extensionclassmethod
