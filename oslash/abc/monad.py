@@ -26,7 +26,7 @@ class Monad(metaclass=ABCMeta):
         does, because it can be used for pretty much anything:
 
         * Transformation, for projecting Monadic values and functions.
-        * Composition, for composing and monadic functions.
+        * Composition, for composing monadic functions.
         * Chaining, for chaining of functions as a monadic value.
         * Combining, for combining monadic values.
         * Sequencing, of Monadic functions.

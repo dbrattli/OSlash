@@ -7,3 +7,4 @@ build
 *.egg-info
 *.pyc
 *.user
+.ipynb_checkpoints

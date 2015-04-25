@@ -13,6 +13,7 @@ from .abc import Monad, Functor
 
 
 class Cont(Monad, Functor):
+
     """The Continuation Monad.
 
     The Continuation monad represents computations in continuation-
@@ -27,7 +28,7 @@ class Cont(Monad, Functor):
         return cls(lambda k: k(a))
 
     def map(self, fn: Callable[[Any], Any]) -> 'Cont':
-        """Map a function over a continuation.
+        r"""Map a function over a continuation.
 
         Haskell: fmap f m = Cont $ \c -> runCont m (c . f)
         """
@@ -56,4 +57,3 @@ class Cont(Monad, Functor):
 
     def __eq__(self, other) -> bool:
         return self(identity) == other(identity)
-

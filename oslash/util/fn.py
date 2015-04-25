@@ -18,14 +18,14 @@ def compose(*funcs: "Tuple[Callable, ...]") -> Callable:
 
     Returns the composed function.
     """
-
-    def _(*args, **kw):
+    def _compose(*args, **kw):
+        """Reduce functions to a single function."""
         ret = reduce(lambda acc, x: lambda f: f(acc(x)),
                      funcs[::-1],
                      lambda f: f(*args, **kw))
         return ret(lambda x: x)
-    return _
+    return _compose
 
-compose2 = lambda f, g: compose(f, g)  # To force partial application
+fmap = lambda f, g: compose(f, g)  # To force partial application
 
 identity = compose()  # type: Callable

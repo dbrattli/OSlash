@@ -11,4 +11,6 @@ from .state import State
 
 from .monadic import *
 
-from .util import compose
+from .util import fn
+
+_ = Reader

@@ -2,7 +2,7 @@
 import unittest
 
 from oslash.maybe import Maybe, Just, Nothing
-from oslash.util import identity, compose, compose2
+from oslash.util import identity, compose, fmap
 
 pure = Just.pure
 unit = Just.unit
@@ -121,7 +121,7 @@ class TestMaybeApplicative(unittest.TestCase):
         v = pure(lambda x: x + 42)
 
         self.assertEquals(
-            pure(compose2).apply(u).apply(v).apply(w),
+            pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
 
@@ -133,7 +133,7 @@ class TestMaybeApplicative(unittest.TestCase):
         v = pure(lambda x: x + 42)
 
         self.assertEquals(
-            pure(compose2).apply(u).apply(v).apply(w),
+            pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
 

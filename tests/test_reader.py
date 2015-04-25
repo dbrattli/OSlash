@@ -2,7 +2,7 @@ import unittest
 
 from oslash import Reader
 from oslash.reader import MonadReader
-from oslash.util import identity, compose, compose2
+from oslash.util import identity, compose, fmap
 
 pure = Reader.pure
 unit = Reader.unit
@@ -86,7 +86,7 @@ class TestReaderApplicative(unittest.TestCase):
         v = pure(lambda x: x + 42)
 
         self.assertEquals(
-            pure(compose2).apply(u).apply(v).apply(w),
+            pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
 

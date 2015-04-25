@@ -2,7 +2,7 @@
 import unittest
 
 from oslash.list import List
-from oslash.util import identity, compose, compose2, Unit
+from oslash.util import identity, compose, fmap, Unit
 
 pure = List.pure
 unit = List.unit
@@ -201,7 +201,7 @@ class TestListApplicative(unittest.TestCase):
         # Singleton list
         w = unit(42)
         self.assertEquals(
-            pure(compose2).apply(u).apply(v).apply(w),
+            pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
 
@@ -214,7 +214,7 @@ class TestListApplicative(unittest.TestCase):
         # Empty list
         w = List()
         self.assertEquals(
-            pure(compose2).apply(u).apply(v).apply(w),
+            pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
 
@@ -227,7 +227,7 @@ class TestListApplicative(unittest.TestCase):
         # Long list
         w = List(range(42))
         self.assertEquals(
-            pure(compose2).apply(u).apply(v).apply(w),
+            pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
 

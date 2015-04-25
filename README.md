@@ -31,7 +31,7 @@ The project currently contains implementations for:
  - **List**, purely functional list of stuff
  - **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
  - **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
- - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for global stuff
+ - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for callable stuff
  - **State**, for stateful computations of stuff
  - **Cont**, for continuation of stuff
 
