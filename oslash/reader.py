@@ -74,14 +74,12 @@ class Reader(Monad, Applicative, Functor):
         one (composes the two functions).
         """
 
-        g = something.run()
-
         def _compose(x):
             f = self(x)
             try:
-                ret = f(g(x))
+                ret = f(something(x))
             except TypeError:
-                ret = partial(f, g(x))
+                ret = partial(f, something(x))
             return ret
 
         return Reader(_compose)
@@ -108,13 +106,10 @@ class Reader(Monad, Applicative, Functor):
         return equal
 
     def __str__(self) -> str:
-        return "Reader(%s)" % self.fn()
+        return "Reader(%s)" % repr(self.fn)
 
     def __repr__(self) -> str:
         return str(self)
-
-# Our version of underscore
-_ = Reader
 
 
 class MonadReader(Reader):
@@ -135,7 +130,7 @@ class MonadReader(Reader):
         return cls(lambda x: x)
 
     @classmethod
-    def asks(cls, func: Callable) -> Reader:
+    def asks(cls, fn: Callable) -> Reader:
         """
         Given a function it returns a Reader which evaluates that
         function and returns the result.
@@ -147,11 +142,11 @@ class MonadReader(Reader):
 
         asks sel = ask >>= return . sel
         """
-        return cls.ask().bind(Reader(lambda e: cls.unit(func(e))))
+        return cls.ask().bind(Reader(lambda x: cls.unit(fn(x))))
 
-    def local(self, func) -> Reader:
+    def local(self, fn) -> Reader:
         r"""local transforms the environment a Reader sees.
 
         local f c = Reader $ \e -> runReader c (f e)
         """
-        return Reader(lambda e: self.run(func(e)))
+        return Reader(lambda x: self(fn(x)))
