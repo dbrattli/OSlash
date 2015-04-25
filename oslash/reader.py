@@ -15,9 +15,9 @@ class Reader(Monad, Applicative, Functor):
     Functions may read that state, but can't change it. The reader monad
     lets us access shared immutable state within a monadic context.
 
-    The Reader is just a fancy name for function, so this monad could
-    also be called the Function or the Callable monad. It's all about
-    composing functions.
+    The Reader is just a fancy name for a wrapped function, so this
+    monad could also be called the Function monad, or perhaps the
+    Callable monad. Reader is all about composing wrapped functions.
     """
 
     def __init__(self, fn: Callable):
