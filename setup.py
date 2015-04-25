@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
     name='OSlash',
-    version='0.4.0',
+    version='0.5.0',
     description="Ø for Python 3.4",
     long_description=("is a functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),
