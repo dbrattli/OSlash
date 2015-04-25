@@ -1,9 +1,9 @@
 import unittest
 
 from oslash import State
-from oslash.util import identity, compose, compose2
+from oslash.util import identity, compose
 
-#pure = State.pure
+# pure = State.pure
 unit = State.unit
 put = State.put
 get = State.get
