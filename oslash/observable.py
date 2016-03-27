@@ -70,7 +70,10 @@ class Observable(Monad, Functor):
 
         Haskell: callCC f = Cont $ \c -> runCont (f (\a -> Cont $ \_ -> c a )) c
         """
-        return Observable(lambda on_next: fn(lambda a: Observable(lambda _: on_next(a))).subscribe(on_next))
+        def subscribe(on_next):
+            return fn(lambda a: Observable(lambda _: on_next(a))).subscribe(on_next)
+
+        return Observable(subscribe)
 
     def subscribe(self, on_next) -> Any:
         return self._get_value()(on_next)
