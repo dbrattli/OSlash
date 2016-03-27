@@ -5,6 +5,7 @@ from oslash.util import identity, compose
 
 # pure = Cont.pure
 unit = Cont.unit
+call_cc = Cont.call_cc
 
 
 class TestCont(unittest.TestCase):
@@ -58,10 +59,11 @@ class TestCont(unittest.TestCase):
     def test_cont_call_cc(self):
         f = lambda x: unit(x*3)
         g = lambda x: unit(x-2)
+
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
         do_c = lambda n: unit(n) | (
-            lambda x: Cont.call_cc(lambda abort: h(x, abort))) | (
+            lambda x: call_cc(lambda abort: h(x, abort))) | (
                 lambda y: g(y))
         final_c = lambda x: "Done: %s" % x
 
@@ -73,10 +75,11 @@ class TestCont(unittest.TestCase):
     def test_cont_call_cc_abort(self):
         f = lambda x: unit(x*3)
         g = lambda x: unit(x-2)
+
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
         do_c = lambda n: unit(n) | (
-            lambda x: Cont.call_cc(lambda abort: h(x, abort))) | (
+            lambda x: call_cc(lambda abort: h(x, abort))) | (
                 lambda y: g(y))
         final_c = lambda x: "Done: %s" % x
 
