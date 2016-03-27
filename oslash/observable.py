@@ -26,7 +26,7 @@ class Observable(Monad, Functor):
         """Observable constructor.
 
         Keyword arguments:
-        on_next -- A callable
+        subscribe -- A callable that takes a callable (on_next)
         """
         self._get_value = lambda: subscribe
 
