@@ -19,8 +19,7 @@ class Observable(Monad, Functor):
 
     The Rx Observable monad is based on the Continuation monad
     representing suspended computations in continuation-passing style
-    (CPS). The difference from the Cont monad is that the continuations
-    (on_next) do not return any values.
+    (CPS).
     """
 
     def __init__(self, subscribe: Callable[[Callable], Any]):
@@ -77,4 +76,4 @@ class Observable(Monad, Functor):
         return self._get_value()(on_next)
 
     def __eq__(self, other) -> bool:
-        return self(identity) == other(identity)
+        return self.subscribe(identity) == other.subscribe(identity)

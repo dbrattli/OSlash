@@ -4,8 +4,9 @@ from oslash.observable import Observable
 from oslash.util import identity, compose
 
 # pure = Cont.pure
+unit = Observable.unit
 just = Observable.just
-call_cc = Observable.call_cc
+# call_cc = Observab le.call_cc
 
 
 class TestObservable(unittest.TestCase):
@@ -41,3 +42,83 @@ class TestObservable(unittest.TestCase):
             xs.append("OnNext(%s)" % x)
         stream.subscribe(on_next)
         self.assertEqual(["OnNext(42)"], xs)
+
+
+class TestObservableFunctor(unittest.TestCase):
+
+    def test_cont_functor_map(self):
+        x = unit(42)
+        f = lambda x: x * 10
+
+        self.assertEqual(
+            x.map(f),
+            unit(420)
+        )
+
+    def test_cont_functor_law_1(self):
+        # fmap id = id
+        x = unit(42)
+
+        self.assertEqual(
+            x.map(identity),
+            x
+        )
+
+    def test_cont_functor_law2(self):
+        # fmap (f . g) x = fmap f (fmap g x)
+        def f(x):
+            return x+10
+
+        def g(x):
+            return x*10
+
+        x = unit(42)
+
+        self.assertEquals(
+            x.map(compose(f, g)),
+            x.map(g).map(f)
+        )
+
+
+class TestObservableMonad(unittest.TestCase):
+
+    def test_cont_monad_bind(self):
+        m = unit(42)
+        f = lambda x: unit(x*10)
+
+        self.assertEqual(
+            m.bind(f),
+            unit(420)
+        )
+
+    def test_cont_monad_law_left_identity(self):
+        # return x >>= f is the same thing as f x
+
+        f = lambda x: unit(x+100000)
+        x = 3
+
+        self.assertEqual(
+            unit(x).bind(f),
+            f(x)
+        )
+
+    def test_cont_monad_law_right_identity(self):
+        # m >>= return is no different than just m.
+
+        m = unit("move on up")
+
+        self.assertEqual(
+            m.bind(unit),
+            m
+        )
+
+    def test_cont_monad_law_associativity(self):
+        # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
+        m = unit(42)
+        f = lambda x: unit(x+1000)
+        g = lambda y: unit(y*42)
+
+        self.assertEqual(
+            m.bind(f).bind(g),
+            m.bind(lambda x: f(x).bind(g))
+        )
