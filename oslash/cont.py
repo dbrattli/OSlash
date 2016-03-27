@@ -16,16 +16,22 @@ class Cont(Monad, Functor):
 
     """The Continuation Monad.
 
-    The Continuation monad represents computations in continuation-
+    The Continuation monad represents suspended computations in continuation-
     passing style (CPS).
     """
 
-    def __init__(self, fn: Callable[[Callable], Any]):
-        self._get_value = lambda: fn
+    def __init__(self, cont: Callable[[Callable], Any]):
+        """Cont constructor.
+
+        Keyword arguments:
+        cont -- A callable
+        """
+        self._get_value = lambda: cont
 
     @classmethod
     def unit(cls, a: Any) -> 'Cont':
-        return cls(lambda k: k(a))
+        """a -> Cont a"""
+        return cls(lambda cont: cont(a))
 
     def map(self, fn: Callable[[Any], Any]) -> 'Cont':
         r"""Map a function over a continuation.
@@ -39,7 +45,7 @@ class Cont(Monad, Functor):
 
         Haskell: m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c
         """
-        return Cont(lambda c: self.run(lambda a: (fn(a).run(c))))
+        return Cont(lambda c: self.run(lambda a: fn(a).run(c)))
 
     @staticmethod
     def call_cc(fn: Callable) -> 'Cont':

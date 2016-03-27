@@ -1,25 +1,35 @@
 import unittest
 
 from oslash.cont import Cont
-from oslash.util import identity, compose  # , compose2, Unit
+from oslash.util import identity, compose
 
 # pure = Cont.pure
 unit = Cont.unit
 
 
 class TestCont(unittest.TestCase):
+    def test_cont_pythagoras(self):
+        add = lambda x, y: unit(x + y)
+        square = lambda x: unit(x * x)
+
+        pythagoras = lambda x, y: square(x) | (
+            lambda xx: (square(y) | (
+                lambda yy: add(xx, yy))))
+
+        self.assertEqual(32, pythagoras(4, 4)(identity))
+
     def test_cont_basic(self):
         add = lambda x, y: x+y
         add_cont = unit(add)
 
         self.assertEqual(
             42,
-            add_cont.run(identity)(40, 2)
+            add_cont(identity)(40, 2)
         )
 
     def test_cont_simple(self):
-        f = lambda x: Cont(lambda c: c(x*3))
-        g = lambda x: Cont(lambda c: c(x-2))
+        f = lambda x: unit(x*3)
+        g = lambda x: unit(x-2)
 
         h = lambda x: f(x) if x == 5 else g(x)
 
@@ -126,6 +136,7 @@ class TestContFunctor(unittest.TestCase):
             x.map(compose(f, g)),
             x.map(g).map(f)
         )
+
 
 class TestContMonad(unittest.TestCase):
 
