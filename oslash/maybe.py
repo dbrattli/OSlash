@@ -47,6 +47,9 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     def __repr__(self) -> str:
         return self.__str__()
 
+    def __bool__(self) -> "Maybe":
+        return bool(self.value)
+
 
 class Just(Maybe):
 
