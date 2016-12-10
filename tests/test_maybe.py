@@ -308,3 +308,25 @@ class TestMaybeMonad(unittest.TestCase):
             m.bind(f).bind(g),
             m.bind(lambda x: f(x).bind(g))
         )
+
+    def test_combine_just_and_just_rule1(self):
+        self.assertEquals(
+            Just(5) and Just(6),
+            Just(6)
+        )
+
+    def test_combine_just_and_just_rule2(self):
+        self.assertEquals(
+            Just(0) and Just(6),
+            Just(0)
+        )
+    def test_combine_just_or_nothing_rule1(self):
+        self.assertEquals(
+            Just(5) or Nothing,
+            Just(5)
+        )
+    def test_combine_just_or_nothing_rule2(self):
+        self.assertEquals(
+            Just(0) or Nothing,
+            Nothing
+        )
