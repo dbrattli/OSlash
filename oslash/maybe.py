@@ -1,12 +1,14 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 from .abc import Applicative
 from .abc import Functor
 from .abc import Monoid
 from .abc import Monad
+
+T = TypeVar("T")
 
 
 class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
@@ -55,7 +57,7 @@ class Just(Maybe):
     Represents a Maybe that contains a value (represented as Just a).
     """
 
-    def __init__(self, value):
+    def __init__(self, value: T) -> None:
         self._get_value = lambda: value
 
     def map(self, mapper: Callable[[Any], Any]) -> "Just":

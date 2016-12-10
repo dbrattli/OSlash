@@ -1,9 +1,13 @@
 from abc import ABCMeta, abstractmethod
 
-from typing import Callable
+from typing import Callable, TypeVar, Generic
+
+A = TypeVar('A')
+B = TypeVar('B')
+C = TypeVar('C')
 
 
-class Applicative(metaclass=ABCMeta):
+class Applicative(Generic[A], metaclass=ABCMeta):
     """Applicative functors are functors with some extra properties.
     Most importantly, they allow you to apply functions inside the
     functor (hence the name).
@@ -13,7 +17,7 @@ class Applicative(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def apply(self, something: "Applicative") -> "Applicative":
+    def apply(self, something: 'Callable[[A], B]') -> "Applicative[B]":
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Apply (<*>) is a beefed up fmap. It takes a functor value that
@@ -23,7 +27,7 @@ class Applicative(metaclass=ABCMeta):
         """
         return NotImplemented
 
-    def __mul__(self, something: "Applicative") -> "Applicative":
+    def __mul__(self, something: 'Callable[[A], B]') -> 'Applicative[B]':
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Provide the * as an infix version of apply() since we cannot
@@ -31,13 +35,13 @@ class Applicative(metaclass=ABCMeta):
         """
         return self.apply(something)
 
-    def lift_a2(self, func, b):
+    def lift_a2(self, func: Callable[[A, B], C], b: 'Applicative[B]') -> 'Applicative[C]':
         """liftA2 :: (Applicative f) => (a -> b -> c) -> f a -> f b -> f c."""
 
         return func % self * b
 
     @classmethod
-    def pure(cls, x: Callable) -> "Applicative":
+    def pure(cls, x: Callable[[A], B]) -> "Applicative[A]":
         """The Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context

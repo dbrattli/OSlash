@@ -10,7 +10,7 @@ class Writer(Monad, Functor):
 
     """The writer monad."""
 
-    def __init__(self, value: Any, log: Monoid):
+    def __init__(self, value: Any, log: Monoid) -> None:
         """Initialize a new writer.
 
         :param value Any: Value to

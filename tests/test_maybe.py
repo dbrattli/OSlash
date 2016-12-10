@@ -10,7 +10,7 @@ unit = Just.unit
 
 class TestMaybeFunctor(unittest.TestCase):
     def test_just_functor_map(self):
-        f = lambda x: x*2
+        f = lambda x: x * 2
         x = Just(21)
 
         self.assertEquals(
@@ -19,7 +19,7 @@ class TestMaybeFunctor(unittest.TestCase):
         )
 
     def test_nothing_functor_map(self):
-        f = lambda x: x+2
+        f = lambda x: x + 2
         x = Nothing()
 
         self.assertEquals(
@@ -45,10 +45,10 @@ class TestMaybeFunctor(unittest.TestCase):
     def test_just_functor_law2(self):
         # fmap (f . g) x = fmap f (fmap g x)
         def f(x):
-            return x+10
+            return x + 10
 
         def g(x):
-            return x*10
+            return x * 10
 
         x = Just(42)
 

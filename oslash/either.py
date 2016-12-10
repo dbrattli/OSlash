@@ -37,7 +37,7 @@ class Right(Either):
 
     """Represents a successful computation."""
 
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         self._get_value = lambda: value
 
     def map(self, mapper: Callable[[Any], Any]) -> Either:
@@ -66,11 +66,11 @@ class Left(Either):
 
     """Represents a computation that has failed."""
 
+    def __init__(self, value: Any) -> None:
+        self._get_value = lambda: value
+
     def apply(self, something: Either) -> Either:
         return Left(self._get_value())
-
-    def __init__(self, value: Any):
-        self._get_value = lambda: value
 
     def map(self, mapper: Callable[[Any], Any]) -> Either:
         try:

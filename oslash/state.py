@@ -15,7 +15,7 @@ class State(Monad, Functor):
         state -> (result, state')
     """
 
-    def __init__(self, fn: Callable[[Any], Tuple[Any, Any]]):
+    def __init__(self, fn: Callable[[Any], Tuple[Any, Any]]) -> None:
         """Initialize a new state.
 
         Keyword arguments:
@@ -61,14 +61,14 @@ class State(Monad, Functor):
         r"""put newState = state $ \s -> ((), newState)"""
         return State(lambda state: (Unit, new_state))
 
-    def run(self, *args):
+    def run(self, state=None):
         """Return wrapped state computation.
 
         This is the inverse of unit and returns the wrapped function.
-        If we receive args, we call the function directly to avoid the
-        ugly `run()(args)` pattern.
+        If we receive state, we call the function directly to avoid the
+        ugly `run()(state)` pattern.
         """
-        return self._get_value()(*args) if args else self._get_value()
+        return self._get_value()(state) if state else self._get_value()
 
     def __call__(self, state):
         return self.run(state)

@@ -1,8 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from functools import reduce  # type: ignore
+from typing import Generic, TypeVar
+
+A = TypeVar('A')
 
 
-class Monoid(metaclass=ABCMeta):
+class Monoid(Generic[A], metaclass=ABCMeta):
     """The class of monoids (types with an associative binary operation that
     has an identity). Instances should satisfy the following laws:
 
@@ -14,7 +17,7 @@ class Monoid(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def empty(cls) -> "Monoid":
+    def empty(cls) -> 'Monoid[A]':
         """mempty :: m
 
         The empty element and identity of append.
@@ -23,7 +26,7 @@ class Monoid(metaclass=ABCMeta):
         return NotImplemented
 
     @abstractmethod
-    def append(self, other: "Monoid") -> "Monoid":
+    def append(self, other: 'Monoid[A]') -> 'Monoid[A]':
         """mappend :: m -> m -> m
 
         An associative operation
@@ -31,11 +34,11 @@ class Monoid(metaclass=ABCMeta):
 
         return NotImplemented
 
-    def __add__(self, other):
+    def __add__(self, other: 'Monoid[A]') -> 'Monoid[A]':
         return self.append(other)
 
     @classmethod
-    def concat(cls, xs) -> "Monoid":
+    def concat(cls, xs: 'Monoid[A]') -> 'Monoid[A]':
         """mconcat :: [m] -> m
 
         Fold a list using the monoid. For most types, the default

@@ -16,7 +16,7 @@ class List(Monad, Monoid, Applicative, Functor):
     Wraps an immutable list built from lambda expressions.
     """
 
-    def __init__(self, lambda_list: Callable[[Callable], Any]=None):
+    def __init__(self, lambda_list: Callable[[Callable], Any]=None) -> None:
         """Initialize List.
         """
         # Accept building List from a Python iterable

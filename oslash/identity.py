@@ -15,7 +15,7 @@ class Identity(Monad, Applicative, Functor):
     information to values.
     """
 
-    def __init__(self, value: "Any"):
+    def __init__(self, value: "Any") -> None:
         """Initialize a new reader."""
         self._get_value = lambda: value
 

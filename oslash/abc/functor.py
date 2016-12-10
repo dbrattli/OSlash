@@ -1,9 +1,12 @@
 from abc import ABCMeta, abstractmethod
 
-from typing import Callable, Any
+from typing import Callable, TypeVar, Generic
+
+A = TypeVar('A')
+B = TypeVar('B')
 
 
-class Functor(metaclass=ABCMeta):
+class Functor(Generic[A], metaclass=ABCMeta):
 
     """The Functor class is used for types that can be mapped over.
 
@@ -21,7 +24,7 @@ class Functor(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def map(self, fn: Callable[[Any], Any]) -> 'Functor':
+    def map(self, fn: Callable[[A], B]) -> 'Functor[B]':
         """Map a function over wrapped values.
 
         Map knows how to apply functions to values that are wrapped in
@@ -29,7 +32,7 @@ class Functor(metaclass=ABCMeta):
         """
         return NotImplemented
 
-    def __rmod__(self, fn: Callable[[Any], Any]) -> 'Functor':
+    def __rmod__(self, fn: Callable[[A], B]) -> 'Functor[B]':
         r"""Infix version of map.
 
         Haskell: <$>
@@ -43,15 +46,17 @@ class Functor(metaclass=ABCMeta):
         return self.map(fn)
 
     @property
-    def value(self) -> Any:
+    def value(self) -> A:
         """Get value of Functor.
 
         Uses map to extract the internal value of the Functor.
         """
-        value = None  # type: Any
+        value = None  # type: A
 
-        def mapper(x):
+        def mapper(x: A) -> A:
             nonlocal value
             value = x
+            return x
+
         self.map(mapper)
         return value

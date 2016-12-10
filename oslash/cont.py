@@ -20,7 +20,7 @@ class Cont(Monad, Functor):
     passing style (CPS).
     """
 
-    def __init__(self, cont: Callable[[Callable], Any]):
+    def __init__(self, cont: Callable[[Callable], Any]) -> None:
         """Cont constructor.
 
         Keyword arguments:

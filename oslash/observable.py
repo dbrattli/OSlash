@@ -1,6 +1,6 @@
 """ The Observable Monad
 
-* https://www.youtube.com/watch?v=looJcaeboBY&feature=youtu.be
+* https://www.youtube.com/watch?v=looJcaeboBY
 * https://wiki.haskell.org/MonadCont_under_the_hood
 * http://blog.sigfpe.com/2008/12/mother-of-all-monads.html
 * http://www.haskellforall.com/2012/12/the-continuation-monad.html
@@ -22,7 +22,7 @@ class Observable(Monad, Functor):
     (CPS).
     """
 
-    def __init__(self, subscribe: Callable[[Callable], Any]):
+    def __init__(self, subscribe: Callable[[Callable], Any]) -> None:
         """Observable constructor.
 
         Keyword arguments:
@@ -49,7 +49,8 @@ class Observable(Monad, Functor):
 
         Haskell: m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c
         """
-        return Observable(lambda on_next: self.subscribe(lambda a: fn(a).subscribe(on_next)))
+        source = self
+        return Observable(lambda on_next: source.subscribe(lambda a: fn(a).subscribe(on_next)))
     flat_map = bind
 
     def filter(self, predicate) -> 'Observable':

@@ -10,7 +10,7 @@ except ImportError:
 setup(
     name='OSlash',
     version='0.5.1',
-    description="Ø for Python 3.4",
+    description="Ø for Python 3.5",
     long_description=("is a functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),
     author='Dag Brattli',
@@ -19,7 +19,6 @@ setup(
     url='https://github.com/dbrattli/oslash',
     download_url='https://github.com/dbrattli/oslash',
     zip_safe=True,
-    install_requires=["mypy-lang"],
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         # 'Development Status :: 3 - Alpha',

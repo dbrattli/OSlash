@@ -9,15 +9,18 @@ All instances of the Monad typeclass should obey the three monad laws:
 
 from abc import ABCMeta, abstractmethod
 
-from typing import Callable, Any
+from typing import Callable, Generic, TypeVar
+
+A = TypeVar('A')
+B = TypeVar('B')
 
 
-class Monad(metaclass=ABCMeta):
+class Monad(Generic[A], metaclass=ABCMeta):
 
     """Monad abstract base class."""
 
     @abstractmethod
-    def bind(self, func: Callable[[Any], 'Monad']) -> 'Monad':
+    def bind(self, func: Callable[[A], 'Monad[B]']) -> 'Monad[B]':
         """Monad bind method.
 
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
@@ -41,7 +44,7 @@ class Monad(metaclass=ABCMeta):
         return NotImplemented
 
     @classmethod
-    def unit(cls, value) -> 'Monad':
+    def unit(cls, value: A) -> 'Monad[A]':
         """Wrap a value in a default context.
 
         Haskell: return :: a -> m a .
@@ -52,7 +55,7 @@ class Monad(metaclass=ABCMeta):
         """
         return cls(value)
 
-    def __or__(self, func: Callable[[Any], 'Monad']) -> 'Monad':
+    def __or__(self, func: Callable[[A], 'Monad[B]']) -> 'Monad[B]':
         """Use | as operator for bind.
 
         Provide the | operator instead of the Haskell >>= operator

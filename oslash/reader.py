@@ -20,7 +20,7 @@ class Reader(Monad, Applicative, Functor):
     Callable monad. Reader is all about composing wrapped functions.
     """
 
-    def __init__(self, fn: Callable):
+    def __init__(self, fn: Callable) -> None:
         r"""Initialize a new reader.
 
         """

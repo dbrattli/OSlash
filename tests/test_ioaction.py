@@ -6,7 +6,7 @@ from oslash import Put, IO, put_line, get_line
 class MyMock:
     """Mock for testing side effects"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.value = None
 
     def print(self, string):
@@ -26,7 +26,7 @@ class TestPut(unittest.TestCase):
 
     def test_put_return(self):
         pm = MyMock()
-        p = Put("hello, world!", IO(()))
+        p = Put("hello, world!", IO())
         p(print=pm.print)
         self.assertEqual(pm.value, "hello, world!")
 
