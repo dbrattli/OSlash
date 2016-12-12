@@ -1,25 +1,28 @@
-from typing import Any, Callable, Tuple
+from typing import Callable, Tuple, TypeVar, Generic
 
 from .abc import Functor
 from .abc import Monad
 from .abc import Monoid
 from .util import Unit, extensionclassmethod
 
+A = TypeVar('A')
+B = TypeVar('B')
+C = TypeVar('C')
 
-class Writer(Monad, Functor):
 
+class Writer(Generic[A], Monad[A], Functor[A]):
     """The writer monad."""
 
-    def __init__(self, value: Any, log: Monoid) -> None:
+    def __init__(self, value: A, log: Monoid[C]) -> None:
         """Initialize a new writer.
 
         :param value Any: Value to
         """
         super().__init__()
 
-        self._get_value = lambda: (value, log)
+        self._value = (value, log)
 
-    def map(self, func: Callable[[Any], Any]) -> "Writer":
+    def map(self, func: Callable[[A], B]) -> 'Writer[B]':
         """Map a function func over the Writer value.
 
         Haskell:
@@ -31,7 +34,7 @@ class Writer(Monad, Functor):
         value, log = self.run()
         return Writer(func(value), log)
 
-    def bind(self, func: Callable[[Any], "Writer"]) -> "Writer":
+    def bind(self, func: Callable[[A], 'Writer[B]']) -> 'Writer[B]':
         """Flat is better than nested.
 
         Haskell:
@@ -52,7 +55,7 @@ class Writer(Monad, Functor):
         return str(self)
 
     @classmethod
-    def unit(cls, value: "Any") -> "Writer":
+    def unit(cls, value: A) -> 'Writer[A]':
         """Wrap a single value in a Writer.
 
         Use the factory method to create *Writer classes that
@@ -61,16 +64,16 @@ class Writer(Monad, Functor):
         """
         return cls(value, log="")
 
-    def run(self) -> tuple:
+    def run(self) -> Tuple[A, B]:
         """Extract value from Writer.
 
         This is the inverse function of the constructor and converts the
         Writer to s simple tuple.
         """
-        return self._get_value()
+        return self._value
 
     @staticmethod
-    def apply_log(a: tuple, func: Callable[[Any], Tuple[Any, Monoid]]) -> tuple:
+    def apply_log(a: tuple, func: Callable[[A], Tuple[B, Monoid[C]]]) -> Tuple[B, Monoid[C]]:
         """Apply a function to a value with a log.
 
         Helper function to apply a function to a value with a log tuple.
@@ -80,10 +83,11 @@ class Writer(Monad, Functor):
         return new, log + entry
 
 
-class MonadWriter(Writer):
-        @classmethod
-        def tell(cls, log):
-            return cls(Unit, log)
+class MonadWriter(Generic[A], Writer[A]):
+
+    @classmethod
+    def tell(cls, log: Monoid[C]) -> 'MonadWriter[A]':
+        return cls(Unit, log)
 
 
 @extensionclassmethod(Writer)

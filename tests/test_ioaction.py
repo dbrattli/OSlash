@@ -1,5 +1,7 @@
 import unittest
+from typing import Tuple
 
+import oslash.ioaction
 from oslash import Put, IO, put_line, get_line
 
 
@@ -7,27 +9,30 @@ class MyMock:
     """Mock for testing side effects"""
 
     def __init__(self) -> None:
-        self.value = None
+        self.value = None  # type: str
+        oslash.ioaction.pure_input = self.pure_input
+        oslash.ioaction.pure_print = self.pure_print
 
-    def print(self, string):
-        self.value = string
+    def pure_print(self, world: int, text: str) -> int:
+        self.value = text
+        return world + 1
 
-    def input(self):
-        return self.value
+    def pure_input(self, world: int) -> Tuple[int, str]:
+        text = self.value
+        new_world = world + 1
+        return new_world, text
 
 
 class TestPut(unittest.TestCase):
 
-    def test_put_line(self):
+    def test_put_line(self) -> None:
         pm = MyMock()
-        io = put_line("hello, world!")
-        io(print=pm.print)
+        action = put_line("hello, world!")
+        action()
         self.assertEqual(pm.value, "hello, world!")
 
-    def test_put_return(self):
+    def test_put_return(self) -> None:
         pm = MyMock()
-        p = Put("hello, world!", IO())
-        p(print=pm.print)
+        action = Put("hello, world!", IO())
+        action()
         self.assertEqual(pm.value, "hello, world!")
-
-

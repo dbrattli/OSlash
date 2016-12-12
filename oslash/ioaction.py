@@ -4,7 +4,7 @@ Many thanks to Chris Taylor and his excellent blog post "IO Is Pure",
 http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
 """
 
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar, Tuple
 
 from .abc import Applicative
 from .abc import Functor
@@ -22,35 +22,35 @@ class IO(Generic[A], Monad[A], Applicative[A], Functor[A]):
     having an action lying around doesn't make anything happen.
     """
 
-    def __init__(self, func: A=None) -> None:
+    def __init__(self, value: A=None) -> None:
         """A container for a world remaking function"""
 
         super().__init__()
-        self._get_value = lambda: func or Unit
+        self._value = value or Unit
 
     def bind(self, func: Callable[[A], 'IO[B]']) -> 'IO[B]':
         """IO a -> (a -> IO b) -> IO b"""
 
-        return func(self._get_value())
+        return func(self._value())
 
-    def apply(self, something) -> "IO":
-        return something.map(self._get_value())
+    def apply(self, something: 'IO[B]') -> 'IO[B]':
+        return something.map(self._value)
 
     def map(self, func: Callable[[A], B]) -> 'IO[B]':
-        return IO(func(self._get_value()))
+        return IO(func(self._value))
 
-    def run(self, *args, **kwargs) -> 'IO[A]':
-        return self._get_value()
+    def run(self, world: int) -> 'IO[A]':
+        return self._value
 
-    def __call__(self, *args, **kwargs) -> 'IO[A]':
+    def __call__(self, world: int) -> 'IO[A]':
         """Nothing more to run."""
-        return self.run(*args, **kwargs)
+        return self.run(world)
 
-    def __str__(self, m=0, n=0):
-        a = self._get_value()
+    def __str__(self, m: int=0, n: int=0) -> str:
+        a = self._value
         return "%sReturn %s" % (ind(m), a)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 
@@ -65,27 +65,26 @@ class Put(Generic[A], IO[A]):
     def bind(self, func: 'Callable[[A], Put[B]]') -> 'Put[B]':
         """IO a -> (a -> IO b) -> IO b"""
 
-        text, a = self._get_value()
+        text, a = self._value()
         return Put(text, a.bind(func))
 
     def map(self, func: Callable[[A], B]) -> 'Put[B]':
         # Put s (fmap f io)
-        text, action = self._get_value()
+        text, action = self._value
         return Put(text, action.map(func))
 
-    def run(self, *args, **kwargs):
+    def run(self, world: int) -> IO[A]:
         """Run IO action"""
 
-        world = kwargs.get('world', 0)
-        text, action = self._get_value()
-        kwargs.get("print", print)("%s" % text)
-        return action(world=world + 1)
+        text, action = self._value
+        new_world = pure_print(world, text)
+        return action(world=new_world)
 
-    def __call__(self, *args, **kwargs):
-        return self.run(*args, **kwargs)
+    def __call__(self, world: int=0) -> IO[A]:
+        return self.run(world)
 
-    def __str__(self, m=0, n=0):
-        s, io, world = self._get_value()
+    def __str__(self, m: int=0, n: int=0) -> str:
+        s, io, world = self._value
         a = io.__str__(m + 1, n)
         return '%sPut ("%s",\n%s\n%s)' % (ind(m), s, a, ind(m))
 
@@ -98,31 +97,30 @@ class Get(Generic[A], IO[A]):
     def __init__(self, func: Callable[[str], IO[A]]) -> None:
         super().__init__(func)
 
-        self.input_func = input  # type: Callable[[], str]
-
     def bind(self, func: 'Callable[[A], Get[B]]') -> 'Get[B]':
         """IO a -> (a -> IO b) -> IO b"""
 
-        g = self._get_value()
+        g = self._value
         return Get(lambda text: g(text).bind(func))
 
     def map(self, func: Callable[[A], B]) -> 'Get[B]':
         # Get (\s -> fmap f (g s))
-        g = self._get_value()
+        g = self._value
         return Get(lambda s: g(s).map(func))
 
-    def run(self, *args, **kwargs):
+    def run(self, world: int) -> IO[A]:
         """Run IO Action"""
-        world = kwargs.get('world', 0)
-        func = self._get_value()
-        action = func(self.input_func())
-        return action(world=world + 1)
 
-    def __call__(self, *args, **kwargs):
-        return self.run(*args, **kwargs)
+        func = self._value
+        new_world, text = pure_input(world)
+        action = func(text)
+        return action(world=new_world)
+
+    def __call__(self, world: int=0) -> IO[A]:
+        return self.run(world)
 
     def __str__(self, m: int=0, n: int=0) -> str:
-        g = self._get_value()
+        g = self._value
         i = "$%s" % n
         a = (g(i)).__str__(m + 1, n + 1)
         return '%sGet (%s -> \n%s\n%s)' % (ind(m), i, a, ind(m))
@@ -149,17 +147,16 @@ class ReadFile(IO):
         filename, g = self._get_value()
         return Get(lambda s: g(s).map(func))
 
-    def run(self, *args, **kwargs):
+    def run(self, world: int) -> IO[A]:
         """Run IO Action"""
 
-        world = kwargs.get('world', 0)
         filename, func = self._get_value()
         f = self.open_func(filename)
         action = func(f.read())
         return action(world=world + 1)
 
-    def __call__(self, *args, **kwargs):
-        return self.run(*args, **kwargs)
+    def __call__(self, world: int=0) -> IO[A]:
+        return self.run(world)
 
     def __str__(self, m: int=0, n: int=0) -> str:
         filename, g = self._get_value()
@@ -178,3 +175,13 @@ def put_line(string: str=None) -> IO[A]:
 
 def read_file(filename: str) -> IO[str]:
     return ReadFile(filename, lambda text: IO(text))
+
+
+def pure_print(world: int, text: str) -> int:
+    print(text)  # Impure. If you see this line you need to wash your hands
+    return world + 1
+
+
+def pure_input(world: int) -> Tuple[int, str]:
+    text = input()  # Impure. If you see this line you need to wash your hands
+    return (world + 1, text)

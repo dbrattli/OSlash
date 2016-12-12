@@ -94,7 +94,7 @@ class TestCont(unittest.TestCase):
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
         do_c = lambda n: unit(n) | (
-            lambda x: Cont.call_cc(lambda abort: h(x, abort) | (
+            lambda x: call_cc(lambda abort: h(x, abort) | (
                 lambda y: g(y))))
 
         final_c = lambda x: "Done: %s" % x

@@ -46,7 +46,7 @@ class TestList(unittest.TestCase):
         self.assertEqual(1, len(xs))
 
     def test_list_length_multiple(self):
-        xs = List(range(42))
+        xs = List.from_iterable(range(42))
         self.assertEqual(42, len(xs))
 
     def test_list_append_empty(self):
@@ -62,10 +62,10 @@ class TestList(unittest.TestCase):
         self.assertEqual(xs, zs)
 
     def test_list_append_non_empty(self):
-        xs = List(range(5))
-        ys = List(range(5, 10))
+        xs = List.from_iterable(range(5))
+        ys = List.from_iterable(range(5, 10))
         zs = xs.append(ys)
-        self.assertEqual(List(range(10)), zs)
+        self.assertEqual(List.from_iterable(range(10)), zs)
 
 
 class TestListFunctor(unittest.TestCase):
@@ -80,12 +80,12 @@ class TestListFunctor(unittest.TestCase):
             unit(420)
         )
 
-        y = List([1, 2, 3, 4])
+        y = List.from_iterable([1, 2, 3, 4])
         g = lambda x: x * 10
 
         self.assertEqual(
             y.map(g),
-            List([10, 20, 30, 40])
+            List.from_iterable([10, 20, 30, 40])
         )
 
     def test_list_functor_law_1(self):
@@ -106,7 +106,7 @@ class TestListFunctor(unittest.TestCase):
         )
 
         # Long list
-        z = List(range(42))
+        z = List.from_iterable(range(42))
         self.assertEqual(
             z.map(identity),
             z
@@ -115,10 +115,10 @@ class TestListFunctor(unittest.TestCase):
     def test_list_functor_law2(self):
         # fmap (f . g) x = fmap f (fmap g x)
         def f(x):
-            return x+10
+            return x + 10
 
         def g(x):
-            return x*10
+            return x * 10
 
         # Singleton list
         x = unit(42)
@@ -128,14 +128,14 @@ class TestListFunctor(unittest.TestCase):
         )
 
         # Empty list
-        y = List([])
+        y = List.empty()
         self.assertEquals(
             y.map(compose(f, g)),
             y.map(g).map(f)
         )
 
         # Long list
-        z = List(range(42))
+        z = List.from_iterable(range(42))
         self.assertEquals(
             z.map(compose(f, g)),
             z.map(g).map(f)
@@ -162,7 +162,7 @@ class TestListApplicative(unittest.TestCase):
         )
 
         # Long list
-        z = List(range(42))
+        z = List.from_iterable(range(42))
         self.assertEquals(
             pure(f).apply(z),
             z.map(f)
@@ -179,14 +179,14 @@ class TestListApplicative(unittest.TestCase):
         )
 
         # Empty list
-        y = List([])
+        y = List.empty()
         self.assertEquals(
             pure(identity).apply(y),
             y
         )
 
         # Log list
-        y = List(range(42))
+        y = List.from_iterable(range(42))
         self.assertEquals(
             pure(identity).apply(y),
             y
@@ -225,7 +225,7 @@ class TestListApplicative(unittest.TestCase):
         v = pure(lambda x: x + 42)
 
         # Long list
-        w = List(range(42))
+        w = List.from_iterable(range(42))
         self.assertEquals(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
@@ -252,21 +252,20 @@ class TestListApplicative(unittest.TestCase):
 
     def test_list_applicative_binary_func(self):
         f = lambda x, y: x+y
-        v = List([1, 2])
-        w = List([4, 8])
+        v = List.from_iterable([1, 2])
+        w = List.from_iterable([4, 8])
 
         self.assertEquals(
             pure(f).apply(v).apply(w),
-            List([5, 9, 6, 10])
+            List.from_iterable([5, 9, 6, 10])
         )
 
     def test_list_applicative_empty_func(self):
-        f = []
         v = unit(42)
-        w = List([1, 2, 3])
+        w = List.from_iterable([1, 2, 3])
 
         self.assertEquals(
-            List(f).apply(v).apply(w),
+            List.empty().apply(v).apply(w),
             List(Unit)
         )
 
@@ -361,7 +360,7 @@ class TestListMonad(unittest.TestCase):
         g = lambda y: unit(y*42)
 
         # Long list
-        m = List(range(42))
+        m = List.from_iterable(range(42))
         self.assertEqual(
             m.bind(f).bind(g),
             m.bind(lambda x: f(x).bind(g))

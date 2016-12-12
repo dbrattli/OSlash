@@ -44,19 +44,3 @@ class Functor(Generic[A], metaclass=ABCMeta):
         Returns a new Functor.
         """
         return self.map(fn)
-
-    @property
-    def value(self) -> A:
-        """Get value of Functor.
-
-        Uses map to extract the internal value of the Functor.
-        """
-        value = None  # type: A
-
-        def mapper(x: A) -> A:
-            nonlocal value
-            value = x
-            return x
-
-        self.map(mapper)
-        return value

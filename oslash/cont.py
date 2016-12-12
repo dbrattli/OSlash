@@ -26,7 +26,7 @@ class Cont(Monad, Functor):
         Keyword arguments:
         cont -- A callable
         """
-        self._get_value = lambda: cont
+        self._value = cont
 
     @classmethod
     def unit(cls, a: Any) -> 'Cont':
@@ -56,7 +56,7 @@ class Cont(Monad, Functor):
         return Cont(lambda c: fn(lambda a: Cont(lambda _: c(a))).run(c))
 
     def run(self, *args) -> Any:
-        return self._get_value()(*args) if args else self._get_value()
+        return self._value(*args) if args else self._value
 
     def __call__(self, *args, **kwargs) -> Any:
         return self.run(*args, **kwargs)
