@@ -31,7 +31,7 @@ class IO(Generic[A], Monad[A], Applicative[A], Functor[A]):
     def bind(self, func: Callable[[A], 'IO[B]']) -> 'IO[B]':
         """IO a -> (a -> IO b) -> IO b"""
 
-        return func(self._value())
+        return func(self._value)
 
     def apply(self, something: 'IO[B]') -> 'IO[B]':
         return something.map(self._value)
@@ -65,7 +65,7 @@ class Put(Generic[A], IO[A]):
     def bind(self, func: 'Callable[[A], Put[B]]') -> 'Put[B]':
         """IO a -> (a -> IO b) -> IO b"""
 
-        text, a = self._value()
+        text, a = self._value
         return Put(text, a.bind(func))
 
     def map(self, func: Callable[[A], B]) -> 'Put[B]':
@@ -84,7 +84,7 @@ class Put(Generic[A], IO[A]):
         return self.run(world)
 
     def __str__(self, m: int=0, n: int=0) -> str:
-        s, io, world = self._value
+        s, io = self._value
         a = io.__str__(m + 1, n)
         return '%sPut ("%s",\n%s\n%s)' % (ind(m), s, a, ind(m))
 
