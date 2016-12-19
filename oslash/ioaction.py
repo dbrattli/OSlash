@@ -122,7 +122,7 @@ class Get(Generic[A], IO[A]):
     def __str__(self, m: int=0, n: int=0) -> str:
         g = self._value
         i = "$%s" % n
-        a = (g(i)).__str__(m + 1, n + 1)
+        a = g(i).__str__(m + 1, n + 1)
         return '%sGet (%s -> \n%s\n%s)' % (ind(m), i, a, ind(m))
 
 
@@ -161,7 +161,7 @@ class ReadFile(IO):
     def __str__(self, m: int=0, n: int=0) -> str:
         filename, g = self._get_value()
         i = "$%s" % n
-        a = (g(i)).__str__(m + 2, n + 1)
+        a = g(i).__str__(m + 2, n + 1)
         return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
 
 
