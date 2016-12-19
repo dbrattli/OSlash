@@ -4,12 +4,12 @@ from .util import Unit
 from .abc import Functor
 from .abc import Monad
 
-A = TypeVar('A')
-B = TypeVar('B')
-S = TypeVar('S')
+A = TypeVar('A')  # Type of value
+B = TypeVar('B')  # Type of new value
+S = TypeVar('S')  # Type of state
 
 
-class State(Generic[A, S], Monad['State[S]'], Functor['State[S]']):
+class State(Generic[A, S], Monad[A], Functor[A]):
 
     """The state monad.
 
