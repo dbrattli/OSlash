@@ -7,12 +7,13 @@ except ImportError:
     use_setuptools()
     from setuptools import setup
 
+readme = open('README.rst').read()
+
 setup(
     name='OSlash',
     version='0.5.1',
     description="Ø for Python 3.5",
-    long_description=("is a functional library for playing with "
-                      "Functors, Applicatives, and Monads in Python."),
+    long_description=readme,
     author='Dag Brattli',
     author_email='dag@brattli.net',
     license='Apache License',
