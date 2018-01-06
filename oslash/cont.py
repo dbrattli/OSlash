@@ -13,7 +13,6 @@ from .abc import Monad, Functor
 
 
 class Cont(Monad, Functor):
-
     """The Continuation Monad.
 
     The Continuation monad represents suspended computations in continuation-
@@ -30,7 +29,10 @@ class Cont(Monad, Functor):
 
     @classmethod
     def unit(cls, a: Any) -> 'Cont':
-        """a -> Cont a"""
+        """Create new continuation.
+
+        Haskell: a -> Cont a
+        """
         return cls(lambda cont: cont(a))
 
     def map(self, fn: Callable[[Any], Any]) -> 'Cont':
@@ -55,10 +57,10 @@ class Cont(Monad, Functor):
         """
         return Cont(lambda c: fn(lambda a: Cont(lambda _: c(a))).run(c))
 
-    def run(self, *args) -> Any:
+    def run(self, *args: Any) -> Any:
         return self._value(*args) if args else self._value
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self.run(*args, **kwargs)
 
     def __eq__(self, other) -> bool:

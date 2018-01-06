@@ -31,7 +31,8 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    test_suite='nose.collector',
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
 
     packages=['oslash', 'oslash.util', 'oslash.abc'],
     package_dir={'oslash': 'oslash'}

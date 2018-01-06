@@ -10,19 +10,18 @@ A = TypeVar('A')
 B = TypeVar('B')
 
 
-class Identity(Generic[A], Monad[A], Applicative[A], Functor[A]):
-
-    """The Identity monad.
+class Identity(Generic[A], Monad, Applicative, Functor):
+    """Identity monad.
 
     The Identity monad is the simplest monad, which attaches no
     information to values.
     """
 
-    def __init__(self, value: A) -> None:
+    def __init__(self, value: Any) -> None:
         """Initialize a new reader."""
         self._value = value
 
-    def map(self, mapper: Callable[[A], B]) -> 'Identity[B]':
+    def map(self, mapper: Callable[[Any], Any]) -> 'Identity':
         """Map a function over wrapped values."""
         value = self._value
         try:
@@ -32,20 +31,20 @@ class Identity(Generic[A], Monad[A], Applicative[A], Functor[A]):
 
         return Identity(result)
 
-    def bind(self, func: Callable[[A], 'Identity[B]']) -> 'Identity[B]':
+    def bind(self, func: Callable[[Any], 'Identity']) -> 'Identity':
         return func(self._value)
 
-    def apply(self, something: 'Identity[B]') -> 'Identity[B]':
+    def apply(self, something: 'Identity') -> 'Identity':
         func = self._value
         return something.map(func)
 
-    def run(self) -> A:
+    def run(self) -> Any:
         return self._value
 
-    def __call__(self) -> A:
+    def __call__(self) -> Any:
         return self.run()
 
-    def __eq__(self, other: 'Identity[B]') -> bool:
+    def __eq__(self, other) -> bool:
         return self._value == other()
 
     def __str__(self) -> str:

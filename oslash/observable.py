@@ -37,7 +37,7 @@ class Observable(Monad, Functor):
     just = unit
 
     def map(self, mapper: Callable[[Any], Any]) -> 'Observable':
-        r"""Map a function over an on_next continuation.
+        r"""Map a function over an observable.
 
         Haskell: fmap f m = Cont $ \c -> runCont m (c . f)
         """
@@ -45,7 +45,7 @@ class Observable(Monad, Functor):
         return Observable(lambda on_next: source.subscribe(compose(on_next, mapper)))
 
     def bind(self, fn: Callable[[Any], 'Observable']) -> 'Observable':
-        r"""Chain continuation passing on_next functions.
+        r"""Chain continuation passing functions.
 
         Haskell: m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c
         """

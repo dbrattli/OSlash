@@ -12,7 +12,7 @@ B = TypeVar('B')
 E = TypeVar('E')
 
 
-class Either(Generic[E, A], Monad['Either[E]'], Applicative['Either[E]'], Functor['Either[E]'], metaclass=ABCMeta):
+class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
 
     """The Either Monad.
 
@@ -21,30 +21,30 @@ class Either(Generic[E, A], Monad['Either[E]'], Applicative['Either[E]'], Functo
     """
 
     @abstractmethod
-    def map(self, _: Callable[[A], B]) -> 'Either[E, B]':
+    def map(self, _: Callable[[A], B]) -> 'Either':
         return NotImplemented
 
     @abstractmethod
-    def apply(self, something: 'Either[E, B]') -> 'Either[E, B]':
+    def apply(self, something: 'Either') -> 'Either':
         return NotImplemented
 
     @abstractmethod
-    def bind(self, func: Callable[[A], 'Either[E, B]']) -> 'Either[E, B]':
+    def bind(self, func: Callable[[A], 'Either']) -> 'Either':
         return NotImplemented
 
     @abstractmethod
-    def __eq__(self, other: 'Either[E, B]') -> bool:
+    def __eq__(self, other: 'Either') -> bool:
         return NotImplemented
 
 
-class Right(Generic[E, A], Either[E, A]):
+class Right(Either):
 
     """Represents a successful computation."""
 
     def __init__(self, value: A) -> None:
         self._value = value
 
-    def map(self, mapper: Callable[[A], B]) -> Either[E, B]:
+    def map(self, mapper: Callable[[A], B]) -> Either:
         value = self._value
         try:
             result = mapper(value)
@@ -53,20 +53,20 @@ class Right(Generic[E, A], Either[E, A]):
 
         return Right(result)
 
-    def apply(self, something: Either[E, B]) -> Either[E, B]:
+    def apply(self, something: Either) -> Either:
         return something.map(self._value)
 
-    def bind(self, func: Callable[[A], Either[E, B]]) -> Either[E, B]:
+    def bind(self, func: Callable[[A], Either]) -> Either:
         return func(self._value)
 
-    def __eq__(self, other: Either[E, B]) -> bool:
+    def __eq__(self, other: Either) -> bool:
         return isinstance(other, Right) and self._value == other._value
 
     def __str__(self) -> str:
         return "Right %s" % self._value
 
 
-class Left(Generic[E, A], Either[E, A]):
+class Left(Either):
 
     """Represents a computation that has failed."""
 
@@ -76,10 +76,10 @@ class Left(Generic[E, A], Either[E, A]):
     def apply(self, something: Either) -> Either:
         return Left(self._value)
 
-    def map(self, mapper: Callable[[A], B]) -> Either[E, B]:
+    def map(self, mapper: Callable[[A], B]) -> Either:
         return Left(self._value)
 
-    def bind(self, func: Callable[[A], Either[E, B]]) -> Either[E, B]:
+    def bind(self, func: Callable[[A], Either]) -> Either:
         return Left(self._value)
 
     def __eq__(self, other: Either) -> bool:

@@ -1,13 +1,11 @@
 from abc import ABCMeta, abstractmethod
 
-from typing import Callable, TypeVar, Generic
+from typing import TypeVar, Generic
 
-A = TypeVar('A')
-B = TypeVar('B')
+T = TypeVar('T')
 
 
-class Functor(Generic[A], metaclass=ABCMeta):
-
+class Functor(Generic[T], metaclass=ABCMeta):
     """The Functor class is used for types that can be mapped over.
 
     Instances of Functor should satisfy the following laws:
@@ -21,10 +19,13 @@ class Functor(Generic[A], metaclass=ABCMeta):
     x.map(compose(f, g)) == x.map(g).map(f)
 
     The instances of Functor for lists, Maybe and IO satisfy these laws.
+
+    NOTE: the methods in this base class cannot be typed as it would
+    require higher kinded polymorphism, aka generics of generics.
     """
 
     @abstractmethod
-    def map(self, fn: Callable[[A], B]) -> 'Functor[B]':
+    def map(self, fn):
         """Map a function over wrapped values.
 
         Map knows how to apply functions to values that are wrapped in
@@ -32,8 +33,8 @@ class Functor(Generic[A], metaclass=ABCMeta):
         """
         return NotImplemented
 
-    def __rmod__(self, fn: Callable[[A], B]) -> 'Functor[B]':
-        r"""Infix version of map.
+    def __rmod__(self, fn):
+        """Infix version of map.
 
         Haskell: <$>
 

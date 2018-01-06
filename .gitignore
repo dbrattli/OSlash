@@ -8,3 +8,9 @@ build
 *.pyc
 *.user
 .ipynb_checkpoints
+
+.coverage
+.cache/
+.mypy_cache/
+.vscode/
+

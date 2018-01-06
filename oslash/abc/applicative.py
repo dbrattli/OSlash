@@ -2,23 +2,27 @@ from abc import ABCMeta, abstractmethod
 
 from typing import Callable, TypeVar, Generic
 
-A = TypeVar('A')
-B = TypeVar('B')
-C = TypeVar('C')
 
+class Applicative(metaclass=ABCMeta):
+    """Applicative.
 
-class Applicative(Generic[A], metaclass=ABCMeta):
-    """Applicative functors are functors with some extra properties.
+    Applicative functors are functors with some extra properties.
     Most importantly, they allow you to apply functions inside the
     functor (hence the name).
 
     To learn more about Applicative functors:
     * http://www.davesquared.net/2012/05/fp-newbie-learns-applicatives.html
+
+    NOTE: the methods in this base class cannot be typed as it would
+    require higher kinded polymorphism, aka generics of generics.
     """
 
     @abstractmethod
-    def apply(self, something: 'Callable[[A], B]') -> "Applicative[B]":
-        """(<*>) :: f (a -> b) -> f a -> f b.
+    def apply(self, something):
+        """Apply wrapped callable.
+
+        Python: apply(self: Applicative, something: Applicative[Callable[[A], B]]) -> Applicative
+        Haskell: (<*>) :: f (a -> b) -> f a -> f b.
 
         Apply (<*>) is a beefed up fmap. It takes a functor value that
         has a function in it and another functor, and extracts that
@@ -27,7 +31,7 @@ class Applicative(Generic[A], metaclass=ABCMeta):
         """
         return NotImplemented
 
-    def __mul__(self, something: 'Callable[[A], B]') -> 'Applicative[B]':
+    def __mul__(self, something: 'Callable[[Any], Any]') -> 'Applicative':
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Provide the * as an infix version of apply() since we cannot
@@ -35,14 +39,14 @@ class Applicative(Generic[A], metaclass=ABCMeta):
         """
         return self.apply(something)
 
-    def lift_a2(self, func: Callable[[A, B], C], b: 'Applicative[B]') -> 'Applicative[C]':
+    def lift_a2(self, func, b):
         """liftA2 :: (Applicative f) => (a -> b -> c) -> f a -> f b -> f c."""
 
         return func % self * b
 
     @classmethod
-    def pure(cls, x: Callable[[A], B]) -> "Applicative[A]":
-        """The Applicative functor constructor.
+    def pure(cls, x):
+        """Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context
         (using them with <*>); otherwise, stick to the default class

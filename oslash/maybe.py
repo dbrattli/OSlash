@@ -1,19 +1,15 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
-from typing import Any, Callable, TypeVar, Generic
+from typing import Callable, Any, Generic, TypeVar
 
 from .abc import Applicative
 from .abc import Functor
 from .abc import Monoid
 from .abc import Monad
 
-A = TypeVar("A")
-B = TypeVar("B")
 
-
-class Maybe(Generic[A], Monad[A], Monoid[A], Applicative[A], Functor[A], metaclass=ABCMeta):
-
+class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     """Encapsulates an optional value.
 
     The Maybe type encapsulates an optional value. A value of type
@@ -24,27 +20,32 @@ class Maybe(Generic[A], Monad[A], Monoid[A], Applicative[A], Functor[A], metacla
     """
 
     @abstractmethod
-    def bind(self, func: Callable[[A], 'Maybe[B]']) -> 'Maybe[B]':
+    def bind(self, func: Callable[[Any], 'Maybe']) -> 'Maybe':
+        """Monad bind method."""
         return NotImplemented
 
     @abstractmethod
-    def map(self, mapper: Callable[[A], B]) -> 'Maybe[B]':
+    def map(self, mapper: Callable[[Any], Any]) -> 'Maybe':
+        """Functor map method."""
         return NotImplemented
 
     @abstractmethod
     def apply(self, something: 'Maybe') -> 'Maybe':
+        """Applicative apply method."""
         return NotImplemented
 
     @classmethod
-    def empty(cls) -> 'Maybe[A]':
+    def empty(cls) -> 'Maybe':
+        """Create empty maybe."""
         return Nothing()
 
     @abstractmethod
-    def append(self, other: 'Maybe[A]') -> 'Maybe[A]':
+    def append(self, other: 'Maybe') -> 'Maybe':
+        """Append maybe to other maybe."""
         return NotImplemented
 
     @abstractmethod
-    def from_just(self) -> A:
+    def from_just(self) -> Any:
         return NotImplemented
 
     @property
@@ -56,11 +57,11 @@ class Maybe(Generic[A], Monad[A], Monoid[A], Applicative[A], Functor[A], metacla
         return False
 
     @abstractmethod
-    def from_maybe(self, default: A) -> A:
+    def from_maybe(self, default: Any) -> Any:
         return NotImplemented
 
     @abstractmethod
-    def __eq__(self, other: 'Maybe[A]') -> bool:
+    def __eq__(self, other) -> bool:
         return NotImplemented
 
     def __repr__(self) -> str:
@@ -70,17 +71,17 @@ class Maybe(Generic[A], Monad[A], Monoid[A], Applicative[A], Functor[A], metacla
         return False
 
 
-class Just(Generic[A], Maybe[A]):
+class Just(Maybe):
 
     """A Maybe that contains a value.
 
     Represents a Maybe that contains a value (represented as Just a).
     """
 
-    def __init__(self, value: A) -> None:
+    def __init__(self, value: Any) -> None:
         self._value = value
 
-    def map(self, mapper: Callable[[A], B]) -> 'Just[B]':
+    def map(self, mapper: Callable[[Any], Any]) -> 'Just':
         # fmap f (Just x) = Just (f x)
 
         value = self._value
@@ -91,10 +92,10 @@ class Just(Generic[A], Maybe[A]):
 
         return Just(result)
 
-    def apply(self, something: Maybe[A]) -> Maybe[B]:
+    def apply(self, something: Maybe) -> Maybe:
         return something.map(self._value)
 
-    def append(self, other: Maybe[A]) -> Maybe[A]:
+    def append(self, other: Maybe) -> Maybe:
         # m `append` Nothing = m
         if other.is_nothing:
             return self
@@ -109,25 +110,27 @@ class Just(Generic[A], Maybe[A]):
         # Just m1 `append` Just m2 = Just (m1 `append` m2)
         return Just(value.append(other_value))
 
-    def bind(self, func: Callable[[A], Maybe[B]]) -> Maybe[B]:
-        """Just x >>= f = f x"""
+    def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
+        """Just x >>= f = f x."""
 
         value = self._value
         return func(value)
 
-    def from_just(self) -> A:
+    def from_just(self) -> Any:
         return self._value
 
-    def from_maybe(self, default: A) -> A:
+    def from_maybe(self, default: Any) -> Any:
         return self._value
 
     def is_just(self) -> bool:
         return True
 
     def __bool__(self) -> bool:
+        """Convert Just to bool."""
         return bool(self._value)
 
-    def __eq__(self, other: Maybe[A]) -> bool:
+    def __eq__(self, other) -> bool:
+        """Return self == other."""
         if other.is_nothing:
             return False
 
@@ -137,7 +140,7 @@ class Just(Generic[A], Maybe[A]):
         return "Just %s" % self._value
 
 
-class Nothing(Generic[A], Maybe[A]):
+class Nothing(Maybe):
 
     """Represents an empty Maybe.
 
@@ -145,16 +148,16 @@ class Nothing(Generic[A], Maybe[A]):
     the value of Nothing).
     """
 
-    def map(self, mapper: Callable[[A], B]) -> Maybe[B]:
+    def map(self, mapper: Callable[[Any], Any]) -> Maybe:
         return Nothing()
 
     def apply(self, other: Maybe) -> Maybe:
         return Nothing()
 
-    def append(self, other: Maybe[A]) -> Maybe[A]:
+    def append(self, other: Maybe) -> Maybe:
         return other
 
-    def bind(self, func: Callable[[A], Maybe[B]]) -> Maybe[B]:
+    def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
         """Nothing >>= f = Nothing
 
         Nothing in, Nothing out.
@@ -162,16 +165,16 @@ class Nothing(Generic[A], Maybe[A]):
 
         return Nothing()
 
-    def from_just(self) -> A:
+    def from_just(self) -> Any:
         raise Exception("Nothing")
 
-    def from_maybe(self, default: A) -> A:
+    def from_maybe(self, default: Any) -> Any:
         return default
 
     def is_nothing(self) -> bool:
         return True
 
-    def __eq__(self, other: Maybe[A]) -> bool:
+    def __eq__(self, other) -> bool:
         return isinstance(other, Nothing)
 
     def __str__(self) -> str:

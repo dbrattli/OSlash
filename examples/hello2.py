@@ -15,4 +15,4 @@ main = Put("What is your name?",
        )
 
 if __name__ == "__main__":
-    main()
+    print(main)

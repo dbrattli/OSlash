@@ -1,6 +1,6 @@
 from functools import partial
 
-from typing import Any, Callable
+from typing import Callable, Any
 
 from .abc import Functor
 from .abc import Monad
@@ -8,7 +8,6 @@ from .abc import Applicative
 
 
 class Reader(Monad, Applicative, Functor):
-
     """The Reader monad.
 
     The Reader monad pass the state you want to share between functions.
@@ -20,14 +19,13 @@ class Reader(Monad, Applicative, Functor):
     Callable monad. Reader is all about composing wrapped functions.
     """
 
-    def __init__(self, fn: Callable) -> None:
-        r"""Initialize a new reader.
+    def __init__(self, fn: Callable[[Any], Any]) -> None:
+        """Initialize a new reader."""
 
-        """
         self.fn = fn
 
     @classmethod
-    def unit(cls, value: Any) -> "Reader":
+    def unit(cls, value: Any) -> 'Reader':
         """The return function creates a Reader that ignores the
         environment and produces the given value.
 
@@ -36,34 +34,34 @@ class Reader(Monad, Applicative, Functor):
         return cls(lambda _: value)
 
     @classmethod
-    def pure(cls, fn: Callable) -> 'Reader':
+    def pure(cls, fn: Callable[[Any], Any]) -> 'Reader':
         return cls.unit(fn)
 
-    def map(self, fn: Callable[[Any], Any]) -> "Reader":
+    def map(self, fn: Callable[[Any], Any]) -> 'Reader':
         r"""Map a function over the Reader.
 
         Haskell:
         fmap f m = Reader $ \r -> f (runReader m r).
         fmap f g = (\x -> f (g x))
         """
-        def _compose(x):
+        def _compose(x: Any) -> Any:
             try:
-                ret = fn(self(x))
+                ret = fn(self.run(x))
             except TypeError:
-                ret = partial(fn, self(x))
+                ret = partial(fn, self.run(x))
             return ret
         return Reader(_compose)
 
-    def bind(self, fn: "Callable[[Any], Reader]") -> "Reader":
+    def bind(self, fn: "Callable[[Any], Reader]") -> 'Reader':
         r"""Bind a monadic function to the Reader.
 
         Haskell:
         Reader: m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r
         Function: h >>= f = \w -> f (h w) w
         """
-        return Reader(lambda x: fn(self(x))(x))
+        return Reader(lambda x: fn(self.run(x)).run(x))
 
-    def apply(self, something: "Reader") -> "Reader":
+    def apply(self, something: 'Reader') -> 'Reader':
         r"""(<*>) :: f (a -> b) -> f a -> f b.
 
         Haskell: f <*> g = \x -> f x (g x)
@@ -74,12 +72,12 @@ class Reader(Monad, Applicative, Functor):
         one (composes the two functions).
         """
 
-        def _compose(x):
-            f = self(x)
+        def _compose(x: Any):
+            f = self.run(x)
             try:
-                ret = f(something(x))
+                ret = f(something.run(x))
             except TypeError:
-                ret = partial(f, something(x))
+                ret = partial(f, something.run(x))
             return ret
 
         return Reader(_compose)
@@ -91,11 +89,12 @@ class Reader(Monad, Applicative, Functor):
 
         This is the inverse of unit and returns the wrapped function.
         """
-        return self(*args, **kwargs)
+        return self.fn(*args, **kwargs) if args or kwargs else self.fn
 
     def __call__(self, *args, **kwargs) -> Any:
         """Call the wrapped function."""
-        return self.fn(*args, **kwargs) if args or kwargs else self.fn
+
+        return self.run(*args, **kwargs)
 
     def __eq__(self, other) -> bool:
         environment = 42  # Can't be wrong!

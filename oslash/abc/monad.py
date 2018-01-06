@@ -8,21 +8,21 @@ All instances of the Monad typeclass should obey the three monad laws:
 """
 
 from abc import ABCMeta, abstractmethod
-
-from typing import Callable, Generic, TypeVar
-
-A = TypeVar('A')
-B = TypeVar('B')
+from oslash.util import identity
 
 
-class Monad(Generic[A], metaclass=ABCMeta):
+class Monad(metaclass=ABCMeta):
+    """Monad abstract base class.
 
-    """Monad abstract base class."""
+    NOTE: the methods in this base class cannot be typed as it would
+    require higher kinded polymorphism, aka generics of generics.
+    """
 
     @abstractmethod
-    def bind(self, func: Callable[[A], 'Monad[B]']) -> 'Monad[B]':
+    def bind(self, fn):
         """Monad bind method.
 
+        Python: bind(self: Monad[A], func: Callable[[A], Monad[B]]) -> Monad[B]
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
 
         This is the mother of all methods. It's hard to describe what it
@@ -44,7 +44,7 @@ class Monad(Generic[A], metaclass=ABCMeta):
         return NotImplemented
 
     @classmethod
-    def unit(cls, value: A) -> 'Monad[A]':
+    def unit(cls, value):
         """Wrap a value in a default context.
 
         Haskell: return :: a -> m a .
@@ -55,9 +55,45 @@ class Monad(Generic[A], metaclass=ABCMeta):
         """
         return cls(value)
 
-    def __or__(self, func: Callable[[A], 'Monad[B]']) -> 'Monad[B]':
+    def lift(self, func):
+        """Map function over monadic value.
+
+        Takes a function and a monadic value and maps the function over the
+        monadic value
+
+        Haskell: liftM :: (Monad m) => (a -> b) -> m a -> m b
+
+        This is really the same function as Functor.fmap, but is instead
+        implemented using bind, and does not rely on us inheriting from
+        Functor.
+        """
+
+        return self.bind(lambda x: self.unit(func(x)))
+
+
+    def join(self):
+        """join :: Monad m => m (m a) -> m a
+
+        The join function is the conventional monad join operator. It is
+        used to remove one level of monadic structure, projecting its
+        bound argument into the outer level."""
+
+        return self.bind(identity)
+
+    def __or__(self, func):
         """Use | as operator for bind.
 
         Provide the | operator instead of the Haskell >>= operator
         """
         return self.bind(func)
+
+    def __rshift__(self, next):
+        """The "Then" operator.
+
+        Sequentially compose two monadic actions, discarding any value
+        produced by the first, like sequencing operators (such as the
+        semicolon) in imperative languages.
+
+        Haskell: (>>) :: m a -> m b -> m b
+        """
+        return self.bind(lambda _: next)

@@ -6,7 +6,7 @@ from oslash.util import identity, compose
 # pure = Cont.pure
 unit = Observable.unit
 just = Observable.just
-# call_cc = Observab le.call_cc
+call_cc = Observable.call_cc
 
 
 class TestObservable(unittest.TestCase):
@@ -42,6 +42,24 @@ class TestObservable(unittest.TestCase):
             xs.append("OnNext(%s)" % x)
         stream.subscribe(on_next)
         self.assertEqual(["OnNext(42)"], xs)
+
+    def test_cont_call_cc(self):
+        f = lambda x: just(x*3)
+        g = lambda x: just(x-2)
+
+        def h(x, on_next):
+            return f(x) if x == 5 else on_next(-1)
+
+        stream = just(5) | (
+            lambda x: call_cc(lambda on_next: h(x, on_next))) | (
+                lambda y: g(y))
+
+        on_next = lambda x: "Done: %s" % x
+
+        self.assertEqual(
+            "Done: 13",
+            stream.subscribe(on_next)
+        )
 
 
 class TestObservableFunctor(unittest.TestCase):
