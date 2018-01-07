@@ -18,22 +18,22 @@ The project currently contains implementations for:
 
 ## Abstract Base Classes
 
- - **[Functor](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#functors)**, for stuff that can be mapped
- - **[Applicative](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#applicatives)**, for callable stuff
- - **Monoid**, for associative stuff
- - **[Monad](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#monads)**, for monadic stuff
+- **[Functor](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#functors)**, for stuff that can be mapped
+- **[Applicative](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#applicatives)**, for callable stuff
+- **Monoid**, for associative stuff
+- **[Monad](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#monads)**, for monadic stuff
 
 ## And Some Monads
 
- - **Identity**, boxed stuff in its simplest form
- - **[Maybe (Just | Nothing)](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures)**, for optional stuff
- - **Either (Right | Left)**, for possible failures
- - **List**, purely functional list of stuff
- - **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
- - **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
- - **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for callable stuff
- - **State**, for stateful computations of stuff
- - **Cont**, for continuation of stuff
+- **Identity**, boxed stuff in its simplest form
+- **[Maybe (Just | Nothing)](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures)**, for optional stuff
+- **Either (Right | Left)**, for possible failures
+- **List**, purely functional list of stuff
+- **[IO Action](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#io-monad)**, for impure stuff
+- **[Writer](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-writer-monad)**, for logging stuff
+- **[Reader](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads#the-reader-monad)**, for callable stuff
+- **State**, for stateful computations of stuff
+- **Cont**, for continuation of stuff
 
 ## Monadic functions
 
@@ -44,10 +44,9 @@ The project currently contains implementations for:
 
 ## Utility functions
 
- - **compose**, for composing 0 to n functions
+- **compose**, for composing 0 to n functions
 
-
-# But why?
+## But why?
 
 Yes, I know there are other projects out there like
 [PyMonad](https://bitbucket.org/jason_delaat/pymonad/),
@@ -64,6 +63,7 @@ work out well, so I renamed it to Oslash.
 ## Examples
 
 Haskell:
+
 ```haskell
 > fmap (+3) (Just 2)
 Just 5
@@ -73,6 +73,7 @@ Just 5
 ```
 
 Python:
+
 ```python
 >>> Just(2).map(lambda x: x+3)
 Just 5
@@ -100,5 +101,5 @@ if __name__ == "__main__":
 
 ## Tutorials
 
-* [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
-* [Three Useful Monads](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads) _(in progress)_
+- [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
+- [Three Useful Monads](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads) _(in progress)_
