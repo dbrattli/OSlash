@@ -43,7 +43,7 @@ class IO(Monad, Applicative, Functor):
         """Run IO action."""
         return self._value
 
-    def __call__(self, world: int) -> Any:
+    def __call__(self, world: int = 0) -> Any:
         """Nothing more to run."""
         return self.run(world)
 
@@ -124,9 +124,9 @@ class Get(IO):
 
     def __str__(self, m: int=0, n: int=0) -> str:
         g = self._value
-        i = "$%s" % n
+        i = "x%s" % n
         a = g(i).__str__(m + 1, n + 1)
-        return '%sGet (%s -> \n%s\n%s)' % (ind(m), i, a, ind(m))
+        return '%sGet (%s => \n%s\n%s)' % (ind(m), i, a, ind(m))
 
 
 class ReadFile(IO):
@@ -163,9 +163,9 @@ class ReadFile(IO):
 
     def __str__(self, m: int=0, n: int=0) -> str:
         filename, g = self._get_value()
-        i = "$%s" % n
+        i = "x%s" % n
         a = g(i).__str__(m + 2, n + 1)
-        return '%sReadFile ("%s",%s -> \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
+        return '%sReadFile ("%s",%s => \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
 
 
 def get_line() -> IO:
