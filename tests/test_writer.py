@@ -9,7 +9,7 @@ class TestWriterMonad(unittest.TestCase):
         self.assertEqual(w.run(), (42, ""))
 
     def test_writer_unitint_log(self):
-        IntWriter = Writer.factory("IntWriter", int)
+        IntWriter = Writer.create("IntWriter", int)
         w = IntWriter.unit(42)
         self.assertEqual(w.run(), (42, 0))
 

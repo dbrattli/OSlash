@@ -1,13 +1,9 @@
-from typing import Callable, Tuple, TypeVar, Any, Union
+from typing import Callable, Tuple, Any, Union, cast
 
 from .abc import Functor
 from .abc import Monad
 from .abc import Monoid
 from .util import Unit
-
-A = TypeVar('A')
-B = TypeVar('B')
-W = TypeVar('W')
 
 Log = Union[Monoid, str]
 
@@ -24,7 +20,7 @@ class Writer(Monad, Functor, Monoid):
 
         self._value = (value, log)
 
-    def map(self, func: Callable[[Tuple], Tuple[B, W]]) -> 'Writer':
+    def map(self, func: Callable[[Tuple[Any, Log]], Tuple[Any, Log]]) -> 'Writer':
         """Map a function func over the Writer value.
 
         Haskell:
@@ -33,10 +29,11 @@ class Writer(Monad, Functor, Monoid):
         Keyword arguments:
         func -- Mapper function:
         """
-        value, log = self.run()
-        return Writer(*func((value, log)))
+        a, w = self.run()
+        b, _w = func((a, w))
+        return Writer(b, _w)
 
-    def bind(self, func: Callable[[A], 'Writer']) -> 'Writer':
+    def bind(self, func: Callable[[Any], 'Writer']) -> 'Writer':
         """Flat is better than nested.
 
         Haskell:
@@ -45,7 +42,13 @@ class Writer(Monad, Functor, Monoid):
         """
         a, w = self.run()
         b, w_ = func(a).run()
-        return Writer(b, w + w_)
+
+        if isinstance(w_, Monoid):
+            w__ = cast(Monoid, w).append(w_)
+        else:
+            w__ = w + w_
+
+        return Writer(b, w__)
 
     @classmethod
     def unit(cls, value: Any) -> 'Writer':
@@ -57,7 +60,7 @@ class Writer(Monad, Functor, Monoid):
         """
         return cls(value, log="")
 
-    def append(self, other: W) -> W:
+    def append(self, other: 'Writer') -> 'Writer':
         return self + other
 
     @classmethod
@@ -73,7 +76,7 @@ class Writer(Monad, Functor, Monoid):
         return self._value
 
     @staticmethod
-    def apply_log(a: tuple, func: Callable[[A], Tuple[B, W]]) -> Tuple[B, W]:
+    def apply_log(a: tuple, func: Callable[[Any], Tuple[Any, Log]]) -> Tuple[Any, Log]:
         """Apply a function to a value with a log.
 
         Helper function to apply a function to a value with a log tuple.
@@ -92,7 +95,7 @@ class Writer(Monad, Functor, Monoid):
         return str(self)
 
     @classmethod
-    def factory(cls, class_name: str, monoid_type=Union[Monoid, str]):
+    def create(cls, class_name: str, monoid_type=Union[Monoid, str]):
         """Create Writer subclass using specified monoid type.
 
         lets us create a Writer that uses a different monoid than str for
