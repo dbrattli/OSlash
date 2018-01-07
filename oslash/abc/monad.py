@@ -41,7 +41,7 @@ class Monad(metaclass=ABCMeta):
 
         Returns a new Monad.
         """
-        return NotImplemented
+        raise NotImplementedError
 
     @classmethod
     def unit(cls, value):

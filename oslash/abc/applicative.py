@@ -29,9 +29,9 @@ class Applicative(metaclass=ABCMeta):
         function from the first functor and then maps it over the second
         one.
         """
-        return NotImplemented
+        raise NotImplementedError
 
-    def __mul__(self, something: 'Callable[[Any], Any]') -> 'Applicative':
+    def __mul__(self, something):
         """(<*>) :: f (a -> b) -> f a -> f b.
 
         Provide the * as an infix version of apply() since we cannot

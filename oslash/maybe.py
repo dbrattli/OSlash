@@ -22,17 +22,17 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     @abstractmethod
     def bind(self, func: Callable[[Any], 'Maybe']) -> 'Maybe':
         """Monad bind method."""
-        return NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def map(self, mapper: Callable[[Any], Any]) -> 'Maybe':
         """Functor map method."""
-        return NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def apply(self, something: 'Maybe') -> 'Maybe':
         """Applicative apply method."""
-        return NotImplemented
+        raise NotImplementedError
 
     @classmethod
     def empty(cls) -> 'Maybe':
@@ -42,11 +42,11 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     @abstractmethod
     def append(self, other: 'Maybe') -> 'Maybe':
         """Append maybe to other maybe."""
-        return NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def from_just(self) -> Any:
-        return NotImplemented
+        raise NotImplementedError
 
     @property
     def is_nothing(self) -> bool:
@@ -58,11 +58,11 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
 
     @abstractmethod
     def from_maybe(self, default: Any) -> Any:
-        return NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def __eq__(self, other) -> bool:
-        return NotImplemented
+        raise NotImplementedError
 
     def __repr__(self) -> str:
         return self.__str__()

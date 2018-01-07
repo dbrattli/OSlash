@@ -1,8 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from functools import reduce  # type: ignore
-from typing import TypeVar
-
-A = TypeVar('A')
+from functools import reduce
 
 
 class Monoid(metaclass=ABCMeta):
@@ -30,7 +27,7 @@ class Monoid(metaclass=ABCMeta):
         The empty element and identity of append.
         """
 
-        return NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def append(self, other):
@@ -41,7 +38,7 @@ class Monoid(metaclass=ABCMeta):
         An associative operation
         """
 
-        return NotImplemented
+        raise NotImplementedError
 
     def __add__(self, other):
         """Append other monoid to monoid."""

@@ -31,7 +31,7 @@ class Functor(Generic[T], metaclass=ABCMeta):
         Map knows how to apply functions to values that are wrapped in
         a context.
         """
-        return NotImplemented
+        raise NotImplementedError
 
     def __rmod__(self, fn):
         """Infix version of map.
