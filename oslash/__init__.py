@@ -14,4 +14,6 @@ from .monadic import *
 
 from .util import fn
 
+from .do import do, let, guard
+
 _ = Reader
