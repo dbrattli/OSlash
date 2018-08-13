@@ -9,9 +9,9 @@ from .writer import Writer, MonadWriter, StringWriter
 from .reader import Reader, MonadReader
 from .identity import Identity
 from .state import State
+from .do import do, let, guard
 
 from .monadic import *
-
 from .util import fn
 
 from ._version import get_versions
