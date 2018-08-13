@@ -10,7 +10,7 @@ A = TypeVar('A')
 B = TypeVar('B')
 
 
-class Identity(Generic[A], Monad, Applicative, Functor):
+class Identity(Monad, Applicative, Functor):
     """Identity monad.
 
     The Identity monad is the simplest monad, which attaches no
