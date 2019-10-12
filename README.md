@@ -103,3 +103,4 @@ if __name__ == "__main__":
 
 - [Functors, Applicatives, And Monads In Pictures](https://github.com/dbrattli/oslash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures) in Python.
 - [Three Useful Monads](https://github.com/dbrattli/OSlash/wiki/Three-Useful-Monads) _(in progress)_
+- [Using Either monad in Python](https://medium.com/@rnesytov/using-either-monad-in-python-b6eac698dff5)
