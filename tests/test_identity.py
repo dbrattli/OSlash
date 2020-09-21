@@ -50,7 +50,7 @@ class TestIdentityFunctor(unittest.TestCase):
 
         x = unit(42)
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(compose(f, g)),
             x.map(g).map(f)
         )
@@ -63,7 +63,7 @@ class TestIdentityApplicative(unittest.TestCase):
         x = unit(42)
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(x),
             x.map(f)
         )
@@ -72,7 +72,7 @@ class TestIdentityApplicative(unittest.TestCase):
         # pure id <*> v = v
         v = unit(42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(v),
             v
         )
@@ -84,7 +84,7 @@ class TestIdentityApplicative(unittest.TestCase):
         u = pure(lambda x: x * 42)
         v = pure(lambda x: x + 42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -94,7 +94,7 @@ class TestIdentityApplicative(unittest.TestCase):
         x = 42
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(pure(x)),
             pure(f(x))
         )
@@ -105,7 +105,7 @@ class TestIdentityApplicative(unittest.TestCase):
         y = 43
         u = unit(lambda x: x*42)
 
-        self.assertEquals(
+        self.assertEqual(
             u.apply(pure(y)),
             pure(lambda f: f(y)).apply(u)
         )

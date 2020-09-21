@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
-from functools import reduce
+from typing import Protocol
+from typing_extensions import runtime_checkable
 
 
-class Monoid(metaclass=ABCMeta):
+@runtime_checkable
+class Monoid(Protocol):
     """The Monoid abstract base class.
 
     The class of monoids (types with an associative binary operation that
@@ -29,32 +31,11 @@ class Monoid(metaclass=ABCMeta):
 
         raise NotImplementedError
 
-    @abstractmethod
-    def append(self, other):
-        """Append other monoid to monoid.
+    def __add__(self, other):
+        """Append other monoid to this monoid.
 
         Haskell: mappend :: m -> m -> m
 
         An associative operation
         """
-
         raise NotImplementedError
-
-    def __add__(self, other):
-        """Append other monoid to monoid."""
-        return self.append(other)
-
-    @classmethod
-    def concat(cls, xs):
-        """mconcat :: [m] -> m
-
-        Fold a list using the monoid. For most types, the default
-        definition for mconcat will be used, but the function is
-        included in the class definition so that an optimized version
-        can be provided for specific types.
-        """
-
-        def reducer(a, b):
-            return a.append(b)
-
-        return reduce(reducer, xs, cls.empty())

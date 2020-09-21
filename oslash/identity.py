@@ -1,47 +1,53 @@
 from functools import partial  # type: ignore
 
-from typing import Any, Callable, Generic, TypeVar
+from typing import NamedTuple, TypeVar, Generic, Callable
 
-from .abc import Functor
-from .abc import Monad
-from .abc import Applicative
+from .typing import Functor, Monad, Applicative
 
-A = TypeVar('A')
-B = TypeVar('B')
+from collections import namedtuple
 
+"""Identity monad.
 
-class Identity(Monad, Applicative, Functor):
-    """Identity monad.
+The Identity monad is the simplest monad, which attaches no
+information to values.
+"""
 
-    The Identity monad is the simplest monad, which attaches no
-    information to values.
-    """
+TSource = TypeVar('TSource')
+TResult = TypeVar('TResult')
 
-    def __init__(self, value: Any) -> None:
-        """Initialize a new reader."""
+class Identity(Generic[TSource]):
+    def __init__(self, value: TSource) -> None:
         self._value = value
 
-    def map(self, mapper: Callable[[Any], Any]) -> 'Identity':
-        """Map a function over wrapped values."""
-        value = self._value
-        try:
-            result = mapper(value)
-        except TypeError:
-            result = partial(mapper, value)
+    @classmethod
+    def unit(cls, value: TSource) -> 'Identity[TSource]':
+        """Initialize a new identity."""
+        return Identity(value)
 
+    def map(self, mapper: Callable[[TSource], TResult]) -> 'Identity[TResult]':
+        """Map a function over wrapped values."""
+        result = mapper(self._value)
         return Identity(result)
 
-    def bind(self, func: Callable[[Any], 'Identity']) -> 'Identity':
+    def bind(self, func: Callable[[TSource], 'Identity[TResult]']) -> 'Identity[TResult]':
         return func(self._value)
 
-    def apply(self, something: 'Identity') -> 'Identity':
-        func = self._value
-        return something.map(func)
+    @classmethod
+    def pure(cls, value: TSource):
+        return Identity(value)
 
-    def run(self) -> Any:
+    def apply(self: 'Identity[Callable[[TSource], TResult]]', something: 'Identity[TSource]') -> 'Identity[TResult]':
+        def mapper(other_value):
+            try:
+                return self._value(other_value)
+            except TypeError:
+                return partial(self._value, other_value)
+        return something.map(mapper)
+
+    def run(self) -> TSource:
         return self._value
 
-    def __call__(self) -> Any:
+    def __call__(self) -> TSource:
         return self.run()
 
     def __eq__(self, other) -> bool:
@@ -52,3 +58,7 @@ class Identity(Monad, Applicative, Functor):
 
     def __repr__(self) -> str:
         return str(self)
+
+assert issubclass(Identity, Functor)
+assert issubclass(Identity, Applicative)
+assert issubclass(Identity, Monad)

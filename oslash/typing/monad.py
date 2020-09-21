@@ -8,18 +8,19 @@ All instances of the Monad typeclass should obey the three monad laws:
 """
 
 from abc import ABCMeta, abstractmethod
+from typing import TypeVar, Protocol, Type, Callable, Generic, Any
+from typing_extensions import runtime_checkable
 from oslash.util import identity
 
+TSource = TypeVar('TSource')
+TResult = TypeVar('TResult')
 
-class Monad(metaclass=ABCMeta):
-    """Monad abstract base class.
-
-    NOTE: the methods in this base class cannot be typed as it would
-    require higher kinded polymorphism, aka generics of generics.
-    """
+@runtime_checkable
+class Monad(Protocol[TSource]):
+    """Monad protocol"""
 
     @abstractmethod
-    def bind(self, fn):
+    def bind(self, fn: Callable[[TSource], 'Monad[TResult]']) -> 'Monad[TResult]':
         """Monad bind method.
 
         Python: bind(self: Monad[A], func: Callable[[A], Monad[B]]) -> Monad[B]
@@ -44,7 +45,8 @@ class Monad(metaclass=ABCMeta):
         raise NotImplementedError
 
     @classmethod
-    def unit(cls, value):
+    @abstractmethod
+    def unit(value: TSource) -> 'Monad[TSource]':
         """Wrap a value in a default context.
 
         Haskell: return :: a -> m a .
@@ -53,33 +55,34 @@ class Monad(metaclass=ABCMeta):
         word in Python, we align with Scala and use the name unit
         instead.
         """
-        return cls(value)
+        raise NotImplementedError
 
-    def lift(self, func):
-        """Map function over monadic value.
+    #def lift(self, func: Callable) -> Monad[B]:
+    #    """Map function over monadic value.
+    #
+    #    Takes a function and a monadic value and maps the function over the
+    #    monadic value
+    #
+    #    Haskell: liftM :: (Monad m) => (a -> b) -> m a -> m b
+    #
+    #    This is really the same function as Functor.fmap, but is instead
+    #    implemented using bind, and does not rely on us inheriting from
+    #    Functor.
+    #    """
+    #
+    #    return self.bind(lambda x: Monad.unit(func(x)))
 
-        Takes a function and a monadic value and maps the function over the
-        monadic value
 
-        Haskell: liftM :: (Monad m) => (a -> b) -> m a -> m b
+    #def join(self):
+    #    """join :: Monad m => m (m a) -> m a
+    #
+    #    The join function is the conventional monad join operator. It is
+    #    used to remove one level of monadic structure, projecting its
+    #    bound argument into the outer level."""
 
-        This is really the same function as Functor.fmap, but is instead
-        implemented using bind, and does not rely on us inheriting from
-        Functor.
-        """
+    #    return self.bind(identity)
 
-        return self.bind(lambda x: self.unit(func(x)))
-
-
-    def join(self):
-        """join :: Monad m => m (m a) -> m a
-
-        The join function is the conventional monad join operator. It is
-        used to remove one level of monadic structure, projecting its
-        bound argument into the outer level."""
-
-        return self.bind(identity)
-
+class MonadEx:
     def __or__(self, func):
         """Use | as operator for bind.
 
