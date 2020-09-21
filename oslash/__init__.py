@@ -1,6 +1,6 @@
 # flake8: noqa
 from .typing import Functor, Applicative, Monoid, Monad
-#from .cont import Cont
+from .cont import Cont
 from .maybe import Maybe, Just, Nothing
 #from .either import Either, Right, Left
 #from .list import List

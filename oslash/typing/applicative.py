@@ -3,9 +3,12 @@ from abc import ABCMeta, abstractmethod
 from typing import Callable, TypeVar, Generic, Protocol
 from typing_extensions import runtime_checkable
 
+TSource = TypeVar('TSource')
+TResult = TypeVar('TResult')
+
 
 @runtime_checkable
-class Applicative(Protocol):
+class Applicative(Protocol[TSource, TResult]):
     """Applicative.
 
     Applicative functors are functors with some extra properties.
@@ -14,9 +17,6 @@ class Applicative(Protocol):
 
     To learn more about Applicative functors:
     * http://www.davesquared.net/2012/05/fp-newbie-learns-applicatives.html
-
-    NOTE: the methods in this base class cannot be typed as it would
-    require higher kinded polymorphism, aka generics of generics.
     """
 
     @abstractmethod
@@ -47,11 +47,12 @@ class Applicative(Protocol):
     #    return func % self * b
 
     @classmethod
-    def pure(cls, x):
+    @abstractmethod
+    def pure(cls, fn: Callable[[TSource], TResult]) -> 'Applicative[TSource, TResult]':
         """Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context
         (using them with <*>); otherwise, stick to the default class
         constructor.
         """
-        return cls(x)
+        raise NotImplementedError

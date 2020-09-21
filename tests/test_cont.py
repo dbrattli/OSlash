@@ -135,7 +135,7 @@ class TestContFunctor(unittest.TestCase):
 
         x = unit(42)
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(compose(f, g)),
             x.map(g).map(f)
         )

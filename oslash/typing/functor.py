@@ -21,9 +21,6 @@ class Functor(Protocol[TSource]):
     x.map(compose(f, g)) == x.map(g).map(f)
 
     The instances of Functor for lists, Maybe and IO satisfy these laws.
-
-    NOTE: the methods in this base class cannot be typed as it would
-    require higher kinded polymorphism, aka generics of generics.
     """
 
     @abstractmethod

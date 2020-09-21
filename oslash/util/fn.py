@@ -21,33 +21,33 @@ def compose(op1: Callable[[A], B]) -> Callable[[A], B]:  # pylint: disable=funct
 
 
 @overload
-def compose(op1: Callable[[A], B], op2: Callable[[B], C]) -> Callable[[A], C]:  # pylint: disable=function-redefined
+def compose(op2: Callable[[B], C], op1: Callable[[A], B]) -> Callable[[A], C]:  # pylint: disable=function-redefined
     ...  # pylint: disable=pointless-statement
 
 
 @overload
-def compose(op1: Callable[[A], B],  # pylint: disable=function-redefined
+def compose(op3: Callable[[C], D],  # pylint: disable=function-redefined
          op2: Callable[[B], C],
-         op3: Callable[[C], D]
+         op1: Callable[[A], B]
          ) -> Callable[[A], D]:
     ...  # pylint: disable=pointless-statement
 
 
 @overload
-def compose(op1: Callable[[A], B],  # pylint: disable=function-redefined
-         op2: Callable[[B], C],
+def compose(op4: Callable[[D], E],  # pylint: disable=function-redefined
          op3: Callable[[C], D],
-         op4: Callable[[D], E]
+         op2: Callable[[B], C],
+         op1: Callable[[A], B]
          ) -> Callable[[A], E]:
     ...  # pylint: disable=pointless-statement
 
 
 @overload
-def compose(op1: Callable[[A], B],  # pylint: disable=function-redefined
-         op2: Callable[[B], C],
-         op3: Callable[[C], D],
+def compose(op5: Callable[[E], F],  # pylint: disable=function-redefined
          op4: Callable[[D], E],
-         op5: Callable[[E], F]
+         op3: Callable[[C], D],
+         op2: Callable[[B], C],
+         op1: Callable[[A], B]
          ) -> Callable[[A], F]:
     ...  # pylint: disable=pointless-statement
 

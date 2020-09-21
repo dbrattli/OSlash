@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Protocol
+from typing import Protocol, TypeVar
 from typing_extensions import runtime_checkable
 
+TSource = TypeVar('TSource')
 
 @runtime_checkable
-class Monoid(Protocol):
+class Monoid(Protocol[TSource]):
     """The Monoid abstract base class.
 
     The class of monoids (types with an associative binary operation that
@@ -14,14 +15,11 @@ class Monoid(Protocol):
     mappend x mempty = x
     mappend x (mappend y z) = mappend (mappend x y) z
     mconcat = foldr mappend mempty
-
-    NOTE: the methods in this base class cannot be typed as it would
-    require higher kinded polymorphism, aka generics of generics.
     """
 
     @classmethod
     @abstractmethod
-    def empty(cls):
+    def empty(cls) -> 'Monoid[TSource]':
         """Create empty monoid.
 
         Haskell: mempty :: m
