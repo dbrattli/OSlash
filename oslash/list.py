@@ -1,45 +1,54 @@
-from functools import partial
+from functools import partial, reduce
 
-from typing import Generic, Callable, Iterator, TypeVar, Iterable, Sized, Any
+from typing import Generic, Callable, Iterator, TypeVar, Iterable, Sized, Union, Any, cast, Optional
 
-from .abc import Applicative
-from .abc import Functor
-from .abc import Monoid
-from .abc import Monad
+from .typing import Applicative
+from .typing import Functor
+from .typing import Monoid
+from .typing import Monad
 
+TSource = TypeVar("TSource")
+TResult = TypeVar("TResult")
+TSelector = Callable[[TSource, Optional[Callable]], Any]
 
-class List(Monad, Monoid, Applicative, Functor, Sized, Iterable):
+class List(Iterable[TSource]):
     """The list monad.
 
     Wraps an immutable list built from lambda expressions.
     """
 
-    def __init__(self, lambda_list: Callable[[Callable], Any]=None) -> None:
+    def __init__(self, lambda_list: Optional[Callable[[TSelector], Any]]=None) -> None:
         """Initialize List."""
 
-        self._get_value = lambda: lambda_list
+        self._value = lambda_list
 
-    def cons(self, element: Any) -> 'List':
+    def cons(self, element: TSource) -> 'List[TSource]':
         """Add element to front of List."""
 
-        tail = self._get_value()
+        tail = self._value
         return List(lambda sel: sel(element, tail))
 
-    def head(self) -> Any:
+    def head(self) -> TSource:
         """Retrive first element in List."""
 
-        lambda_list = self._get_value()
-        return lambda_list(lambda head, _: head)
+        lambda_list = self._value
+        if lambda_list is None:
+            raise IndexError("List is empty")
 
-    def tail(self) -> 'List':
+        return cast(TSource, lambda_list(lambda head, _: head))
+
+    def tail(self) -> 'List[TSource]':
         """Return tail of List."""
 
-        lambda_list = self._get_value()
+        lambda_list = self._value
+        if lambda_list is None:
+            raise IndexError("List is empty")
+
         return List(lambda_list(lambda _, tail: tail))
 
     def null(self) -> bool:
         """Return True if List is empty."""
-        return not self._get_value()
+        return not self._value
 
     @classmethod
     def unit(cls, value: Any) -> 'List':
@@ -48,12 +57,9 @@ class List(Monad, Monoid, Applicative, Functor, Sized, Iterable):
 
     pure = unit
 
-    def map(self, mapper: Callable[[Any], Any]) -> 'List':
+    def map(self, mapper: Callable[[TSource], TResult]) -> 'List[TResult]':
         """Map a function over a List."""
-        try:
-            ret = List.from_iterable([mapper(x) for x in self])
-        except TypeError:
-            ret = List.from_iterable([partial(mapper, x) for x in self])
+        ret = List.from_iterable([mapper(x) for x in self])
         return ret
 
     def apply(self, something: 'List') -> 'List':
@@ -66,7 +72,7 @@ class List(Monad, Monoid, Applicative, Functor, Sized, Iterable):
         return List.from_iterable(xs)
 
     @classmethod
-    def empty(cls) -> 'List':
+    def empty(cls) -> 'List[TSource]':
         """Create an empty list."""
         return cls()
 
@@ -99,6 +105,21 @@ class List(Monad, Monoid, Applicative, Functor, Sized, Iterable):
             return List.unit(value).append(recurse())
         return List.empty().append(recurse())
 
+    @classmethod
+    def concat(cls, xs):
+        """mconcat :: [m] -> m
+
+        Fold a list using the monoid. For most types, the default
+        definition for mconcat will be used, but the function is
+        included in the class definition so that an optimized version
+        can be provided for specific types.
+        """
+
+        def reducer(a, b):
+            return a + b
+
+        return reduce(reducer, xs, cls.empty())
+
     def __iter__(self) -> Iterator:
         """Return iterator for List."""
 
@@ -109,6 +130,9 @@ class List(Monad, Monoid, Applicative, Functor, Sized, Iterable):
 
             yield xs.head()
             xs = xs.tail()
+
+    def __add__(self, other):
+        return self.append(other)
 
     def __len__(self) -> int:
         """Return length of List."""

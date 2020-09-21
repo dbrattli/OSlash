@@ -51,7 +51,7 @@ class TestReaderFunctor(unittest.TestCase):
 
         x = unit(42)
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(compose(f, g)),
             x.map(g).map(f)
         )
@@ -64,7 +64,7 @@ class TestReaderApplicative(unittest.TestCase):
         x = unit(42)
         f = lambda e: e * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(x),
             x.map(f)
         )
@@ -73,7 +73,7 @@ class TestReaderApplicative(unittest.TestCase):
         # pure id <*> v = v
         v = unit(42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(v),
             v
         )
@@ -85,7 +85,7 @@ class TestReaderApplicative(unittest.TestCase):
         u = pure(lambda x: x * 42)
         v = pure(lambda x: x + 42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -95,7 +95,7 @@ class TestReaderApplicative(unittest.TestCase):
         x = 42
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(unit(x)),
             unit(f(x))
         )
@@ -106,7 +106,7 @@ class TestReaderApplicative(unittest.TestCase):
         y = 43
         u = pure(lambda x: x*42)
 
-        self.assertEquals(
+        self.assertEqual(
             u.apply(unit(y)),
             pure(lambda f: f(y)).apply(u)
         )

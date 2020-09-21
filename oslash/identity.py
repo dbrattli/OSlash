@@ -59,6 +59,6 @@ class Identity(Generic[TSource]):
     def __repr__(self) -> str:
         return str(self)
 
-assert issubclass(Identity, Functor)
-assert issubclass(Identity, Applicative)
-assert issubclass(Identity, Monad)
+assert isinstance(Identity, Functor)
+assert isinstance(Identity, Applicative)
+assert isinstance(Identity, Monad)

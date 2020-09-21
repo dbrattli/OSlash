@@ -81,3 +81,6 @@ class Cont(Generic[T, TResult]):
 
     def __eq__(self, other) -> bool:
         return self(identity) == other(identity)
+
+assert isinstance(Cont, Functor)
+assert isinstance(Cont, Monad)
