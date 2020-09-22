@@ -1,6 +1,6 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 
-from typing import TypeVar, Generic, Protocol, Callable
+from typing import TypeVar, Protocol, Callable
 from typing_extensions import runtime_checkable
 
 TSource = TypeVar('TSource', covariant=True)

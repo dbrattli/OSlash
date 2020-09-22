@@ -1,13 +1,17 @@
 from functools import partial
 
-from typing import Callable, Any
+from typing import Callable, Any, TypeVar, Generic
 
-from .abc import Functor
-from .abc import Monad
-from .abc import Applicative
+from .typing import Functor
+from .typing import Monad
+from .typing import Applicative
+
+TEnv = TypeVar("TEnv")
+TSource = TypeVar("TSource")
+TResult = TypeVar("TResult")
 
 
-class Reader(Monad, Applicative, Functor):
+class Reader(Generic[TEnv, TSource]):
     """The Reader monad.
 
     The Reader monad pass the state you want to share between functions.
@@ -19,40 +23,34 @@ class Reader(Monad, Applicative, Functor):
     Callable monad. Reader is all about composing wrapped functions.
     """
 
-    def __init__(self, fn: Callable[[Any], Any]) -> None:
+    def __init__(self, fn: Callable[[TEnv], TSource]) -> None:
         """Initialize a new reader."""
 
         self.fn = fn
 
     @classmethod
-    def unit(cls, value: Any) -> 'Reader':
-        """The return function creates a Reader that ignores the
+    def unit(cls, value: TSource) -> "Reader[TEnv, TSource]":
+        r"""The return function creates a Reader that ignores the
         environment and produces the given value.
 
         return a = Reader $ \_ -> a
         """
         return cls(lambda _: value)
 
-    @classmethod
-    def pure(cls, fn: Callable[[Any], Any]) -> 'Reader':
-        return cls.unit(fn)
-
-    def map(self, fn: Callable[[Any], Any]) -> 'Reader':
+    def map(self, fn: Callable[[TSource], TResult]) -> "Reader[TEnv, TResult]":
         r"""Map a function over the Reader.
 
         Haskell:
         fmap f m = Reader $ \r -> f (runReader m r).
         fmap f g = (\x -> f (g x))
         """
+
         def _compose(x: Any) -> Any:
-            try:
-                ret = fn(self.run(x))
-            except TypeError:
-                ret = partial(fn, self.run(x))
-            return ret
+            return fn(self.run(x))
+
         return Reader(_compose)
 
-    def bind(self, fn: "Callable[[Any], Reader]") -> 'Reader':
+    def bind(self, fn: "Callable[[TSource], Reader[TEnv, TResult]]") -> "Reader[TEnv, TResult]":
         r"""Bind a monadic function to the Reader.
 
         Haskell:
@@ -61,7 +59,13 @@ class Reader(Monad, Applicative, Functor):
         """
         return Reader(lambda x: fn(self.run(x)).run(x))
 
-    def apply(self, something: 'Reader') -> 'Reader':
+    @classmethod
+    def pure(cls, fn: Callable[[TSource], TResult]) -> "Reader[TEnv, Callable[[TSource], TResult]]":
+        return Reader.unit(fn)
+
+    def apply(
+        self: "Reader[TEnv, Callable[[TSource], TResult]]", something: "Reader[TEnv, TSource]"
+    ) -> "Reader[TEnv, TResult]":
         r"""(<*>) :: f (a -> b) -> f a -> f b.
 
         Haskell: f <*> g = \x -> f x (g x)
@@ -72,37 +76,30 @@ class Reader(Monad, Applicative, Functor):
         one (composes the two functions).
         """
 
-        def _compose(x: Any):
-            f = self.run(x)
+        def comp(env: TEnv):
+            fn: Callable[[TSource], TResult] = self.run(env)
+
+            value: TSource = something.run(env)
             try:
-                ret = f(something.run(x))
+                return fn(value)
             except TypeError:
-                ret = partial(f, something.run(x))
-            return ret
+                return partial(fn, value)
 
-        return Reader(_compose)
+        return Reader(comp)
 
-    def run(self, *args, **kwargs) -> Callable:
-        """Return wrapped function.
+    def run(self, env: TEnv) -> TSource:
+        """Run reader in given environment.
 
         Haskell: runReader :: Reader r a -> r -> a
 
-        This is the inverse of unit and returns the wrapped function.
+        Applies given environment on wrapped function.
         """
-        return self.fn(*args, **kwargs) if args or kwargs else self.fn
+        return self.fn(env)
 
-    def __call__(self, *args, **kwargs) -> Any:
+    def __call__(self, env: TEnv) -> TSource:
         """Call the wrapped function."""
 
-        return self.run(*args, **kwargs)
-
-    def __eq__(self, other) -> bool:
-        environment = 42  # Can't be wrong!
-        try:
-            equal = self(environment) == other(environment)
-        except Exception:
-            equal = False
-        return equal
+        return self.run(env)
 
     def __str__(self) -> str:
         return "Reader(%s)" % repr(self.fn)
@@ -111,7 +108,7 @@ class Reader(Monad, Applicative, Functor):
         return str(self)
 
 
-class MonadReader(Reader):
+class MonadReader(Reader[TEnv, TSource]):
 
     """The MonadReader class.
 
@@ -120,16 +117,16 @@ class MonadReader(Reader):
     """
 
     @classmethod
-    def ask(cls) -> Reader:
+    def ask(cls) -> Reader[TEnv, TEnv]:
         r"""Reader $ \x -> x
 
         Provides a way to easily access the environment.
         ask lets us read the environment and then play with it
         """
-        return cls(lambda x: x)
+        return Reader(lambda x: x)
 
     @classmethod
-    def asks(cls, fn: Callable) -> Reader:
+    def asks(cls, fn: Callable[[TEnv], TSource]) -> Reader[TEnv, TSource]:
         """
         Given a function it returns a Reader which evaluates that
         function and returns the result.
@@ -141,11 +138,17 @@ class MonadReader(Reader):
 
         asks sel = ask >>= return . sel
         """
-        return cls.ask().bind(Reader(lambda x: cls.unit(fn(x))))
 
-    def local(self, fn) -> Reader:
+        return cls.ask().bind(lambda env: cls.unit(fn(env)))
+
+    def local(self, fn: Callable[[TEnv], TEnv]) -> Reader[TEnv, TSource]:
         r"""local transforms the environment a Reader sees.
 
         local f c = Reader $ \e -> runReader c (f e)
         """
-        return Reader(lambda x: self(fn(x)))
+        return Reader(lambda env: self.run(fn(env)))
+
+
+assert isinstance(Reader, Functor)
+assert isinstance(Reader, Applicative)
+assert isinstance(Reader, Monad)

@@ -7,10 +7,9 @@ All instances of the Monad typeclass should obey the three monad laws:
     3) Associativity: (m >>= f) >>= g = m >>= (\x -> f x >>= g)
 """
 
-from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Protocol, Type, Callable, Generic, Any
+from abc import abstractmethod
+from typing import TypeVar, Protocol, Callable
 from typing_extensions import runtime_checkable
-from oslash.util import identity
 
 TSource = TypeVar('TSource')
 TResult = TypeVar('TResult')

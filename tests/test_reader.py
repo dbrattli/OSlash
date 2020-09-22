@@ -9,11 +9,13 @@ unit = Reader.unit
 asks = MonadReader.asks
 
 
+env = 42
+
 class TestReader(unittest.TestCase):
 
     def test_reader_run(self) -> None:
         r = Reader(lambda name: "Hello, %s!" % name)
-        greeting = r.run()("adit")
+        greeting = r.run("adit")
         self.assertEqual(greeting, "Hello, adit!")
 
     def test_reader_asks(self) -> None:
@@ -28,8 +30,8 @@ class TestReaderFunctor(unittest.TestCase):
         f = lambda x: x * 10
 
         self.assertEqual(
-            x.map(f),
-            unit(420)
+            x.map(f).run(env),
+            unit(420).run(env)
         )
 
     def test_reader_functor_law_1(self) -> None:
@@ -37,8 +39,8 @@ class TestReaderFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEqual(
-            x.map(identity),
-            x
+            x.map(identity).run(env),
+            x.run(env)
         )
 
     def test_reader_functor_law2(self) -> None:
@@ -52,8 +54,8 @@ class TestReaderFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEqual(
-            x.map(compose(f, g)),
-            x.map(g).map(f)
+            x.map(compose(f, g)).run(env),
+            x.map(g).map(f).run(env)
         )
 
 
@@ -65,8 +67,8 @@ class TestReaderApplicative(unittest.TestCase):
         f = lambda e: e * 42
 
         self.assertEqual(
-            pure(f).apply(x),
-            x.map(f)
+            pure(f).apply(x).run(env),
+            x.map(f).run(env)
         )
 
     def test_reader_applicative_law_identity(self) -> None:
@@ -74,8 +76,8 @@ class TestReaderApplicative(unittest.TestCase):
         v = unit(42)
 
         self.assertEqual(
-            pure(identity).apply(v),
-            v
+            pure(identity).apply(v).run(env),
+            v.run(env)
         )
 
     def test_reader_applicative_law_composition(self) -> None:
@@ -86,8 +88,8 @@ class TestReaderApplicative(unittest.TestCase):
         v = pure(lambda x: x + 42)
 
         self.assertEqual(
-            pure(fmap).apply(u).apply(v).apply(w),
-            u.apply(v.apply(w))
+            pure(fmap).apply(u).apply(v).apply(w).run(env),
+            u.apply(v.apply(w)).run(env)
         )
 
     def test_reader_applicative_law_homomorphism(self) -> None:
@@ -96,8 +98,8 @@ class TestReaderApplicative(unittest.TestCase):
         f = lambda x: x * 42
 
         self.assertEqual(
-            pure(f).apply(unit(x)),
-            unit(f(x))
+            pure(f).apply(unit(x)).run(env),
+            unit(f(x)).run(env)
         )
 
     def test_reader_applicative_law_interchange(self) -> None:
@@ -107,8 +109,8 @@ class TestReaderApplicative(unittest.TestCase):
         u = pure(lambda x: x*42)
 
         self.assertEqual(
-            u.apply(unit(y)),
-            pure(lambda f: f(y)).apply(u)
+            u.apply(unit(y)).run(env),
+            pure(lambda f: f(y)).apply(u).run(env)
         )
 
 
@@ -119,8 +121,8 @@ class TestReaderMonad(unittest.TestCase):
         f = lambda x: unit(x*10)
 
         self.assertEqual(
-            m.bind(f),
-            unit(420)
+            m.bind(f).run(env),
+            unit(420).run(env)
         )
 
     def test_reader_monad_law_left_identity(self) -> None:
@@ -130,8 +132,8 @@ class TestReaderMonad(unittest.TestCase):
         x = 3
 
         self.assertEqual(
-            unit(x).bind(f),
-            f(x)
+            unit(x).bind(f).run(env),
+            f(x).run(env)
         )
 
     def test_reader_monad_law_right_identity(self) -> None:
@@ -140,8 +142,8 @@ class TestReaderMonad(unittest.TestCase):
         m = unit("move on up")
 
         self.assertEqual(
-            m.bind(unit),
-            m
+            m.bind(unit).run(env),
+            m.run(env)
         )
 
     def test_reader_monad_law_associativity(self) -> None:
@@ -151,6 +153,6 @@ class TestReaderMonad(unittest.TestCase):
         g = lambda y: unit(y*42)
 
         self.assertEqual(
-            m.bind(f).bind(g),
-            m.bind(lambda x: f(x).bind(g))
+            m.bind(f).bind(g).run(env),
+            m.bind(lambda x: f(x).bind(g)).run(env)
         )

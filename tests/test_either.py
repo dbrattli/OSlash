@@ -51,7 +51,7 @@ class TestEither(unittest.TestCase):
 
     def test_right_applicative_1(self) -> None:
         a = Right.pure(lambda x, y: x + y).apply(Right(2)).apply(Right(40))
-        self.assertNotEquals(a, Left(42))
+        self.assertNotEqual(a, Left(42))
         self.assertEqual(a, Right(42))
 
     def test_right_applicative_2(self) -> None:

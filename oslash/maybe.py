@@ -1,16 +1,16 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from functools import reduce, partial
 
 from typing import Callable, Any, Generic, TypeVar, cast
-from typing_extensions import runtime_checkable
 
 from .typing import Applicative
 from .typing import Functor
 from .typing import Monoid
 from .typing import Monad
 
-TSource = TypeVar('TSource')
-TResult = TypeVar('TResult')
+TSource = TypeVar("TSource")
+TResult = TypeVar("TResult")
+
 
 class Maybe(Generic[TSource]):
     """Encapsulates an optional value.
@@ -23,32 +23,32 @@ class Maybe(Generic[TSource]):
     """
 
     @classmethod
-    def empty(cls) -> 'Maybe[TSource]':
+    def empty(cls) -> "Maybe[TSource]":
         return Nothing()
 
     @abstractmethod
-    def __add__(self, other: 'Maybe[TSource]') -> 'Maybe[TSource]':
+    def __add__(self, other: "Maybe[TSource]") -> "Maybe[TSource]":
         raise NotImplementedError
 
     @abstractmethod
-    def map(self, mapper: Callable[[TSource], TResult]) -> 'Maybe[TResult]':
+    def map(self, mapper: Callable[[TSource], TResult]) -> "Maybe[TResult]":
         raise NotImplementedError
 
     @classmethod
-    def pure(cls, value: Callable[[TSource], TResult]) -> 'Maybe[Callable[[TSource], TResult]]':
+    def pure(cls, value: Callable[[TSource], TResult]) -> "Maybe[Callable[[TSource], TResult]]":
         raise NotImplementedError
 
     @abstractmethod
-    def apply(self: 'Maybe[Callable[[TSource], TResult]]', something: 'Maybe[TSource]') -> 'Maybe[TResult]':
+    def apply(self: "Maybe[Callable[[TSource], TResult]]", something: "Maybe[TSource]") -> "Maybe[TResult]":
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def unit(cls, a: TSource) -> 'Maybe[TSource]':
+    def unit(cls, a: TSource) -> "Maybe[TSource]":
         raise NotImplementedError
 
     @abstractmethod
-    def bind(self, fn: Callable[[TSource], 'Maybe[TResult]']) -> 'Maybe[TResult]':
+    def bind(self, fn: Callable[[TSource], "Maybe[TResult]"]) -> "Maybe[TResult]":
         raise NotImplementedError
 
     @classmethod
@@ -66,6 +66,7 @@ class Maybe(Generic[TSource]):
 
         return reduce(reducer, xs, cls.empty())
 
+
 class Just(Maybe[TSource]):
     """A Maybe that contains a value.
 
@@ -75,7 +76,8 @@ class Just(Maybe[TSource]):
     def __init__(self, value: TSource) -> None:
         self._value = value
 
-    ### Monoid section ###
+    # Monoid Section
+    # ==============
 
     def __add__(self, other: Maybe[TSource]) -> Maybe[TSource]:
         # m `append` Nothing = m
@@ -83,9 +85,12 @@ class Just(Maybe[TSource]):
             return self
 
         # Just m1 `append` Just m2 = Just (m1 `append` m2)
-        return other.map(lambda other_value: cast(Any, self._value) + other_value if hasattr(self._value, "__add__") else Nothing())
+        return other.map(
+            lambda other_value: cast(Any, self._value) + other_value if hasattr(self._value, "__add__") else Nothing()
+        )
 
-    ### Functor section ###
+    # Functor Section
+    # ===============
 
     def map(self, mapper: Callable[[TSource], TResult]) -> Maybe[TResult]:
         # fmap f (Just x) = Just (f x)
@@ -94,21 +99,24 @@ class Just(Maybe[TSource]):
 
         return Just(result)
 
-    ### Applicative Section ###
+    # Applicative Section
+    # ===================
 
     @classmethod
-    def pure(cls, value: Callable[[TSource], TResult]) -> 'Just[Callable[[TSource], TResult]]':
+    def pure(cls, value: Callable[[TSource], TResult]) -> "Just[Callable[[TSource], TResult]]":
         return Just(value)
 
-    def apply(self: 'Just[Callable[[TSource], TResult]]', something: Maybe[TSource]) -> Maybe[TResult]:
+    def apply(self: "Just[Callable[[TSource], TResult]]", something: Maybe[TSource]) -> Maybe[TResult]:
         def mapper(other_value):
             try:
                 return self._value(other_value)
             except TypeError:
                 return partial(self._value, other_value)
+
         return something.map(mapper)
 
-    ### Monad section ###
+    # Monad Section
+    # =============
 
     @classmethod
     def unit(cls, value: TSource) -> Maybe[TSource]:
@@ -120,10 +128,17 @@ class Just(Maybe[TSource]):
         value = self._value
         return func(value)
 
-    ### Others Section ###
+    # Utilities Section
+    # =================
 
     def is_just(self) -> bool:
         return True
+
+    def is_nothing(self) -> bool:
+        return False
+
+    # Operator Overloads Section
+    # ==========================
 
     def __bool__(self) -> bool:
         """Convert Just to bool."""
@@ -152,27 +167,31 @@ class Nothing(Maybe[TSource]):
     the value of Nothing).
     """
 
-    ### Monoid Section ###
+    # Monoid Section
+    # ==============
 
     def __add__(self, other: Maybe) -> Maybe:
         # m `append` Nothing = m
         return other
 
-    ### Functor Section ###
+    # Functor Section
+    # ===============
 
     def map(self, mapper: Callable[[TSource], TResult]) -> Maybe[TResult]:
         return Nothing()
 
-    ### Applicative Section ###
+    # Applicative Section
+    # ===================
 
     @classmethod
     def pure(cls, value: Callable[[TSource], TResult]) -> Maybe[Callable[[TSource], TResult]]:
         return Nothing()
 
-    def apply(self: Maybe[Callable[[TSource], TResult]], something: Maybe[TSource]) -> Maybe[TResult]:
+    def apply(self: "Nothing[Callable[[TSource], TResult]]", something: Maybe[TSource]) -> Maybe[TResult]:
         return Nothing()
 
-    ### Monad Section ###
+    # Monad Section
+    # =============
 
     @classmethod
     def unit(cls, value: TSource) -> Maybe[TSource]:
@@ -186,8 +205,17 @@ class Nothing(Maybe[TSource]):
 
         return Nothing()
 
+    # Utilities Section
+    # =================
+
+    def is_pure(self) -> bool:
+        return False
+
     def is_nothing(self) -> bool:
         return True
+
+    # Operator Overloads Section
+    # ==========================
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Nothing)
@@ -197,6 +225,7 @@ class Nothing(Maybe[TSource]):
 
     def __repr__(self) -> str:
         return str(self)
+
 
 assert issubclass(Just, Maybe)
 assert issubclass(Nothing, Maybe)

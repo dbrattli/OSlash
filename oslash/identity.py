@@ -1,21 +1,19 @@
 from functools import partial  # type: ignore
-
-from typing import NamedTuple, TypeVar, Generic, Callable
+from typing import TypeVar, Generic, Callable
 
 from .typing import Functor, Monad, Applicative
 
-from collections import namedtuple
-
-"""Identity monad.
-
-The Identity monad is the simplest monad, which attaches no
-information to values.
-"""
 
 TSource = TypeVar('TSource')
 TResult = TypeVar('TResult')
 
+
 class Identity(Generic[TSource]):
+    """Identity monad.
+
+    The Identity monad is the simplest monad, which attaches no
+    information to values.
+    """
     def __init__(self, value: TSource) -> None:
         self._value = value
 
@@ -58,6 +56,7 @@ class Identity(Generic[TSource]):
 
     def __repr__(self) -> str:
         return str(self)
+
 
 assert isinstance(Identity, Functor)
 assert isinstance(Identity, Applicative)
