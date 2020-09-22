@@ -6,7 +6,7 @@ subclasses that inherit from Monad.
 """
 from typing import Callable, Any
 
-from .abc import Monad
+from .typing import Monad
 
 
 def compose(f: Callable[[Any], Monad], g: Callable[[Any], Monad]) -> Callable[[Any], Monad]:

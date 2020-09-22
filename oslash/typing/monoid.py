@@ -1,8 +1,9 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from typing import Protocol, TypeVar
 from typing_extensions import runtime_checkable
 
 TSource = TypeVar('TSource')
+
 
 @runtime_checkable
 class Monoid(Protocol[TSource]):
