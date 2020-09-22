@@ -9,13 +9,13 @@ except ImportError:
 
 setup(
     name='OSlash',
-    version='0.5.1',
-    description="Ø for Python 3.5",
-    long_description=("is a functional library for playing with "
+    version='0.6.0',
+    description="OSlash (Ø) for Python 3.8",
+    long_description=("A functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),
     author='Dag Brattli',
     author_email='dag@brattli.net',
-    license='Apache License',
+    license='MIT License',
     url='https://github.com/dbrattli/oslash',
     download_url='https://github.com/dbrattli/oslash',
     zip_safe=True,
@@ -26,7 +26,7 @@ setup(
         # 'Development Status :: 5 - Production/Stable',
         'Environment :: Other Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: MIT Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries :: Python Modules',

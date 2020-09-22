@@ -1,12 +1,11 @@
 # Functors, Applicatives, And Monads in Python
 
-Ø is a library for playing with functional programming in Python. It's
-an attempt to re-implement some of the code from
-[Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
-Python 3.4. Ø unifies functional and object oriented paradigms by
-grouping related functions within classes. Objects are however never
-used for storing values or mutable data, and data only lives within
-function closures.
+OSlash (Ø) is a library for playing with functional programming in
+Python. It's an attempt to re-implement some of the code from [Learn You
+a Haskell for Great Good!](http://learnyouahaskell.com/) in Python 3.4.
+Ø unifies functional and object oriented paradigms by grouping related
+functions within classes. Objects are however never used for storing
+values or mutable data, and data only lives within function closures.
 
 ## Install
 
