@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Callable, Tuple, Any, TypeVar, Generic
+from typing import Callable, Tuple, Any, TypeVar, Generic, Union
 
 from .typing import Functor
 from .typing import Monad
@@ -21,7 +21,6 @@ class Writer(Generic[TSource, TLog]):
 
         self._value: Tuple[TSource, TLog] = (value, log)
 
-    @abstractmethod
     def map(self, func: Callable[[Tuple[TSource, TLog]], Tuple[TResult, TLog]]) -> 'Writer[TResult, TLog]':
         """Map a function func over the Writer value.
 
@@ -31,9 +30,10 @@ class Writer(Generic[TSource, TLog]):
         Keyword arguments:
         func -- Mapper function:
         """
-        raise NotImplementedError
+        a, w = self.run()
+        b, _w = func((a, w))
+        return Writer(b, _w)
 
-    @abstractmethod
     def bind(self, func: Callable[[TSource], 'Writer[TResult, TLog]']) -> 'Writer[TResult, TLog]':
         """Flat is better than nested.
 
@@ -41,10 +41,14 @@ class Writer(Generic[TSource, TLog]):
         (Writer (x, v)) >>= f = let
             (Writer (y, v')) = f x in Writer (y, v `append` v')
         """
-        raise NotImplementedError
+        a, w = self.run()
+        b, w_ = func(a).run()
+
+        w__ = w + w_
+
+        return Writer(b, w__)
 
     @classmethod
-    @abstractmethod
     def unit(cls, value: TSource) -> 'Writer[TSource, TLog]':
         """Wrap a single value in a Writer.
 
@@ -52,7 +56,7 @@ class Writer(Generic[TSource, TLog]):
         uses a different monoid than str, or use the constructor
         directly.
         """
-        raise NotImplementedError
+        return cls(value, log="")
 
     def run(self) -> Tuple[TSource, TLog]:
         """Extract value from Writer.
@@ -72,6 +76,23 @@ class Writer(Generic[TSource, TLog]):
         new, entry = func(value)
         return new, log + entry
 
+    @classmethod
+    def create(cls, class_name: str, monoid_type=Union[Monoid, str]):
+        """Create Writer subclass using specified monoid type.
+        lets us create a Writer that uses a different monoid than str for
+        the log.
+        """
+
+        def unit(cls, value):
+            if hasattr(monoid_type, "empty"):
+                log = monoid_type.empty()
+            else:
+                log = monoid_type()
+
+            return cls(value, log)
+
+        return type(class_name, (Writer, ), dict(unit=classmethod(unit)))
+
     def __eq__(self, other) -> bool:
         return self.run() == other.run()
 
@@ -89,46 +110,7 @@ class MonadWriter(Writer[Any, TLog]):
         return cls(None, log)
 
 
-class StringWriter(Writer[TSource, str]):
-    """The writer monad (with a string log"""
-
-    def map(self, func: Callable[[Tuple[TSource, str]], Tuple[TResult, str]]) -> 'Writer[TResult, str]':
-        """Map a function func over the Writer value.
-
-        Haskell:
-        fmap f m = Writer $ let (a, w) = runWriter m in (f a, w)
-
-        Keyword arguments:
-        func -- Mapper function:
-        """
-        a, w = self.run()
-        b, _w = func((a, w))
-        return StringWriter(b, _w)
-
-    @classmethod
-    def unit(cls, value: TSource) -> 'Writer[TSource, str]':
-        """Wrap a single value in a Writer.
-
-        Use the factory method to create *Writer classes that
-        uses a different monoid than str, or use the constructor
-        directly.
-        """
-        return cls(value, log="")
-
-    def bind(self, func: Callable[[TSource], 'Writer[TResult, str]']) -> 'Writer[TResult, str]':
-        """Flat is better than nested.
-
-        Haskell:
-        (Writer (x, v)) >>= f = let
-            (Writer (y, v')) = f x in Writer (y, v `append` v')
-        """
-
-        a, w = self.run()
-        b, w_ = func(a).run()
-
-        w__ = w + w_
-
-        return StringWriter(b, w__)
+StringWriter = Writer.create("StringWriter", str)
 
 
 assert(isinstance(Writer, Functor))

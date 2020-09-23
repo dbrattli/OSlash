@@ -7,9 +7,11 @@ except ImportError:
     use_setuptools()
     from setuptools import setup
 
+import versioneer
 setup(
     name='OSlash',
-    version='0.6.0',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description="OSlash (Ø) for Python 3.8",
     long_description=("A functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),

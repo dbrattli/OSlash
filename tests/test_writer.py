@@ -1,6 +1,6 @@
 import unittest
 
-from oslash import StringWriter
+from oslash import Writer, StringWriter
 
 
 class TestWriterMonad(unittest.TestCase):
@@ -9,7 +9,7 @@ class TestWriterMonad(unittest.TestCase):
         self.assertEqual(w.run(), (42, ""))
 
     def test_writer_unitint_log(self):
-        IntWriter = StringWriter.create("IntWriter", int)
+        IntWriter = Writer.create("IntWriter", int)
         w = IntWriter.unit(42)
         self.assertEqual(w.run(), (42, 0))
 
