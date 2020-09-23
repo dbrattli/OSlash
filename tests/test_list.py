@@ -122,21 +122,21 @@ class TestListFunctor(unittest.TestCase):
 
         # Singleton list
         x = unit(42)
-        self.assertEquals(
+        self.assertEqual(
             x.map(compose(f, g)),
             x.map(g).map(f)
         )
 
         # Empty list
         y = List.empty()
-        self.assertEquals(
+        self.assertEqual(
             y.map(compose(f, g)),
             y.map(g).map(f)
         )
 
         # Long list
         z = List.from_iterable(range(42))
-        self.assertEquals(
+        self.assertEqual(
             z.map(compose(f, g)),
             z.map(g).map(f)
         )
@@ -149,21 +149,21 @@ class TestListApplicative(unittest.TestCase):
         f = lambda x: x * 42
 
         x = unit(42)
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(x),
             x.map(f)
         )
 
         # Empty list
         z = List()
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(z),
             z.map(f)
         )
 
         # Long list
         z = List.from_iterable(range(42))
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(z),
             z.map(f)
         )
@@ -173,21 +173,21 @@ class TestListApplicative(unittest.TestCase):
 
         # Singleton list
         x = unit(42)
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(x),
             x
         )
 
         # Empty list
         y = List.empty()
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(y),
             y
         )
 
         # Log list
         y = List.from_iterable(range(42))
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(y),
             y
         )
@@ -200,7 +200,7 @@ class TestListApplicative(unittest.TestCase):
 
         # Singleton list
         w = unit(42)
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -213,7 +213,7 @@ class TestListApplicative(unittest.TestCase):
 
         # Empty list
         w = List()
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -226,7 +226,7 @@ class TestListApplicative(unittest.TestCase):
 
         # Long list
         w = List.from_iterable(range(42))
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -236,7 +236,7 @@ class TestListApplicative(unittest.TestCase):
         v = unit(2)
         w = unit(40)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(v).apply(w),
             unit(42)
         )
@@ -245,7 +245,7 @@ class TestListApplicative(unittest.TestCase):
         f = lambda x: x * 2
         v = unit(21)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(v),
             unit(42)
         )
@@ -255,7 +255,7 @@ class TestListApplicative(unittest.TestCase):
         v = List.from_iterable([1, 2])
         w = List.from_iterable([4, 8])
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(v).apply(w),
             List.from_iterable([5, 9, 6, 10])
         )
@@ -264,7 +264,7 @@ class TestListApplicative(unittest.TestCase):
         v = unit(42)
         w = List.from_iterable([1, 2, 3])
 
-        self.assertEquals(
+        self.assertEqual(
             List.empty().apply(v).apply(w),
             List(Unit)
         )
@@ -274,7 +274,7 @@ class TestListApplicative(unittest.TestCase):
         v = unit(42)
         e = List()
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(e).apply(v),
             List()
         )
@@ -284,7 +284,7 @@ class TestListApplicative(unittest.TestCase):
         v = unit(42)
         e = List()
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(v).apply(e),
             List()
         )

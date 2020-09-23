@@ -1,47 +1,51 @@
 from functools import partial  # type: ignore
+from typing import TypeVar, Generic, Callable
 
-from typing import Any, Callable, Generic, TypeVar
-
-from .abc import Functor
-from .abc import Monad
-from .abc import Applicative
-
-A = TypeVar('A')
-B = TypeVar('B')
+from .typing import Functor, Monad, Applicative
 
 
-class Identity(Monad, Applicative, Functor):
+TSource = TypeVar('TSource')
+TResult = TypeVar('TResult')
+
+
+class Identity(Generic[TSource]):
     """Identity monad.
 
     The Identity monad is the simplest monad, which attaches no
     information to values.
     """
-
-    def __init__(self, value: Any) -> None:
-        """Initialize a new reader."""
+    def __init__(self, value: TSource) -> None:
         self._value = value
 
-    def map(self, mapper: Callable[[Any], Any]) -> 'Identity':
-        """Map a function over wrapped values."""
-        value = self._value
-        try:
-            result = mapper(value)
-        except TypeError:
-            result = partial(mapper, value)
+    @classmethod
+    def unit(cls, value: TSource) -> 'Identity[TSource]':
+        """Initialize a new identity."""
+        return Identity(value)
 
+    def map(self, mapper: Callable[[TSource], TResult]) -> 'Identity[TResult]':
+        """Map a function over wrapped values."""
+        result = mapper(self._value)
         return Identity(result)
 
-    def bind(self, func: Callable[[Any], 'Identity']) -> 'Identity':
+    def bind(self, func: Callable[[TSource], 'Identity[TResult]']) -> 'Identity[TResult]':
         return func(self._value)
 
-    def apply(self, something: 'Identity') -> 'Identity':
-        func = self._value
-        return something.map(func)
+    @classmethod
+    def pure(cls, value: TSource):
+        return Identity(value)
 
-    def run(self) -> Any:
+    def apply(self: 'Identity[Callable[[TSource], TResult]]', something: 'Identity[TSource]') -> 'Identity[TResult]':
+        def mapper(other_value):
+            try:
+                return self._value(other_value)
+            except TypeError:
+                return partial(self._value, other_value)
+        return something.map(mapper)
+
+    def run(self) -> TSource:
         return self._value
 
-    def __call__(self) -> Any:
+    def __call__(self) -> TSource:
         return self.run()
 
     def __eq__(self, other) -> bool:
@@ -52,3 +56,8 @@ class Identity(Monad, Applicative, Functor):
 
     def __repr__(self) -> str:
         return str(self)
+
+
+assert isinstance(Identity, Functor)
+assert isinstance(Identity, Applicative)
+assert isinstance(Identity, Monad)

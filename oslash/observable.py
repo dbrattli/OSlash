@@ -7,13 +7,16 @@
 
 """
 
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar, Generic
 
 from .util import identity, compose
-from .abc import Monad, Functor
+from .typing import Monad, Functor
+
+TSource = TypeVar("TSource")
+TResult = TypeVar("TResult")
 
 
-class Observable(Monad, Functor):
+class Observable(Generic[TSource]):
 
     """The Rx Observable Monad.
 
@@ -31,12 +34,12 @@ class Observable(Monad, Functor):
         self._get_value = lambda: subscribe
 
     @classmethod
-    def unit(cls, x: Any) -> 'Observable':
+    def unit(cls, x: TSource) -> 'Observable[TSource]':
         """x -> Observable x"""
         return cls(lambda on_next: on_next(x))
     just = unit
 
-    def map(self, mapper: Callable[[Any], Any]) -> 'Observable':
+    def map(self, mapper: Callable[[TSource], TResult]) -> 'Observable[TResult]':
         r"""Map a function over an observable.
 
         Haskell: fmap f m = Cont $ \c -> runCont m (c . f)
@@ -44,7 +47,7 @@ class Observable(Monad, Functor):
         source = self
         return Observable(lambda on_next: source.subscribe(compose(on_next, mapper)))
 
-    def bind(self, fn: Callable[[Any], 'Observable']) -> 'Observable':
+    def bind(self, fn: Callable[[TSource], 'Observable[TResult]']) -> 'Observable[TResult]':
         r"""Chain continuation passing functions.
 
         Haskell: m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c
@@ -53,7 +56,7 @@ class Observable(Monad, Functor):
         return Observable(lambda on_next: source.subscribe(lambda a: fn(a).subscribe(on_next)))
     flat_map = bind
 
-    def filter(self, predicate) -> 'Observable':
+    def filter(self, predicate: Callable[[TSource], bool]) -> 'Observable[TSource]':
         """Filter the on_next continuation functions"""
         source = self
 
@@ -76,8 +79,19 @@ class Observable(Monad, Functor):
 
         return Observable(subscribe)
 
-    def subscribe(self, on_next) -> Any:
+    def subscribe(self, on_next: Callable[[TSource], None]) -> Any:
         return self._get_value()(on_next)
+
+    def __or__(self, func):
+        """Use | as operator for bind.
+
+        Provide the | operator instead of the Haskell >>= operator
+        """
+        return self.bind(func)
 
     def __eq__(self, other) -> bool:
         return self.subscribe(identity) == other.subscribe(identity)
+
+
+assert(isinstance(Observable, Functor))
+assert(isinstance(Observable, Monad))

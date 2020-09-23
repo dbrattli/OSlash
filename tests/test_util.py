@@ -36,4 +36,4 @@ class TestCompose(unittest.TestCase):
 
         a = compose(u, v)(w)
         b = u(v(w))
-        self.assertEquals(a, b)
+        self.assertEqual(a, b)

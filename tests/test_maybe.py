@@ -13,7 +13,7 @@ class TestMaybeFunctor(unittest.TestCase):
         f = lambda x: x * 2
         x = Just(21)
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(f),
             Just(42)
         )
@@ -22,14 +22,14 @@ class TestMaybeFunctor(unittest.TestCase):
         f = lambda x: x + 2
         x = Nothing()
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(f),
             x
         )
 
     def test_nothing_functor_law1(self):
         # fmap id = id
-        self.assertEquals(
+        self.assertEqual(
             Nothing().map(identity),
             Nothing()
         )
@@ -37,7 +37,7 @@ class TestMaybeFunctor(unittest.TestCase):
     def test_just_functor_law1(self):
         # fmap id = id
         x = Just(3)
-        self.assertEquals(
+        self.assertEqual(
             x.map(identity),
             x
         )
@@ -52,7 +52,7 @@ class TestMaybeFunctor(unittest.TestCase):
 
         x = Just(42)
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(compose(f, g)),
             x.map(g).map(f)
         )
@@ -67,7 +67,7 @@ class TestMaybeFunctor(unittest.TestCase):
 
         x = Nothing()
 
-        self.assertEquals(
+        self.assertEqual(
             x.map(compose(f, g)),
             x.map(g).map(f)
         )
@@ -80,7 +80,7 @@ class TestMaybeApplicative(unittest.TestCase):
         x = unit(42)
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(x),
             x.map(f)
         )
@@ -90,7 +90,7 @@ class TestMaybeApplicative(unittest.TestCase):
         x = Nothing()
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(x),
             x.map(f)
         )
@@ -99,7 +99,7 @@ class TestMaybeApplicative(unittest.TestCase):
         # pure id <*> v = v
         v = unit(42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(v),
             v
         )
@@ -108,7 +108,7 @@ class TestMaybeApplicative(unittest.TestCase):
         # pure id <*> v = v
         v = Nothing()
 
-        self.assertEquals(
+        self.assertEqual(
             pure(identity).apply(v),
             v
         )
@@ -120,7 +120,7 @@ class TestMaybeApplicative(unittest.TestCase):
         u = pure(lambda x: x * 42)
         v = pure(lambda x: x + 42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -132,7 +132,7 @@ class TestMaybeApplicative(unittest.TestCase):
         u = pure(lambda x: x * 42)
         v = pure(lambda x: x + 42)
 
-        self.assertEquals(
+        self.assertEqual(
             pure(fmap).apply(u).apply(v).apply(w),
             u.apply(v.apply(w))
         )
@@ -142,7 +142,7 @@ class TestMaybeApplicative(unittest.TestCase):
         x = 42
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(pure(x)),
             pure(f(x))
         )
@@ -151,7 +151,7 @@ class TestMaybeApplicative(unittest.TestCase):
         # pure f <*> pure x = pure (f x)
         f = lambda x: x * 42
 
-        self.assertEquals(
+        self.assertEqual(
             pure(f).apply(Nothing()),
             Nothing()
         )
@@ -162,7 +162,7 @@ class TestMaybeApplicative(unittest.TestCase):
         y = 43
         u = unit(lambda x: x*42)
 
-        self.assertEquals(
+        self.assertEqual(
             u.apply(pure(y)),
             pure(lambda f: f(y)).apply(u)
         )
@@ -172,23 +172,23 @@ class TestMaybeApplicative(unittest.TestCase):
 
         u = unit(lambda x: x*42)
 
-        self.assertEquals(
+        self.assertEqual(
             u.apply(Nothing()),
             Nothing().apply(u)
         )
 
     def test_just_applicative_1(self):
         a = Just.pure(lambda x, y: x+y).apply(Just(2)).apply(Just(40))
-        self.assertNotEquals(a, Nothing())
-        self.assertEquals(a, Just(42))
+        self.assertNotEqual(a, Nothing())
+        self.assertEqual(a, Just(42))
 
     def test_just_applicative_2(self):
         a = Just.pure(lambda x, y: x+y).apply(Nothing()).apply(Just(42))
-        self.assertEquals(a, Nothing())
+        self.assertEqual(a, Nothing())
 
     def test_just_applicative_3(self):
         a = Just.pure(lambda x, y: x+y).apply(Just(42)).apply(Nothing())
-        self.assertEquals(a, Nothing())
+        self.assertEqual(a, Nothing())
 
 
 class TestMaybeMonoid(unittest.TestCase):
@@ -196,16 +196,16 @@ class TestMaybeMonoid(unittest.TestCase):
     def test_maybe_monoid_nothing_append_just(self):
         m = Just("Python")
 
-        self.assertEquals(
-            Nothing().append(m),
+        self.assertEqual(
+            Nothing() + m,
             m
         )
 
     def test_maybe_monoid_just_append_nothing(self):
         m = Just("Python")
 
-        self.assertEquals(
-            m.append(Nothing()),
+        self.assertEqual(
+            m + Nothing(),
             m
         )
 
@@ -213,14 +213,14 @@ class TestMaybeMonoid(unittest.TestCase):
         m = Just("Python")
         n = Just(" rocks!")
 
-        self.assertEquals(
-            m.append(n),
+        self.assertEqual(
+            m + n,
             Just("Python rocks!")
         )
 
     def test_maybe_monoid_concat(self):
 
-        self.assertEquals(
+        self.assertEqual(
             Maybe.concat([Just(2), Just(40)]),
             Just(42)
         )
@@ -310,23 +310,25 @@ class TestMaybeMonad(unittest.TestCase):
         )
 
     def test_combine_just_and_just_rule1(self):
-        self.assertEquals(
+        self.assertEqual(
             Just(5) and Just(6),
             Just(6)
         )
 
     def test_combine_just_and_just_rule2(self):
-        self.assertEquals(
+        self.assertEqual(
             Just(0) and Just(6),
             Just(0)
         )
+
     def test_combine_just_or_nothing_rule1(self):
-        self.assertEquals(
+        self.assertEqual(
             Just(5) or Nothing,
             Just(5)
         )
+
     def test_combine_just_or_nothing_rule2(self):
-        self.assertEquals(
+        self.assertEqual(
             Just(0) or Nothing,
             Nothing
         )

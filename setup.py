@@ -7,15 +7,17 @@ except ImportError:
     use_setuptools()
     from setuptools import setup
 
+import versioneer
 setup(
     name='OSlash',
-    version='0.5.1',
-    description="Ø for Python 3.5",
-    long_description=("is a functional library for playing with "
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+    description="OSlash (Ø) for Python 3.8+",
+    long_description=("A functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),
     author='Dag Brattli',
     author_email='dag@brattli.net',
-    license='Apache License',
+    license='MIT License',
     url='https://github.com/dbrattli/oslash',
     download_url='https://github.com/dbrattli/oslash',
     zip_safe=True,
@@ -26,14 +28,15 @@ setup(
         # 'Development Status :: 5 - Production/Stable',
         'Environment :: Other Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: MIT Software License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    install_requires=['typing_extensions'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
 
-    packages=['oslash', 'oslash.util', 'oslash.abc'],
+    packages=['oslash', 'oslash.util', 'oslash.typing'],
     package_dir={'oslash': 'oslash'}
 )

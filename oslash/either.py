@@ -3,16 +3,16 @@ from functools import partial
 
 from typing import Callable, TypeVar, Generic
 
-from oslash.abc import Applicative
-from oslash.abc import Functor
-from oslash.abc import Monad
+from oslash.typing import Applicative
+from oslash.typing import Functor
+from oslash.typing import Monad
 
-A = TypeVar('A')
-B = TypeVar('B')
-E = TypeVar('E')
+TSource = TypeVar("TSource")
+TResult = TypeVar("TResult")
+TError = TypeVar("TError")
 
 
-class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
+class Either(Generic[TSource, TError]):
 
     """The Either Monad.
 
@@ -21,69 +21,125 @@ class Either(Monad, Applicative, Functor, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def map(self, _: Callable[[A], B]) -> 'Either':
-        return NotImplemented
+    def map(self, _: Callable[[TSource], TResult]) -> "Either[TResult, TError]":
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def pure(cls, value: Callable[[TSource], TResult]) -> "Either[Callable[[TSource], TResult], TError]":
+        raise NotImplementedError
 
     @abstractmethod
-    def apply(self, something: 'Either') -> 'Either':
-        return NotImplemented
+    def apply(
+        self: "Either[Callable[[TSource], TResult], TError]", something: "Either[TSource, TError]"
+    ) -> "Either[TResult, TError]":
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def unit(cls, value: TSource) -> "Right[TSource, TError]":
+        raise NotImplementedError
 
     @abstractmethod
-    def bind(self, func: Callable[[A], 'Either']) -> 'Either':
-        return NotImplemented
+    def bind(self, func: Callable[[TSource], "Either[TResult, TError]"]) -> "Either[TResult, TError]":
+        raise NotImplementedError
 
     @abstractmethod
-    def __eq__(self, other: 'Either') -> bool:
-        return NotImplemented
+    def __eq__(self, other) -> bool:
+        raise NotImplementedError
 
 
-class Right(Either):
+class Right(Either[TSource, TError]):
 
     """Represents a successful computation."""
 
-    def __init__(self, value: A) -> None:
+    def __init__(self, value: TSource) -> None:
         self._value = value
 
-    def map(self, mapper: Callable[[A], B]) -> Either:
-        value = self._value
-        try:
-            result = mapper(value)
-        except TypeError:
-            result = partial(mapper, value)
+    # Functor Section
+    # ===============
 
+    def map(self, mapper: Callable[[TSource], TResult]) -> Either[TResult, TError]:
+        result = mapper(self._value)
         return Right(result)
 
-    def apply(self, something: Either) -> Either:
-        return something.map(self._value)
+    # Applicative Section
+    # ===================
 
-    def bind(self, func: Callable[[A], Either]) -> Either:
+    @classmethod
+    def pure(cls, value: Callable[[TSource], TResult]) -> "Right[Callable[[TSource], TResult], TError]":
+        return Right(value)
+
+    def apply(
+        self: "Right[Callable[[TSource], TResult], TError]", something: "Either[TSource, TError]"
+    ) -> "Either[TResult, TError]":
+        def mapper(other_value):
+            try:
+                return self._value(other_value)
+            except TypeError:
+                return partial(self._value, other_value)
+
+        return something.map(mapper)
+
+    # Monad Section
+    # =============
+
+    @classmethod
+    def unit(cls, value: TSource) -> "Right[TSource, TError]":
+        return Right(value)
+
+    def bind(self, func: Callable[[TSource], Either[TResult, TError]]) -> Either[TResult, TError]:
         return func(self._value)
 
-    def __eq__(self, other: Either) -> bool:
+    # Operator Overloads
+    # ==================
+
+    def __eq__(self, other) -> bool:
         return isinstance(other, Right) and self._value == other._value
 
     def __str__(self) -> str:
         return "Right %s" % self._value
 
 
-class Left(Either):
+class Left(Either[TSource, TError]):
 
     """Represents a computation that has failed."""
 
-    def __init__(self, value: E) -> None:
-        self._value = value
+    def __init__(self, error: TError) -> None:
+        self._error = error
+
+    @classmethod
+    def pure(cls, value: Callable[[TSource], TResult]) -> Either[Callable[[TSource], TResult], TError]:
+        return Right(value)
 
     def apply(self, something: Either) -> Either:
-        return Left(self._value)
+        return Left(self._error)
 
-    def map(self, mapper: Callable[[A], B]) -> Either:
-        return Left(self._value)
+    def map(self, mapper: Callable[[TSource], TResult]) -> Either[TResult, TError]:
+        return Left(self._error)
 
-    def bind(self, func: Callable[[A], Either]) -> Either:
-        return Left(self._value)
+    @classmethod
+    def unit(cls, value: TSource):
+        return Right(value)
 
-    def __eq__(self, other: Either) -> bool:
-        return isinstance(other, Left) and self._value == other._value
+    def bind(self, func: Callable[[TSource], Either[TResult, TError]]) -> Either[TResult, TError]:
+        return Left(self._error)
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, Left) and self._error == other._error
 
     def __str__(self) -> str:
-        return "Left %s" % self._value
+        return "Left: %s" % self._error
+
+
+assert(isinstance(Either, Functor))
+assert(isinstance(Either, Applicative))
+assert(isinstance(Either, Monad))
+
+assert(isinstance(Right, Functor))
+assert(isinstance(Right, Applicative))
+assert(isinstance(Right, Monad))
+
+assert(isinstance(Left, Functor))
+assert(isinstance(Left, Applicative))
+assert(isinstance(Left, Monad))
