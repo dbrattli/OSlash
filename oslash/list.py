@@ -105,7 +105,7 @@ class List(Monad, Monoid, Applicative, Functor, Sized, Iterable):
         xs = self  # Don't think we can avoid this mutable local
         while True:
             if xs.null():
-                raise StopIteration
+                return
 
             yield xs.head()
             xs = xs.tail()
