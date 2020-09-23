@@ -59,7 +59,7 @@ quite different in implementation.
 Why is the project called OSlash? OSlash is the Norwegian character called
 [Oslash](http://en.wikipedia.org/wiki/Ø). Initially I wanted to create a
 project that used Ø and ø (unicode) for the project name and modules. It didn't
-work out well, so I renamed it to Oslash.
+work out well, so I renamed it to OSlash.
 
 ## Examples
 

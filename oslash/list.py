@@ -155,3 +155,9 @@ class List(Iterable[TSource]):
         if self.null() or other.null():
             return True if self.null() and other.null() else False
         return self.head() == other.head() and self.tail() == other.tail()
+
+
+assert(isinstance(List, Monoid))
+assert(isinstance(List, Functor))
+assert(isinstance(List, Applicative))
+assert(isinstance(List, Monad))

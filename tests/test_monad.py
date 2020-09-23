@@ -9,7 +9,8 @@ class TestMonadMonadic(unittest.TestCase):
     def test_monad_monadic_compose(self):
         unit, tell = StringWriter.unit, MonadWriter.tell
 
-        half = lambda x: tell("I just halved %s!" % x).bind(lambda _: unit(x//2))
+        def half(x):
+            return tell("I just halved %s!" % x).bind(lambda _: unit(x//2))
 
         quarter = compose(half, half)
         value, log = quarter(8).run()

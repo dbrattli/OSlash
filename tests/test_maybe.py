@@ -320,11 +320,13 @@ class TestMaybeMonad(unittest.TestCase):
             Just(0) and Just(6),
             Just(0)
         )
+
     def test_combine_just_or_nothing_rule1(self):
         self.assertEqual(
             Just(5) or Nothing,
             Just(5)
         )
+
     def test_combine_just_or_nothing_rule2(self):
         self.assertEqual(
             Just(0) or Nothing,

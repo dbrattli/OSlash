@@ -59,13 +59,20 @@ class IO(Generic[TSource]):
         """Run IO action."""
         return self._value
 
+    def __or__(self, func):
+        """Use | as operator for bind.
+
+        Provide the | operator instead of the Haskell >>= operator
+        """
+        return self.bind(func)
+
     def __call__(self, world: int = 0) -> Any:
         """Nothing more to run."""
         return self.run(world)
 
     def __str__(self, m: int = 0, n: int = 0) -> str:
         a = self._value
-        return "%sReturn %s" % (ind(m), a)
+        return "%sReturn %s" % (ind(m), [a])
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -123,11 +130,13 @@ class Get(IO):
     def bind(self, func: Callable[[Any], IO]) -> IO:
         """IO a -> (a -> IO b) -> IO b"""
 
+        assert self._value is not None
         g = self._value
         return Get(lambda text: g(text).bind(func))
 
     def map(self, func: Callable[[Any], Any]) -> "Get":
         # Get (\s -> fmap f (g s))
+        assert self._value is not None
         g = self._value
         return Get(lambda s: g(s).map(func))
 

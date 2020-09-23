@@ -10,7 +10,7 @@ from .reader import Reader, MonadReader
 from .identity import Identity
 from .state import State
 
-#from .monadic import *
+from .monadic import *
 
 from .util import fn
 

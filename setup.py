@@ -36,6 +36,6 @@ setup(
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
 
-    packages=['oslash', 'oslash.util', 'oslash.abc'],
+    packages=['oslash', 'oslash.util', 'oslash.typing'],
     package_dir={'oslash': 'oslash'}
 )

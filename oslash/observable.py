@@ -91,3 +91,7 @@ class Observable(Generic[TSource]):
 
     def __eq__(self, other) -> bool:
         return self.subscribe(identity) == other.subscribe(identity)
+
+
+assert(isinstance(Observable, Functor))
+assert(isinstance(Observable, Monad))

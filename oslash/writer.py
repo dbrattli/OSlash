@@ -1,10 +1,10 @@
-from typing import Callable, Tuple, Any, TypeVar, Generic, Union
+from typing import Callable, Tuple, Any, TypeVar, Generic, Union, cast
 
 from .typing import Functor
 from .typing import Monad
 from .typing import Monoid
 
-TLog = TypeVar("TLog", Monoid, str)
+TLog = TypeVar("TLog", str, Monoid)
 TSource = TypeVar("TSource")
 TResult = TypeVar("TResult")
 
@@ -55,7 +55,7 @@ class Writer(Generic[TSource, TLog]):
         uses a different monoid than str, or use the constructor
         directly.
         """
-        return cls(value, log="")
+        return Writer(value, log=cast(TLog, ""))
 
     def run(self) -> Tuple[TSource, TLog]:
         """Extract value from Writer.
