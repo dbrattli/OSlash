@@ -30,9 +30,10 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT Software License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    install_requires=['typing_extensions'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
 
