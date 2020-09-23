@@ -3,7 +3,7 @@
 ![Python package](https://github.com/dbrattli/OSlash/workflows/Python%20package/badge.svg)
 
 OSlash (Ø) is a library for playing with functional programming in
-Python. It's an attempt to re-implement some of the code from [Learn You
+Python 3.8+. It's an attempt to re-implement some of the code from [Learn You
 a Haskell for Great Good!](http://learnyouahaskell.com/) in Python 3.8.
 OSlash unifies functional and object oriented paradigms by grouping related
 functions within classes. Objects are however never used for storing

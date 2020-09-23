@@ -12,7 +12,7 @@ setup(
     name='OSlash',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description="OSlash (Ø) for Python 3.8",
+    description="OSlash (Ø) for Python 3.8+",
     long_description=("A functional library for playing with "
                       "Functors, Applicatives, and Monads in Python."),
     author='Dag Brattli',
