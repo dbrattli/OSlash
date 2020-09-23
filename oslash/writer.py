@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Callable, Tuple, Any, TypeVar, Generic, Union
 
 from .typing import Functor
@@ -78,9 +77,14 @@ class Writer(Generic[TSource, TLog]):
 
     @classmethod
     def create(cls, class_name: str, monoid_type=Union[Monoid, str]):
-        """Create Writer subclass using specified monoid type.
-        lets us create a Writer that uses a different monoid than str for
-        the log.
+        """Create Writer subclass using specified monoid type. lets us
+        create a Writer that uses a different monoid than str for the
+        log.
+
+        Usage:
+            StringWriter = Writer.create("StringWriter", str)
+            IntWriter = Writer.create("IntWriter", int)
+            ...
         """
 
         def unit(cls, value):

@@ -82,5 +82,12 @@ class Observable(Generic[TSource]):
     def subscribe(self, on_next: Callable[[TSource], None]) -> Any:
         return self._get_value()(on_next)
 
+    def __or__(self, func):
+        """Use | as operator for bind.
+
+        Provide the | operator instead of the Haskell >>= operator
+        """
+        return self.bind(func)
+
     def __eq__(self, other) -> bool:
         return self.subscribe(identity) == other.subscribe(identity)
