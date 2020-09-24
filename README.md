@@ -1,12 +1,13 @@
 # Functors, Applicatives, And Monads in Python
 
-Ø is a library for playing with functional programming in Python. It's
-an attempt to re-implement some of the code from
-[Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in
-Python 3.4. Ø unifies functional and object oriented paradigms by
-grouping related functions within classes. Objects are however never
-used for storing values or mutable data, and data only lives within
-function closures.
+![Python package](https://github.com/dbrattli/OSlash/workflows/Python%20package/badge.svg)
+
+OSlash (Ø) is a library for playing with functional programming in
+Python 3.8+. It's an attempt to re-implement some of the code from [Learn You
+a Haskell for Great Good!](http://learnyouahaskell.com/) in Python 3.8.
+OSlash unifies functional and object oriented paradigms by grouping related
+functions within classes. Objects are however never used for storing
+values or mutable data, and data only lives within function closures.
 
 ## Install
 
@@ -51,14 +52,14 @@ The project currently contains implementations for:
 Yes, I know there are other projects out there like
 [PyMonad](https://bitbucket.org/jason_delaat/pymonad/),
 [fn.py](https://github.com/kachayev/fn.py). I'm simply doing this in order to
-better understand the book. It's so much easier to learn when you implement
+better understand the [book](http://learnyouahaskell.com/). It's so much easier to learn when you implement
 things yourself. The code may be similar to PyMonad in structure, but is
 quite different in implementation.
 
 Why is the project called OSlash? OSlash is the Norwegian character called
 [Oslash](http://en.wikipedia.org/wiki/Ø). Initially I wanted to create a
 project that used Ø and ø (unicode) for the project name and modules. It didn't
-work out well, so I renamed it to Oslash.
+work out well, so I renamed it to OSlash.
 
 ## Examples
 

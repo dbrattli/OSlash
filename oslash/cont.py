@@ -6,48 +6,57 @@
 
 """
 
-from typing import Any, Callable
+from typing import Any, Callable, Generic, TypeVar
+
 
 from .util import identity, compose
-from .abc import Monad, Functor
+from .typing import Monad, Functor
 
+T = TypeVar('T')
+T2 = TypeVar('T2')
+TResult = TypeVar('TResult')
 
-class Cont(Monad, Functor):
+TCont = Callable[[T], TResult]
+
+class Cont(Generic[T, TResult]):
     """The Continuation Monad.
 
     The Continuation monad represents suspended computations in continuation-
     passing style (CPS).
     """
 
-    def __init__(self, cont: Callable[[Callable], Any]) -> None:
+    def __init__(self, comp: Callable[[TCont], TResult]) -> None:
         """Cont constructor.
 
         Keyword arguments:
         cont -- A callable
         """
-        self._value = cont
+        self._comp = comp
 
     @classmethod
-    def unit(cls, a: Any) -> 'Cont':
+    def unit(cls, value: T) -> 'Cont[T, TResult]':
         """Create new continuation.
 
         Haskell: a -> Cont a
         """
-        return cls(lambda cont: cont(a))
+        fn : Callable[[TCont], TResult] = lambda cont: cont(value)
+        return Cont(fn)
 
-    def map(self, fn: Callable[[Any], Any]) -> 'Cont':
+    def map(self, fn: Callable[[T], T2]) -> 'Cont[T2, TResult]':
         r"""Map a function over a continuation.
 
         Haskell: fmap f m = Cont $ \c -> runCont m (c . f)
         """
-        return Cont(lambda c: self.run(compose(c, fn)))
+        def comp(cont: Callable[[T2], TResult]) -> TResult:
+            return self.run(compose(cont, fn))
+        return Cont(comp)
 
-    def bind(self, fn: Callable[[Any], 'Cont']) -> 'Cont':
+    def bind(self, fn: Callable[[T], 'Cont[T2, TResult]']) -> 'Cont[T2, TResult]':
         r"""Chain continuation passing functions.
 
         Haskell: m >>= k = Cont $ \c -> runCont m $ \a -> runCont (k a) c
         """
-        return Cont(lambda c: self.run(lambda a: fn(a).run(c)))
+        return Cont(lambda cont: self.run(lambda a: fn(a).run(cont)))
 
     @staticmethod
     def call_cc(fn: Callable) -> 'Cont':
@@ -57,11 +66,21 @@ class Cont(Monad, Functor):
         """
         return Cont(lambda c: fn(lambda a: Cont(lambda _: c(a))).run(c))
 
-    def run(self, *args: Any) -> Any:
-        return self._value(*args) if args else self._value
+    def run(self, cont: Callable[[T], TResult]) -> TResult:
+        return self._comp(cont)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self.run(*args, **kwargs)
+    def __or__(self, func):
+        """Use | as operator for bind.
+
+        Provide the | operator instead of the Haskell >>= operator
+        """
+        return self.bind(func)
+
+    def __call__(self, comp: Callable[[T], TResult]) -> TResult:
+        return self.run(comp)
 
     def __eq__(self, other) -> bool:
         return self(identity) == other(identity)
+
+assert isinstance(Cont, Functor)
+assert isinstance(Cont, Monad)

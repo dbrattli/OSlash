@@ -1,15 +1,18 @@
-from abc import ABCMeta, abstractmethod
-from functools import partial
+from abc import abstractmethod
+from functools import reduce, partial
 
-from typing import Callable, Any, Generic, TypeVar
+from typing import Callable, Any, Generic, TypeVar, cast
 
-from .abc import Applicative
-from .abc import Functor
-from .abc import Monoid
-from .abc import Monad
+from .typing import Applicative
+from .typing import Functor
+from .typing import Monoid
+from .typing import Monad
+
+TSource = TypeVar("TSource")
+TResult = TypeVar("TResult")
 
 
-class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
+class Maybe(Generic[TSource]):
     """Encapsulates an optional value.
 
     The Maybe type encapsulates an optional value. A value of type
@@ -19,111 +22,123 @@ class Maybe(Monad, Monoid, Applicative, Functor, metaclass=ABCMeta):
     measures such as error.
     """
 
-    @abstractmethod
-    def bind(self, func: Callable[[Any], 'Maybe']) -> 'Maybe':
-        """Monad bind method."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def map(self, mapper: Callable[[Any], Any]) -> 'Maybe':
-        """Functor map method."""
-        raise NotImplementedError
-
-    @abstractmethod
-    def apply(self, something: 'Maybe') -> 'Maybe':
-        """Applicative apply method."""
-        raise NotImplementedError
-
     @classmethod
-    def empty(cls) -> 'Maybe':
-        """Create empty maybe."""
+    def empty(cls) -> "Maybe[TSource]":
         return Nothing()
 
     @abstractmethod
-    def append(self, other: 'Maybe') -> 'Maybe':
-        """Append maybe to other maybe."""
+    def __add__(self, other: "Maybe[TSource]") -> "Maybe[TSource]":
         raise NotImplementedError
 
     @abstractmethod
-    def from_just(self) -> Any:
+    def map(self, mapper: Callable[[TSource], TResult]) -> "Maybe[TResult]":
         raise NotImplementedError
 
-    @property
-    def is_nothing(self) -> bool:
-        return False
-
-    @property
-    def is_just(self) -> bool:
-        return False
-
-    @abstractmethod
-    def from_maybe(self, default: Any) -> Any:
+    @classmethod
+    def pure(cls, value: Callable[[TSource], TResult]) -> "Maybe[Callable[[TSource], TResult]]":
         raise NotImplementedError
 
     @abstractmethod
-    def __eq__(self, other) -> bool:
+    def apply(self: "Maybe[Callable[[TSource], TResult]]", something: "Maybe[TSource]") -> "Maybe[TResult]":
         raise NotImplementedError
 
-    def __repr__(self) -> str:
-        return self.__str__()
+    @classmethod
+    @abstractmethod
+    def unit(cls, a: TSource) -> "Maybe[TSource]":
+        raise NotImplementedError
 
-    def __bool__(self) -> bool:
-        return False
+    @abstractmethod
+    def bind(self, fn: Callable[[TSource], "Maybe[TResult]"]) -> "Maybe[TResult]":
+        raise NotImplementedError
+
+    @classmethod
+    def concat(cls, xs):
+        """mconcat :: [m] -> m
+
+        Fold a list using the monoid. For most types, the default
+        definition for mconcat will be used, but the function is
+        included in the class definition so that an optimized version
+        can be provided for specific types.
+        """
+
+        def reducer(a, b):
+            return a + b
+
+        return reduce(reducer, xs, cls.empty())
 
 
-class Just(Maybe):
-
+class Just(Maybe[TSource]):
     """A Maybe that contains a value.
 
     Represents a Maybe that contains a value (represented as Just a).
     """
 
-    def __init__(self, value: Any) -> None:
+    def __init__(self, value: TSource) -> None:
         self._value = value
 
-    def map(self, mapper: Callable[[Any], Any]) -> 'Just':
+    # Monoid Section
+    # ==============
+
+    def __add__(self, other: Maybe[TSource]) -> Maybe[TSource]:
+        # m `append` Nothing = m
+        if isinstance(other, Nothing):
+            return self
+
+        # Just m1 `append` Just m2 = Just (m1 `append` m2)
+        return other.map(
+            lambda other_value: cast(Any, self._value) + other_value if hasattr(self._value, "__add__") else Nothing()
+        )
+
+    # Functor Section
+    # ===============
+
+    def map(self, mapper: Callable[[TSource], TResult]) -> Maybe[TResult]:
         # fmap f (Just x) = Just (f x)
 
-        value = self._value
-        try:
-            result = mapper(value)
-        except TypeError:
-            result = partial(mapper, value)
+        result = mapper(self._value)
 
         return Just(result)
 
-    def apply(self, something: Maybe) -> Maybe:
-        return something.map(self._value)
+    # Applicative Section
+    # ===================
 
-    def append(self, other: Maybe) -> Maybe:
-        # m `append` Nothing = m
-        if other.is_nothing:
-            return self
+    @classmethod
+    def pure(cls, value: Callable[[TSource], TResult]) -> "Just[Callable[[TSource], TResult]]":
+        return Just(value)
 
-        other_value = other.from_just()
+    def apply(self: "Just[Callable[[TSource], TResult]]", something: Maybe[TSource]) -> Maybe[TResult]:
+        def mapper(other_value):
+            try:
+                return self._value(other_value)
+            except TypeError:
+                return partial(self._value, other_value)
 
-        # Use + for append if no append
-        value = self._value
-        if not hasattr(other_value, "append"):
-            return Just(value + other_value)
+        return something.map(mapper)
 
-        # Just m1 `append` Just m2 = Just (m1 `append` m2)
-        return Just(value.append(other_value))
+    # Monad Section
+    # =============
 
-    def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
+    @classmethod
+    def unit(cls, value: TSource) -> Maybe[TSource]:
+        return Just(value)
+
+    def bind(self, func: Callable[[TSource], Maybe[TResult]]) -> Maybe[TResult]:
         """Just x >>= f = f x."""
 
         value = self._value
         return func(value)
 
-    def from_just(self) -> Any:
-        return self._value
-
-    def from_maybe(self, default: Any) -> Any:
-        return self._value
+    # Utilities Section
+    # =================
 
     def is_just(self) -> bool:
         return True
+
+    def is_nothing(self) -> bool:
+        return False
+
+    # Operator Overloads Section
+    # ==========================
 
     def __bool__(self) -> bool:
         """Convert Just to bool."""
@@ -131,16 +146,20 @@ class Just(Maybe):
 
     def __eq__(self, other) -> bool:
         """Return self == other."""
-        if other.is_nothing:
+
+        if isinstance(other, Nothing):
             return False
 
-        return self._value == other.from_just()
+        return bool(other.map(lambda other_value: other_value == self._value))
 
     def __str__(self) -> str:
         return "Just %s" % self._value
 
+    def __repr__(self) -> str:
+        return str(self)
 
-class Nothing(Maybe):
+
+class Nothing(Maybe[TSource]):
 
     """Represents an empty Maybe.
 
@@ -148,16 +167,37 @@ class Nothing(Maybe):
     the value of Nothing).
     """
 
-    def map(self, mapper: Callable[[Any], Any]) -> Maybe:
-        return Nothing()
+    # Monoid Section
+    # ==============
 
-    def apply(self, other: Maybe) -> Maybe:
-        return Nothing()
-
-    def append(self, other: Maybe) -> Maybe:
+    def __add__(self, other: Maybe) -> Maybe:
+        # m `append` Nothing = m
         return other
 
-    def bind(self, func: Callable[[Any], Maybe]) -> Maybe:
+    # Functor Section
+    # ===============
+
+    def map(self, mapper: Callable[[TSource], TResult]) -> Maybe[TResult]:
+        return Nothing()
+
+    # Applicative Section
+    # ===================
+
+    @classmethod
+    def pure(cls, value: Callable[[TSource], TResult]) -> Maybe[Callable[[TSource], TResult]]:
+        return Nothing()
+
+    def apply(self: "Nothing[Callable[[TSource], TResult]]", something: Maybe[TSource]) -> Maybe[TResult]:
+        return Nothing()
+
+    # Monad Section
+    # =============
+
+    @classmethod
+    def unit(cls, value: TSource) -> Maybe[TSource]:
+        return cls()
+
+    def bind(self, func: Callable[[TSource], Maybe[TResult]]) -> Maybe[TResult]:
         """Nothing >>= f = Nothing
 
         Nothing in, Nothing out.
@@ -165,17 +205,42 @@ class Nothing(Maybe):
 
         return Nothing()
 
-    def from_just(self) -> Any:
-        raise Exception("Nothing")
+    # Utilities Section
+    # =================
 
-    def from_maybe(self, default: Any) -> Any:
-        return default
+    def is_pure(self) -> bool:
+        return False
 
     def is_nothing(self) -> bool:
         return True
+
+    # Operator Overloads Section
+    # ==========================
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Nothing)
 
     def __str__(self) -> str:
         return "Nothing"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+assert issubclass(Just, Maybe)
+assert issubclass(Nothing, Maybe)
+
+assert isinstance(Maybe, Monoid)
+assert isinstance(Maybe, Functor)
+assert isinstance(Maybe, Applicative)
+assert isinstance(Maybe, Monad)
+
+assert isinstance(Just, Monoid)
+assert isinstance(Just, Functor)
+assert isinstance(Just, Applicative)
+assert isinstance(Just, Monad)
+
+assert isinstance(Nothing, Monoid)
+assert isinstance(Nothing, Functor)
+assert isinstance(Nothing, Applicative)
+assert isinstance(Nothing, Monad)

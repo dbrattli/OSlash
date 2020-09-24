@@ -1,5 +1,6 @@
 import unittest
 
+from typing import Callable
 from oslash import State
 from oslash.util import identity, compose
 
@@ -8,6 +9,7 @@ unit = State.unit
 put = State.put
 get = State.get
 
+state = 42
 
 class TestState(unittest.TestCase):
 
@@ -27,12 +29,12 @@ class TestState(unittest.TestCase):
 class TestStateFunctor(unittest.TestCase):
 
     def test_state_functor_map(self) -> None:
-        x = unit(42)
+        x : State[int, int] = unit(42)
         f = lambda x: x * 10
 
         self.assertEqual(
-            x.map(f),
-            unit(420)
+            x.map(f).run(state),
+            unit(420).run(state)
         )
 
     def test_state_functor_law_1(self) -> None:
@@ -40,8 +42,8 @@ class TestStateFunctor(unittest.TestCase):
         x = unit(42)
 
         self.assertEqual(
-            x.map(identity),
-            x
+            x.map(identity).run(state),
+            x.run(state)
         )
 
     def test_state_functor_law2(self) -> None:
@@ -52,23 +54,23 @@ class TestStateFunctor(unittest.TestCase):
         def g(x):
             return x * 10
 
-        x = unit(42)
+        x : State[int, int] = unit(42)
 
-        self.assertEquals(
-            x.map(compose(f, g)),
-            x.map(g).map(f)
+        self.assertEqual(
+            x.map(compose(f, g)).run(state),
+            x.map(g).map(f).run(state)
         )
 
 
 class TestStateMonad(unittest.TestCase):
 
     def test_state_monad_bind(self) -> None:
-        m = unit(42)
-        f = lambda x: unit(x * 10)
+        m : State[int, int] = unit(42)
+        f : Callable[[int], State[int, int]]= lambda x: unit(x * 10)
 
         self.assertEqual(
-            m.bind(f),
-            unit(420)
+            m.bind(f).run(state),
+            unit(420).run(state)
         )
 
     def test_state_monad_law_left_identity(self) -> None:
@@ -78,8 +80,8 @@ class TestStateMonad(unittest.TestCase):
         x = 3
 
         self.assertEqual(
-            unit(x).bind(f),
-            f(x)
+            unit(x).bind(f).run(state),
+            f(x).run(state)
         )
 
     def test_state_monad_law_right_identity(self) -> None:
@@ -88,8 +90,8 @@ class TestStateMonad(unittest.TestCase):
         m = unit("move on up")
 
         self.assertEqual(
-            m.bind(unit),
-            m
+            m.bind(unit).run(state),
+            m.run(state)
         )
 
     def test_state_monad_law_associativity(self) -> None:
@@ -99,6 +101,6 @@ class TestStateMonad(unittest.TestCase):
         g = lambda y: unit(y * 42)
 
         self.assertEqual(
-            m.bind(f).bind(g),
-            m.bind(lambda x: f(x).bind(g))
+            m.bind(f).bind(g).run(state),
+            m.bind(lambda x: f(x).bind(g)).run(state)
         )

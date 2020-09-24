@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "OSlash"
+version = "0.6.0"
+description = "A functional library for playing with Functors, Applicatives, and Monads in Python"
+authors = ["Dag Brattli <dag@brattli.net>"]
+
+[tool.poetry.dependencies]
+python = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.4"

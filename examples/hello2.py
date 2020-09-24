@@ -6,7 +6,7 @@ main = Put("What is your name?",
              Get(lambda age:
                Put("Hello " + name + "!",
                  Put("You are " + age + " years old",
-                   IO(())
+                   IO()
                  )
                )
              )
