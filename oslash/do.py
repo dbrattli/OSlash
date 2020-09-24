@@ -4,7 +4,7 @@
 
 from collections import namedtuple
 
-from .abc import Monad
+from .typing import Monad
 from .util import Unit
 
 # This would be most natural to implement as a syntactic macro.
@@ -15,6 +15,7 @@ from .util import Unit
 # borrowing Python's for run-of-the-mill names.
 
 __all__ = ["do", "let", "guard"]
+
 
 # TODO: guard belongs where in OSlash?
 def guard(M, test):
@@ -28,8 +29,11 @@ def guard(M, test):
     """
     return M.pure(Unit) if test else M()
 
+
 # The kwargs syntax forces name to be a valid Python identifier.
 MonadicLet = namedtuple("MonadicLet", "name value")
+
+
 def let(**binding):
     """``<-`` for Python.
 
@@ -45,6 +49,7 @@ def let(**binding):
         raise ValueError("Expected exactly one binding, got {:d} with values {}".format(len(binding), binding))
     for k, v in binding.items():
         return MonadicLet(k, v)
+
 
 def do(*lines):
     """Do-notation.
@@ -122,14 +127,16 @@ def do(*lines):
     """
     # The monadic bind and sequence operators, with any relevant whitespace.
     bind = " | "
-    seq  = " >> "
+    seq = " >> "
 
     class env:
         def __init__(self):
             self.names = set()
+
         def assign(self, k, v):
             self.names.add(k)
             setattr(self, k, v)
+
         # simulate lexical closure property for env attrs
         #   - freevars: set of names that "fall in" from a surrounding lexical scope
         def close_over(self, freevars):
@@ -140,6 +147,7 @@ def do(*lines):
 
     # stuff used inside the eval
     e = env()
+
     def begin(*exprs):  # args eagerly evaluated by Python
         # begin(e1, e2, ..., en):
         #   perform side effects e1, e2, ..., e[n-1], return the value of en.
@@ -150,8 +158,8 @@ def do(*lines):
     bodys = []
     begin_is_open = False
     for j, item in enumerate(lines):
-        is_first = (j == 0)
-        is_last  = (j == len(lines) - 1)
+        is_first = j == 0
+        is_last = j == len(lines) - 1
 
         if isinstance(item, MonadicLet):
             name, body = item
@@ -180,9 +188,9 @@ def do(*lines):
         # even though we use an imperative stateful object to implement it)
         if not is_last:
             if name:
-                code += "{bind:s}(lambda {n:s}:\nbegin(e.close_over({fvs}), e.assign('{n:s}', {n:s}), ".format(bind=bind,
-                                                                                                               n=name,
-                                                                                                               fvs=freevars)
+                code += "{bind:s}(lambda {n:s}:\nbegin(e.close_over({fvs}), e.assign('{n:s}', {n:s}), ".format(
+                    bind=bind, n=name, fvs=freevars
+                )
                 begin_is_open = True
             else:
                 if is_first:
