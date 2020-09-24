@@ -14,6 +14,7 @@ from typing_extensions import runtime_checkable
 TSource = TypeVar('TSource')
 TResult = TypeVar('TResult')
 
+
 @runtime_checkable
 class Monad(Protocol[TSource]):
     """Monad protocol"""
@@ -80,22 +81,3 @@ class Monad(Protocol[TSource]):
     #    bound argument into the outer level."""
 
     #    return self.bind(identity)
-
-class MonadEx:
-    def __or__(self, func):
-        """Use | as operator for bind.
-
-        Provide the | operator instead of the Haskell >>= operator
-        """
-        return self.bind(func)
-
-    def __rshift__(self, next):
-        """The "Then" operator.
-
-        Sequentially compose two monadic actions, discarding any value
-        produced by the first, like sequencing operators (such as the
-        semicolon) in imperative languages.
-
-        Haskell: (>>) :: m a -> m b -> m b
-        """
-        return self.bind(lambda _: next)
