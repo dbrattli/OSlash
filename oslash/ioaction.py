@@ -3,7 +3,6 @@
 from abc import abstractmethod
 from typing import Any, Callable, Generic, TypeVar, Tuple
 
-from .typing import Applicative
 from .typing import Functor
 from .typing import Monad
 from .util import indent as ind, Unit
@@ -46,6 +45,15 @@ class IO(Generic[TSource]):
         Provide the | operator instead of the Haskell >>= operator
         """
         return self.bind(func)
+
+    def __rshift__(self, next: 'IO[TResult]') -> 'IO[TResult]':
+        """The "Then" operator.
+        Sequentially compose two monadic actions, discarding any value
+        produced by the first, like sequencing operators (such as the
+        semicolon) in imperative languages.
+        Haskell: (>>) :: m a -> m b -> m b
+        """
+        return self.bind(lambda _: next)
 
     def __call__(self, world: int = 0) -> Any:
         """Run io action."""

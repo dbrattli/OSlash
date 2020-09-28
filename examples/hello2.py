@@ -1,3 +1,4 @@
+"""Hello example as expression tree."""
 from oslash import Put, Get, Return, Unit
 
 main = Put("What is your name?",

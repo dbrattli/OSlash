@@ -1,3 +1,4 @@
+"""Hello example using bind."""
 from oslash import put_line, get_line
 
 main = (
