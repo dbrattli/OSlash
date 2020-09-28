@@ -18,6 +18,7 @@ TResult = TypeVar('TResult')
 
 TCont = Callable[[T], TResult]
 
+
 class Cont(Generic[T, TResult]):
     """The Continuation Monad.
 
@@ -39,7 +40,7 @@ class Cont(Generic[T, TResult]):
 
         Haskell: a -> Cont a
         """
-        fn : Callable[[TCont], TResult] = lambda cont: cont(value)
+        fn: Callable[[TCont], TResult] = lambda cont: cont(value)
         return Cont(fn)
 
     def map(self, fn: Callable[[T], T2]) -> 'Cont[T2, TResult]':
