@@ -1,15 +1,12 @@
-"""Implementation of IO Actions.
+"""Implementation of IO Actions."""
 
-Many thanks to Chris Taylor and his excellent blog post "IO Is Pure",
-http://chris-taylor.github.io/blog/2013/02/09/io-is-not-a-side-effect/
-"""
-
-from typing import Any, Callable, Generic, TypeVar, Tuple, Optional
+from abc import abstractmethod
+from typing import Any, Callable, Generic, TypeVar, Tuple
 
 from .typing import Applicative
 from .typing import Functor
 from .typing import Monad
-from .util import indent as ind
+from .util import indent as ind, Unit
 
 TSource = TypeVar("TSource")
 TResult = TypeVar("TResult")
@@ -24,40 +21,24 @@ class IO(Generic[TSource]):
     happen.
     """
 
-    def __init__(self, value: Optional[TSource] = None) -> None:
-        """Create IO Action."""
-
-        super().__init__()
-        self._value = value
-
     @classmethod
     def unit(cls, value: TSource):
-        return cls(value)
+        return Return(value)
 
-    def bind(self, func: Callable[[Optional[TSource]], "IO[Optional[TResult]]"]) -> "IO[Optional[TResult]]":
+    @abstractmethod
+    def bind(self, func: Callable[[TSource], "IO[TResult]"]) -> "IO[TResult]":
         """IO a -> (a -> IO b) -> IO b."""
 
-        return func(self._value)
+        raise NotImplementedError
 
-    @classmethod
-    def pure(
-        cls, value: Optional[Callable[[Optional[TSource]], Optional[TResult]]]
-    ) -> "IO[Optional[Callable[[Optional[TSource]], Optional[TResult]]]]":
-        return IO(value)
+    @abstractmethod
+    def map(self, func: Callable[[TSource], TResult]) -> "IO[TResult]":
+        raise NotImplementedError
 
-    def apply(
-        self: "IO[Optional[Callable[[Optional[TSource]], Optional[TResult]]]]", something: "IO[Optional[TSource]]"
-    ) -> "IO[Optional[TResult]]":
-        """Apply wrapped function over something."""
-        assert self._value is not None
-        return something.map(self._value)
-
-    def map(self, func: Callable[[Optional[TSource]], Optional[TResult]]) -> "IO[Optional[TResult]]":
-        return IO(func(self._value))
-
-    def run(self, world: int) -> Optional[TSource]:
+    @abstractmethod
+    def run(self, world: int) -> TSource:
         """Run IO action."""
-        return self._value
+        raise NotImplementedError
 
     def __or__(self, func):
         """Use | as operator for bind.
@@ -67,41 +48,63 @@ class IO(Generic[TSource]):
         return self.bind(func)
 
     def __call__(self, world: int = 0) -> Any:
-        """Nothing more to run."""
+        """Run io action."""
         return self.run(world)
 
+    @abstractmethod
     def __str__(self, m: int = 0, n: int = 0) -> str:
-        a = self._value
-        return "%sReturn %s" % (ind(m), [a])
+        raise NotImplementedError
 
     def __repr__(self) -> str:
         return self.__str__()
 
 
-class Put(IO):
+class Return(IO[TSource]):
+    def __init__(self, value: TSource) -> None:
+        """Create IO Action."""
+
+        self._value = value
+
+    def map(self, func: Callable[[TSource], TResult]) -> "IO[TResult]":
+        return Return(func(self._value))
+
+    def bind(self, func: Callable[[TSource], "IO[TResult]"]) -> "IO[TResult]":
+        """IO a -> (a -> IO b) -> IO b."""
+
+        return func(self._value)
+
+    def run(self, world: int) -> TSource:
+        """Run IO action."""
+        return self._value
+
+    def __str__(self, m: int = 0, n: int = 0) -> str:
+        a = self._value
+        return f"{ind(m)}Return {a}"
+
+
+class Put(IO[TSource]):
     """The Put action.
 
     A container holding a string to be printed to stdout, followed by
     another IO Action.
     """
 
-    def __init__(self, text: str, action: IO) -> None:
-        super().__init__((text, action))
+    def __init__(self, text: str, io: IO) -> None:
+        self._value = text, io
 
-    def bind(self, func: Callable[[Optional[TSource]], IO[Optional[TResult]]]) -> "Put":
+    def bind(self, func: Callable[[TSource], IO[TResult]]) -> 'IO[TResult]':
         """IO a -> (a -> IO b) -> IO b"""
 
-        assert self._value is not None
-        text, a = self._value
-        return Put(text, a.bind(func))
+        text, io = self._value
+        return Put(text, io.bind(func))
 
-    def map(self, func: Callable[[Optional[TSource]], Optional[TResult]]) -> "Put":
+    def map(self, func: Callable[[TSource], TResult]) -> "IO[TResult]":
         # Put s (fmap f io)
         assert self._value is not None
         text, action = self._value
         return Put(text, action.map(func))
 
-    def run(self, world: int) -> IO:
+    def run(self, world: int) -> TSource:
         """Run IO action"""
 
         assert self._value is not None
@@ -109,7 +112,7 @@ class Put(IO):
         new_world = pure_print(world, text)
         return action(world=new_world)
 
-    def __call__(self, world: int = 0) -> IO:
+    def __call__(self, world: int = 0) -> TSource:
         return self.run(world)
 
     def __str__(self, m: int = 0, n: int = 0) -> str:
@@ -119,96 +122,91 @@ class Put(IO):
         return '%sPut ("%s",\n%s\n%s)' % (ind(m), s, a, ind(m))
 
 
-class Get(IO):
-    """A container holding a function from string -> IO, which can
+class Get(IO[TSource]):
+    """A container holding a function from string -> IO[TSource], which can
     be applied to whatever string is read from stdin.
     """
 
-    def __init__(self, func: Callable[[str], IO]) -> None:
-        super().__init__(func)
+    def __init__(self, fn: Callable[[str], IO[TSource]]) -> None:
+        self._fn = fn
 
-    def bind(self, func: Callable[[Any], IO]) -> IO:
+    def bind(self, func: Callable[[TSource], IO[TResult]]) -> IO[TResult]:
         """IO a -> (a -> IO b) -> IO b"""
 
-        assert self._value is not None
-        g = self._value
+        g = self._fn
         return Get(lambda text: g(text).bind(func))
 
-    def map(self, func: Callable[[Any], Any]) -> "Get":
+    def map(self, func: Callable[[TSource], TResult]) -> IO[TResult]:
         # Get (\s -> fmap f (g s))
-        assert self._value is not None
-        g = self._value
+        g = self._fn
         return Get(lambda s: g(s).map(func))
 
-    def run(self, world: int) -> IO:
+    def run(self, world: int) -> TSource:
         """Run IO Action"""
 
-        assert self._value is not None
-        func = self._value
+        func = self._fn
         new_world, text = pure_input(world)
         action = func(text)
         return action(world=new_world)
 
-    def __call__(self, world: int = 0) -> IO:
+    def __call__(self, world: int = 0) -> TSource:
         return self.run(world)
 
     def __str__(self, m: int = 0, n: int = 0) -> str:
-        assert self._value is not None
-        g = self._value
+        g = self._fn
         i = "x%s" % n
         a = g(i).__str__(m + 1, n + 1)
         return "%sGet (%s => \n%s\n%s)" % (ind(m), i, a, ind(m))
 
 
-class ReadFile(IO):
-    """A container holding a filename and a function from string -> IO,
+class ReadFile(IO[str]):
+    """A container holding a filename and a function from string -> IO[str],
     which can be applied to whatever string is read from the file.
     """
 
     def __init__(self, filename: str, func: Callable[[str], IO]) -> None:
-        super().__init__((filename, func))
         self.open_func = open
-        self._get_value = lambda: (filename, func)
+        self._value = filename, func
 
     def bind(self, func: Callable[[Any], IO]) -> IO:
         """IO a -> (a -> IO b) -> IO b"""
 
-        filename, g = self._get_value()
+        filename, g = self._value
         return ReadFile(filename, lambda s: g(s).bind(func))
 
     def map(self, func: Callable[[Any], Any]) -> IO:
         # Get (\s -> fmap f (g s))
-        filename, g = self._get_value()
+        filename, g = self._value
         return Get(lambda s: g(s).map(func))
 
-    def run(self, world: int) -> IO:
+    def run(self, world: int) -> str:
         """Run IO Action"""
 
-        filename, func = self._get_value()
+        filename, func = self._value
         f = self.open_func(filename)
         action = func(f.read())
         return action(world=world + 1)
 
-    def __call__(self, world: int = 0) -> IO:
+    def __call__(self, world: int = 0) -> str:
         return self.run(world)
 
     def __str__(self, m: int = 0, n: int = 0) -> str:
-        filename, g = self._get_value()
+        filename, g = self._value
         i = "x%s" % n
         a = g(i).__str__(m + 2, n + 1)
         return '%sReadFile ("%s",%s => \n%s\n%s)' % (ind(m), filename, i, a, ind(m))
 
 
-def get_line() -> IO:
-    return Get(lambda text: IO(text))
+def get_line() -> IO[str]:
+    return Get(Return)
 
 
-def put_line(string: str) -> IO:
-    return Put(string, IO(None))
+def put_line(text: str) -> IO:
+    return Put(text, Return(Unit))
 
 
 def read_file(filename: str) -> IO:
-    return ReadFile(filename, lambda text: IO(text))
+    return ReadFile(filename, Return)
 
 
 def pure_print(world: int, text: str) -> int:
@@ -222,17 +220,13 @@ def pure_input(world: int) -> Tuple[int, str]:
 
 
 assert isinstance(IO, Functor)
-assert isinstance(IO, Applicative)
 assert isinstance(IO, Monad)
 
 assert isinstance(Put, Functor)
-assert isinstance(Put, Applicative)
 assert isinstance(Put, Monad)
 
 assert isinstance(Get, Functor)
-assert isinstance(Get, Applicative)
 assert isinstance(Get, Monad)
 
 assert isinstance(ReadFile, Functor)
-assert isinstance(ReadFile, Applicative)
 assert isinstance(ReadFile, Monad)

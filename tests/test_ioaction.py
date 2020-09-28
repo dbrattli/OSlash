@@ -2,7 +2,8 @@ import unittest
 from typing import Tuple
 
 import oslash.ioaction
-from oslash import Put, IO, put_line, get_line
+from oslash import Put, Return, put_line, get_line
+from oslash.util import Unit
 
 
 class MyMock:
@@ -33,6 +34,6 @@ class TestPut(unittest.TestCase):
 
     def test_put_return(self) -> None:
         pm = MyMock()
-        action = Put("hello, world!", IO())
+        action = Put("hello, world!", Return(Unit))
         action()
         self.assertEqual(pm.value, "hello, world!")

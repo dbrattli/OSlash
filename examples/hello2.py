@@ -1,4 +1,4 @@
-from oslash import Put, Get, IO
+from oslash import Put, Get, Return, Unit
 
 main = Put("What is your name?",
          Get(lambda name:
@@ -6,7 +6,7 @@ main = Put("What is your name?",
              Get(lambda age:
                Put("Hello " + name + "!",
                  Put("You are " + age + " years old",
-                   IO()
+                   Return(Unit)
                  )
                )
              )

@@ -1,6 +1,6 @@
 from functools import partial, reduce
 
-from typing import Generic, Callable, Iterator, TypeVar, Iterable, Sized, Union, Any, cast, Optional
+from typing import Callable, Iterator, TypeVar, Iterable, Sized, Any, cast, Optional
 
 from .typing import Applicative
 from .typing import Functor
@@ -11,13 +11,14 @@ TSource = TypeVar("TSource")
 TResult = TypeVar("TResult")
 TSelector = Callable[[TSource, Optional[Callable]], Any]
 
-class List(Iterable[TSource]):
+
+class List(Iterable[TSource], Sized):
     """The list monad.
 
     Wraps an immutable list built from lambda expressions.
     """
 
-    def __init__(self, lambda_list: Optional[Callable[[TSelector], Any]]=None) -> None:
+    def __init__(self, lambda_list: Optional[Callable[[TSelector], Any]] = None) -> None:
         """Initialize List."""
 
         self._value = lambda_list
