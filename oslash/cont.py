@@ -6,7 +6,7 @@
 
 """
 
-from typing import Any, Callable, Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 
 from .util import identity, compose
@@ -82,6 +82,7 @@ class Cont(Generic[T, TResult]):
 
     def __eq__(self, other) -> bool:
         return self(identity) == other(identity)
+
 
 assert isinstance(Cont, Functor)
 assert isinstance(Cont, Monad)

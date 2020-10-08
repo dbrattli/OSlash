@@ -124,7 +124,6 @@ class Put(IO[TSource]):
         return self.run(world)
 
     def __str__(self, m: int = 0, n: int = 0) -> str:
-        assert self._value is not None
         s, io = self._value
         a = io.__str__(m + 1, n)
         return '%sPut ("%s",\n%s\n%s)' % (ind(m), s, a, ind(m))

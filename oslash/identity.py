@@ -1,4 +1,4 @@
-from functools import partial  # type: ignore
+from functools import partial
 from typing import TypeVar, Generic, Callable
 
 from .typing import Functor, Monad, Applicative

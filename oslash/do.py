@@ -23,11 +23,11 @@ def guard(M, test):
 
     What it does::
 
-        return M.pure(Unit) if test else M()
+        return M.pure(Unit) if test else M.empty()
 
     https://en.wikibooks.org/wiki/Haskell/Alternative_and_MonadPlus#guard
     """
-    return M.pure(Unit) if test else M()
+    return M.pure(Unit) if test else M.empty()
 
 
 # The kwargs syntax forces name to be a valid Python identifier.

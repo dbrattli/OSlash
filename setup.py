@@ -1,20 +1,20 @@
 # coding=utf-8
-try:
-    from setuptools import setup
-except ImportError:
-    from ez_setup import use_setuptools
-
-    use_setuptools()
-    from setuptools import setup
-
+from setuptools import setup
 import versioneer
+
+# read the contents of your README file
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name='OSlash',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="OSlash (Ø) for Python 3.8+",
-    long_description=("A functional library for playing with "
-                      "Functors, Applicatives, and Monads in Python."),
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Dag Brattli',
     author_email='dag@brattli.net',
     license='MIT License',
