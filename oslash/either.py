@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from functools import partial
 
 from typing import Callable, TypeVar, Generic

@@ -5,6 +5,7 @@ import unittest
 from oslash.list import List
 from oslash.do import do, let, guard
 
+
 class TestDo(unittest.TestCase):
     def test_do_list_basic(self):
         l = lambda *items: List.from_iterable(items)
@@ -31,6 +32,7 @@ class TestDo(unittest.TestCase):
         self.assertEqual(out1, out2)
 
     # TODO: add more tests
+
 
 class TestDoErrors(unittest.TestCase):
     def test_do_invalid_input(self):
