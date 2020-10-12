@@ -66,6 +66,19 @@ class Maybe(Generic[TSource]):
 
         return reduce(reducer, xs, cls.empty())
 
+    def __rmod__(self, fn):
+        """Infix version of map.
+
+        Haskell: <$>
+
+        Example:
+        >>> (lambda x: x+2) % Just(40)
+        42
+
+        Returns a new Functor.
+        """
+        return self.map(fn)
+
 
 class Just(Maybe[TSource]):
     """A Maybe that contains a value.
