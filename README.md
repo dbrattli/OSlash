@@ -8,7 +8,7 @@ functional and object oriented paradigms by grouping related functions within cl
 for storing values or mutable data, and data only lives within function closures.
 
 OSlash is intended to be a tutorial. For practical functional programming in Python in production environments you
-should use [FSlash](https://github.com/dbrattli/fslash) instead.
+should use [Expression](https://github.com/dbrattli/Expression) instead.
 
 ## Install
 
