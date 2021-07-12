@@ -100,6 +100,9 @@ class Right(Either[TSource, TError]):
     def __str__(self) -> str:
         return "Right %s" % self._value
 
+    def __repr__(self) -> str:
+        return f"Right({self._value!r})"
+
 
 class Left(Either[TSource, TError]):
 
@@ -130,6 +133,9 @@ class Left(Either[TSource, TError]):
 
     def __str__(self) -> str:
         return "Left: %s" % self._error
+
+    def __repr__(self) -> str:
+        return f"Left({self._error!r})"
 
 
 assert(isinstance(Either, Functor))
