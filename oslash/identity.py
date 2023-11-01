@@ -52,7 +52,7 @@ class Identity(Generic[TSource]):
         return self._value == other()
 
     def __str__(self) -> str:
-        return "Identity(%s)" % self._value
+        return f"Identity({self._value})"
 
     def __repr__(self) -> str:
         return str(self)

@@ -166,7 +166,7 @@ class Just(Maybe[TSource]):
         return bool(other.map(lambda other_value: other_value == self._value))
 
     def __str__(self) -> str:
-        return "Just %s" % self._value
+        return f"Just {self._value}"
 
     def __repr__(self) -> str:
         return str(self)
