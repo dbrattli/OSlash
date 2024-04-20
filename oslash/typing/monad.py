@@ -8,8 +8,7 @@ All instances of the Monad typeclass should obey the three monad laws:
 """
 
 from abc import abstractmethod
-from typing import TypeVar, Protocol, Callable
-from typing_extensions import runtime_checkable
+from typing import TypeVar, Protocol, Callable, runtime_checkable
 
 TSource = TypeVar('TSource')
 TResult = TypeVar('TResult')
