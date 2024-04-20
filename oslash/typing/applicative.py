@@ -1,7 +1,6 @@
 from abc import abstractmethod
 
-from typing import Callable, TypeVar, Protocol
-from typing_extensions import runtime_checkable
+from typing import Callable, TypeVar, Protocol, runtime_checkable
 
 TSource = TypeVar('TSource')
 TResult = TypeVar('TResult')
