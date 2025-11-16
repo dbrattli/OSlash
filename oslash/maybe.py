@@ -1,18 +1,20 @@
+"""Maybe monad implementation.
+
+The Maybe type encapsulates an optional value, providing a type-safe way
+to handle null/None values without exceptions.
+"""
+
+from __future__ import annotations
+
 from abc import abstractmethod
-from functools import reduce, partial
+from collections.abc import Callable
+from functools import partial, reduce
+from typing import Any, Self, cast
 
-from typing import Callable, Any, Generic, TypeVar, cast
-
-from .typing import Applicative
-from .typing import Functor
-from .typing import Monoid
-from .typing import Monad
-
-TSource = TypeVar("TSource")
-TResult = TypeVar("TResult")
+from .typing import Applicative, Functor, Monad, Monoid
 
 
-class Maybe(Generic[TSource]):
+class Maybe[T]:
     """Encapsulates an optional value.
 
     The Maybe type encapsulates an optional value. A value of type
@@ -23,36 +25,44 @@ class Maybe(Generic[TSource]):
     """
 
     @classmethod
-    def empty(cls) -> "Maybe[TSource]":
+    def empty(cls) -> Maybe[T]:
+        """Return the empty Maybe (Nothing)."""
         return Nothing()
 
     @abstractmethod
-    def __add__(self, other: "Maybe[TSource]") -> "Maybe[TSource]":
+    def __add__(self, other: Maybe[T]) -> Maybe[T]:
+        """Monoid append operation."""
         raise NotImplementedError
 
     @abstractmethod
-    def map(self, mapper: Callable[[TSource], TResult]) -> "Maybe[TResult]":
-        raise NotImplementedError
-
-    @classmethod
-    def pure(cls, value: Callable[[TSource], TResult]) -> "Maybe[Callable[[TSource], TResult]]":
-        raise NotImplementedError
-
-    @abstractmethod
-    def apply(self: "Maybe[Callable[[TSource], TResult]]", something: "Maybe[TSource]") -> "Maybe[TResult]":
+    def map[U](self, mapper: Callable[[T], U]) -> Maybe[U]:
+        """Functor map operation."""
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def unit(cls, a: TSource) -> "Maybe[TSource]":
+    def pure(cls, value: T) -> Self:
+        """Applicative pure operation."""
         raise NotImplementedError
 
     @abstractmethod
-    def bind(self, fn: Callable[[TSource], "Maybe[TResult]"]) -> "Maybe[TResult]":
+    def apply[U](self: Maybe[Callable[[T], U]], something: Maybe[T]) -> Maybe[U]:
+        """Applicative apply operation."""
         raise NotImplementedError
 
     @classmethod
-    def concat(cls, xs):
+    @abstractmethod
+    def unit(cls, value: T) -> Self:
+        """Monad unit operation."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def bind[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
+        """Monad bind operation."""
+        raise NotImplementedError
+
+    @classmethod
+    def concat(cls, xs: list[Maybe[T]]) -> Maybe[T]:
         """mconcat :: [m] -> m
 
         Fold a list using the monoid. For most types, the default
@@ -61,70 +71,81 @@ class Maybe(Generic[TSource]):
         can be provided for specific types.
         """
 
-        def reducer(a, b):
+        def reducer(a: Maybe[T], b: Maybe[T]) -> Maybe[T]:
             return a + b
 
         return reduce(reducer, xs, cls.empty())
 
-    def __rmod__(self, fn):
+    def __rmod__[U](self, fn: Callable[[T], U]) -> Maybe[U]:
         """Infix version of map.
 
         Haskell: <$>
 
         Example:
         >>> (lambda x: x+2) % Just(40)
-        42
+        Just 42
 
         Returns a new Functor.
         """
         return self.map(fn)
 
 
-class Just(Maybe[TSource]):
+class Just[T](Maybe[T]):
     """A Maybe that contains a value.
 
     Represents a Maybe that contains a value (represented as Just a).
     """
 
-    def __init__(self, value: TSource) -> None:
+    __match_args__ = ("_value",)
+
+    def __init__(self, value: T) -> None:
         self._value = value
 
     # Monoid Section
     # ==============
 
-    def __add__(self, other: Maybe[TSource]) -> Maybe[TSource]:
-        # m `append` Nothing = m
-        if isinstance(other, Nothing):
-            return self
+    def __add__(self, other: Maybe[T]) -> Maybe[T]:
+        """Monoid append for Just.
 
-        # Just m1 `append` Just m2 = Just (m1 `append` m2)
-        return other.map(
-            lambda other_value: cast(Any, self._value) + other_value if hasattr(self._value, "__add__") else Nothing()
-        )
+        m `append` Nothing = m
+        Just m1 `append` Just m2 = Just (m1 `append` m2)
+        """
+        match other:
+            case Nothing():
+                return self
+            case Just(other_value):
+                # If the wrapped value supports addition, add them
+                if hasattr(self._value, "__add__"):
+                    return Just(self._value + other_value)  # type: ignore
+                return self
+            case _:
+                return self
 
     # Functor Section
     # ===============
 
-    def map(self, mapper: Callable[[TSource], TResult]) -> Maybe[TResult]:
-        # fmap f (Just x) = Just (f x)
-
+    def map[U](self, mapper: Callable[[T], U]) -> Maybe[U]:
+        """fmap f (Just x) = Just (f x)"""
         result = mapper(self._value)
-
         return Just(result)
 
     # Applicative Section
     # ===================
 
     @classmethod
-    def pure(cls, value: Callable[[TSource], TResult]) -> "Just[Callable[[TSource], TResult]]":
-        return Just(value)
+    def pure[U](cls, value: U) -> Just[U]:
+        """Wrap a value in Just."""
+        return Just[U](value)
 
-    def apply(self: "Just[Callable[[TSource], TResult]]", something: Maybe[TSource]) -> Maybe[TResult]:
-        def mapper(other_value):
+    def apply[U](self: Just[Callable[[T], U]], something: Maybe[T]) -> Maybe[U]:
+        """Apply a wrapped function to a wrapped value."""
+
+        def mapper(other_value: T) -> U:
             try:
                 return self._value(other_value)
             except TypeError:
-                return partial(self._value, other_value)
+                # Partial application for curried functions
+                return partial(self._value, other_value)  # type: ignore
 
         return something.map(mapper)
 
@@ -132,22 +153,53 @@ class Just(Maybe[TSource]):
     # =============
 
     @classmethod
-    def unit(cls, value: TSource) -> Maybe[TSource]:
-        return Just(value)
+    def unit(cls, value: T) -> Just[T]:
+        """Wrap a value in Just."""
+        return cls(value)
 
-    def bind(self, func: Callable[[TSource], Maybe[TResult]]) -> Maybe[TResult]:
+    def bind[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
         """Just x >>= f = f x."""
+        return fn(self._value)
 
-        value = self._value
-        return func(value)
+    def __or__[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
+        """Use | as operator for bind.
+
+        Provide the | operator for monadic bind, allowing for more readable
+        chaining of operations.
+
+        Example:
+            >>> Just(5) | (lambda x: Just(x + 1))
+            Just 6
+
+        Returns a new Maybe.
+        """
+        return self.bind(fn)
+
+    def __rshift__[U](self, next: Maybe[U]) -> Maybe[U]:
+        """The Then operator >>.
+
+        Sequentially compose two monadic actions, discarding any value
+        produced by the first.
+
+        Haskell: (>>) :: m a -> m b -> m b
+
+        Example:
+            >>> Just(5) >> Just(10)
+            Just 10
+
+        Returns the second Maybe.
+        """
+        return self.bind(lambda _: next)
 
     # Utilities Section
     # =================
 
     def is_just(self) -> bool:
+        """Check if this is a Just value."""
         return True
 
     def is_nothing(self) -> bool:
+        """Check if this is Nothing."""
         return False
 
     # Operator Overloads Section
@@ -157,13 +209,17 @@ class Just(Maybe[TSource]):
         """Convert Just to bool."""
         return bool(self._value)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return self == other."""
-
-        if isinstance(other, Nothing):
-            return False
-
-        return bool(other.map(lambda other_value: other_value == self._value))
+        match other:
+            case Nothing():
+                return False
+            case Just():
+                # Cast: Pattern matching narrows other to Just[T]
+                other_just: Just[Any] = cast(Just[Any], other)
+                return self._value == other_just._value
+            case _:
+                return NotImplemented
 
     def __str__(self) -> str:
         return f"Just {self._value}"
@@ -172,66 +228,104 @@ class Just(Maybe[TSource]):
         return str(self)
 
 
-class Nothing(Maybe[TSource]):
-
+class Nothing[T](Maybe[T]):
     """Represents an empty Maybe.
 
     Represents an empty Maybe that holds nothing (in which case it has
     the value of Nothing).
     """
 
+    __match_args__ = ()
+
     # Monoid Section
     # ==============
 
-    def __add__(self, other: Maybe) -> Maybe:
-        # m `append` Nothing = m
+    def __add__(self, other: Maybe[T]) -> Maybe[T]:
+        """Nothing `append` m = m"""
         return other
 
     # Functor Section
     # ===============
 
-    def map(self, mapper: Callable[[TSource], TResult]) -> Maybe[TResult]:
+    def map[U](self, mapper: Callable[[T], U]) -> Maybe[U]:
+        """fmap f Nothing = Nothing"""
         return Nothing()
 
     # Applicative Section
     # ===================
 
     @classmethod
-    def pure(cls, value: Callable[[TSource], TResult]) -> Maybe[Callable[[TSource], TResult]]:
-        return Nothing()
+    def pure(cls, value: T) -> Nothing[T]:
+        """Nothing cannot be pure, returns Nothing."""
+        return cls()
 
-    def apply(self: "Nothing[Callable[[TSource], TResult]]", something: Maybe[TSource]) -> Maybe[TResult]:
+    def apply[U](self: Nothing[Callable[[T], U]], something: Maybe[T]) -> Maybe[U]:
+        """Nothing <*> _ = Nothing"""
         return Nothing()
 
     # Monad Section
     # =============
 
     @classmethod
-    def unit(cls, value: TSource) -> Maybe[TSource]:
+    def unit(cls, value: T) -> Nothing[T]:
+        """Nothing unit returns Nothing."""
         return cls()
 
-    def bind(self, func: Callable[[TSource], Maybe[TResult]]) -> Maybe[TResult]:
+    def bind[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
         """Nothing >>= f = Nothing
 
         Nothing in, Nothing out.
         """
-
         return Nothing()
+
+    def __or__[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
+        """Use | as operator for bind on Nothing.
+
+        Since Nothing represents no value, the bind operation always
+        returns Nothing regardless of the function.
+
+        Example:
+            >>> Nothing() | (lambda x: Just(x + 1))
+            Nothing
+
+        Returns Nothing.
+        """
+        return self.bind(fn)
+
+    def __rshift__[U](self, next: Maybe[U]) -> Maybe[U]:
+        """The Then operator >> for Nothing.
+
+        Since Nothing represents no value, sequencing always returns Nothing.
+
+        Example:
+            >>> Nothing() >> Just(10)
+            Nothing
+
+        Returns Nothing.
+        """
+        return self.bind(lambda _: next)
 
     # Utilities Section
     # =================
 
-    def is_pure(self) -> bool:
+    def is_just(self) -> bool:
+        """Check if this is a Just value."""
         return False
 
     def is_nothing(self) -> bool:
+        """Check if this is Nothing."""
         return True
 
     # Operator Overloads Section
     # ==========================
 
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Nothing)
+    def __eq__(self, other: object) -> bool:
+        """Nothing equals Nothing."""
+        match other:
+            case Nothing():
+                return True
+            case _:
+                return False
 
     def __str__(self) -> str:
         return "Nothing"
@@ -240,6 +334,7 @@ class Nothing(Maybe[TSource]):
         return str(self)
 
 
+# Type assertions for runtime checking
 assert issubclass(Just, Maybe)
 assert issubclass(Nothing, Maybe)
 

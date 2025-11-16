@@ -1,19 +1,16 @@
 import unittest
 
-from oslash import StringWriter, MonadWriter
+from oslash import MonadWriter, StringWriter
 from oslash.monadic import compose
 
 
 class TestMonadMonadic(unittest.TestCase):
-
-    def test_monad_monadic_compose(self):
-        unit, tell = StringWriter.unit, MonadWriter.tell
-
-        def half(x):
-            return tell("I just halved %s!" % x).bind(lambda _: unit(x//2))
+    def test_monad_monadic_compose(self) -> None:
+        def half(x: int) -> StringWriter:
+            return MonadWriter.tell(f"I just halved {x}!").bind(lambda _: StringWriter.unit(x // 2))
 
         quarter = compose(half, half)
         value, log = quarter(8).run()
 
-        self.assertEqual(2, value)
-        self.assertEqual("I just halved 8!I just halved 4!", log)
+        assert value == 2
+        assert log == "I just halved 8!I just halved 4!"

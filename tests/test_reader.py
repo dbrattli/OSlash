@@ -1,158 +1,115 @@
 import unittest
+from collections.abc import Callable
 
 from oslash import Reader
 from oslash.reader import MonadReader
-from oslash.util import identity, compose, fmap
-
-pure = Reader.pure
-unit = Reader.unit
-asks = MonadReader.asks
-
+from oslash.util import compose, fmap, identity
 
 env = 42
 
-class TestReader(unittest.TestCase):
 
+class TestReader(unittest.TestCase):
     def test_reader_run(self) -> None:
-        r = Reader(lambda name: "Hello, %s!" % name)
-        greeting = r.run("adit")
-        self.assertEqual(greeting, "Hello, adit!")
+        r: Reader[str, str] = Reader(lambda name: f"Hello, {name}!")
+        greeting: str = r.run("adit")
+        assert greeting == "Hello, adit!"
 
     def test_reader_asks(self) -> None:
-        a = asks(len).run("Banana")
-        self.assertEqual(6, a)
+        a: int = MonadReader.asks(len).run("Banana")
+        assert a == 6
 
 
 class TestReaderFunctor(unittest.TestCase):
-
     def test_reader_functor_map(self) -> None:
-        x = unit(42)
-        f = lambda x: x * 10
+        x: Reader[int, int] = Reader.unit(42)
+        f: Callable[[int], int] = lambda x: x * 10
 
-        self.assertEqual(
-            x.map(f).run(env),
-            unit(420).run(env)
-        )
+        assert x.map(f).run(env) == Reader.unit(420).run(env)
 
     def test_reader_functor_law_1(self) -> None:
         # fmap id = id
-        x = unit(42)
+        x: Reader[int, int] = Reader.unit(42)
 
-        self.assertEqual(
-            x.map(identity).run(env),
-            x.run(env)
-        )
+        assert x.map(identity).run(env) == x.run(env)
 
     def test_reader_functor_law2(self) -> None:
         # fmap (f . g) x = fmap f (fmap g x)
-        def f(x):
-            return x+10
+        f: Callable[[int], int] = lambda x: x + 10
+        g: Callable[[int], int] = lambda x: x * 10
 
-        def g(x):
-            return x*10
+        x: Reader[int, int] = Reader.unit(42)
 
-        x = unit(42)
-
-        self.assertEqual(
-            x.map(compose(f, g)).run(env),
-            x.map(g).map(f).run(env)
-        )
+        assert x.map(compose(f, g)).run(env) == x.map(g).map(f).run(env)
 
 
 class TestReaderApplicative(unittest.TestCase):
-
     def test_reader_applicative_law_functor(self) -> None:
         # pure f <*> x = fmap f x
-        x = unit(42)
-        f = lambda e: e * 42
+        x: Reader[int, int] = Reader.unit(42)
+        f: Callable[[int], int] = lambda e: e * 42
 
-        self.assertEqual(
-            pure(f).apply(x).run(env),
-            x.map(f).run(env)
-        )
+        assert Reader.pure(f).apply(x).run(env) == x.map(f).run(env)
 
     def test_reader_applicative_law_identity(self) -> None:
         # pure id <*> v = v
-        v = unit(42)
+        v: Reader[int, int] = Reader.unit(42)
 
-        self.assertEqual(
-            pure(identity).apply(v).run(env),
-            v.run(env)
-        )
+        assert Reader.pure(identity).apply(v).run(env) == v.run(env)
 
     def test_reader_applicative_law_composition(self) -> None:
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
-        w = unit(42)
-        u = pure(lambda x: x * 42)
-        v = pure(lambda x: x + 42)
+        w: Reader[int, int] = Reader.unit(42)
+        mul_42: Callable[[int], int] = lambda x: x * 42
+        add_42: Callable[[int], int] = lambda x: x + 42
+        u: Reader[int, Callable[[int], int]] = Reader.pure(mul_42)
+        v: Reader[int, Callable[[int], int]] = Reader.pure(add_42)
 
-        self.assertEqual(
-            pure(fmap).apply(u).apply(v).apply(w).run(env),
-            u.apply(v.apply(w)).run(env)
-        )
+        assert Reader.pure(fmap).apply(u).apply(v).apply(w).run(env) == u.apply(v.apply(w)).run(env)
 
     def test_reader_applicative_law_homomorphism(self) -> None:
         # pure f <*> pure x = pure (f x)
-        x = 42
-        f = lambda x: x * 42
+        x: int = 42
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(
-            pure(f).apply(unit(x)).run(env),
-            unit(f(x)).run(env)
-        )
+        assert Reader.pure(f).apply(Reader.unit(x)).run(env) == Reader.unit(f(x)).run(env)
 
     def test_reader_applicative_law_interchange(self) -> None:
         # u <*> pure y = pure ($ y) <*> u
 
-        y = 43
-        u = pure(lambda x: x*42)
+        y: int = 43
+        mul_42: Callable[[int], int] = lambda x: x * 42
+        u: Reader[int, Callable[[int], int]] = Reader.pure(mul_42)
 
-        self.assertEqual(
-            u.apply(unit(y)).run(env),
-            pure(lambda f: f(y)).apply(u).run(env)
-        )
+        assert u.apply(Reader.unit(y)).run(env) == Reader.pure(lambda f: f(y)).apply(u).run(env)
 
 
 class TestReaderMonad(unittest.TestCase):
-
     def test_reader_monad_bind(self) -> None:
-        m = unit(42)
-        f = lambda x: unit(x*10)
+        m: Reader[int, int] = Reader.unit(42)
+        f: Callable[[int], Reader[int, int]] = lambda x: Reader.unit(x * 10)
 
-        self.assertEqual(
-            m.bind(f).run(env),
-            unit(420).run(env)
-        )
+        assert m.bind(f).run(env) == Reader.unit(420).run(env)
 
     def test_reader_monad_law_left_identity(self) -> None:
         # return x >>= f is the same thing as f x
 
-        f = lambda x: unit(x+100000)
-        x = 3
+        f: Callable[[int], Reader[int, int]] = lambda x: Reader.unit(x + 100000)
+        x: int = 3
 
-        self.assertEqual(
-            unit(x).bind(f).run(env),
-            f(x).run(env)
-        )
+        assert Reader.unit(x).bind(f).run(env) == f(x).run(env)
 
     def test_reader_monad_law_right_identity(self) -> None:
         # m >>= return is no different than just m.
 
-        m = unit("move on up")
+        m: Reader[int, str] = Reader.unit("move on up")
 
-        self.assertEqual(
-            m.bind(unit).run(env),
-            m.run(env)
-        )
+        assert m.bind(Reader.unit).run(env) == m.run(env)
 
     def test_reader_monad_law_associativity(self) -> None:
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        m = unit(42)
-        f = lambda x: unit(x+1000)
-        g = lambda y: unit(y*42)
+        m: Reader[int, int] = Reader.unit(42)
+        f: Callable[[int], Reader[int, int]] = lambda x: Reader.unit(x + 1000)
+        g: Callable[[int], Reader[int, int]] = lambda y: Reader.unit(y * 42)
 
-        self.assertEqual(
-            m.bind(f).bind(g).run(env),
-            m.bind(lambda x: f(x).bind(g)).run(env)
-        )
+        assert m.bind(f).bind(g).run(env) == m.bind(lambda x: f(x).bind(g)).run(env)

@@ -1,72 +1,53 @@
+"""Function composition utilities."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
 from functools import reduce
-
-from typing import Tuple, Callable, Any, TypeVar, overload  # noqa
-
-A = TypeVar("A")
-B = TypeVar("B")
-C = TypeVar("C")
-D = TypeVar("D")
-E = TypeVar("E")
-F = TypeVar("F")
-G = TypeVar("G")
+from typing import Any, overload
 
 
 @overload
-def compose() -> Callable[[A], A]:  # pylint: disable=function-redefined
-    ...  # pylint: disable=pointless-statement
+def compose[A]() -> Callable[[A], A]: ...
 
 
 @overload
-def compose(op1: Callable[[A], B]) -> Callable[[A], B]:  # pylint: disable=function-redefined
-    ...  # pylint: disable=pointless-statement
+def compose[A, B](op1: Callable[[A], B], /) -> Callable[[A], B]: ...
 
 
 @overload
-def compose(op2: Callable[[B], C], op1: Callable[[A], B]) -> Callable[[A], C]:  # pylint: disable=function-redefined
-    ...  # pylint: disable=pointless-statement
+def compose[A, B, C](op2: Callable[[B], C], op1: Callable[[A], B], /) -> Callable[[A], C]: ...
 
 
 @overload
-def compose(
-    op3: Callable[[C], D], op2: Callable[[B], C], op1: Callable[[A], B]  # pylint: disable=function-redefined
-) -> Callable[[A], D]:
-    ...  # pylint: disable=pointless-statement
+def compose[A, B, C, D](op3: Callable[[C], D], op2: Callable[[B], C], op1: Callable[[A], B], /) -> Callable[[A], D]: ...
 
 
 @overload
-def compose(
-    op4: Callable[[D], E],  # pylint: disable=function-redefined
-    op3: Callable[[C], D],
-    op2: Callable[[B], C],
-    op1: Callable[[A], B],
-) -> Callable[[A], E]:
-    ...  # pylint: disable=pointless-statement
+def compose[A, B, C, D, E](
+    op4: Callable[[D], E], op3: Callable[[C], D], op2: Callable[[B], C], op1: Callable[[A], B], /
+) -> Callable[[A], E]: ...
 
 
 @overload
-def compose(
-    op5: Callable[[E], F],  # pylint: disable=function-redefined
-    op4: Callable[[D], E],
-    op3: Callable[[C], D],
-    op2: Callable[[B], C],
-    op1: Callable[[A], B],
-) -> Callable[[A], F]:
-    ...  # pylint: disable=pointless-statement
+def compose[A, B, C, D, E, F](
+    op5: Callable[[E], F], op4: Callable[[D], E], op3: Callable[[C], D], op2: Callable[[B], C], op1: Callable[[A], B], /
+) -> Callable[[A], F]: ...
 
 
 @overload
-def compose(
-    op1: Callable[[A], B],  # pylint: disable=function-redefined,too-many-arguments
-    op2: Callable[[B], C],
-    op3: Callable[[C], D],
-    op4: Callable[[D], E],
-    op5: Callable[[E], F],
+def compose[A, B, C, D, E, F, G](
     op6: Callable[[F], G],
-) -> Callable[[A], G]:
-    ...  # pylint: disable=pointless-statement
+    op5: Callable[[E], F],
+    op4: Callable[[D], E],
+    op3: Callable[[C], D],
+    op2: Callable[[B], C],
+    op1: Callable[[A], B],
+    /,
+) -> Callable[[A], G]: ...
 
 
-def compose(*funcs: Callable) -> Callable:  # type: ignore
+def compose[T](*funcs: Callable[[Any], Any]) -> Callable[[Any], Any]:
     """Compose multiple functions right to left.
 
     Composes zero or more functions into a functional composition. The
@@ -82,12 +63,19 @@ def compose(*funcs: Callable) -> Callable:  # type: ignore
     Returns the composed function.
     """
 
-    def _compose(source: Any) -> Any:
-        return reduce(lambda acc, f: f(acc), funcs[::-1], source)
+    def _compose(source: T) -> T:
+        return reduce(lambda acc, f: f(acc), funcs[::-1], source)  # type: ignore
 
     return _compose
 
 
-fmap = lambda f, g: compose(f, g)  # To force partial application
+# Force partial application for fmap
+def fmap[A, B, C](f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
+    """Map a function over a function (function composition)."""
+    return compose(f, g)
 
-identity = compose()  # type: Callable
+
+# Identity function
+def identity[T](x: T) -> T:
+    """Return the argument unchanged."""
+    return x
