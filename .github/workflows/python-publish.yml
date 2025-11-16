@@ -9,7 +9,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  # id-token: write  # Uncomment when PyPI trusted publishing is configured
 
 jobs:
   deploy:
@@ -31,3 +31,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
