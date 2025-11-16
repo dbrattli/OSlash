@@ -7,7 +7,7 @@ name = "oslash"
 version = "1.0.0"
 description = "Functional library for Functors, Applicatives, and Monads in Python 3.12+"
 readme = "README.md"
-license = { text = "MIT License" }
+license = { file = "LICENSE" }
 authors = [
     { name = "Dag Brattli", email = "dag@brattli.net" }
 ]
@@ -45,6 +45,15 @@ dev = [
 
 [tool.hatchling.build.targets.wheel]
 packages = ["oslash"]
+
+[tool.hatchling.build.targets.sdist]
+include = [
+    "/oslash",
+    "/tests",
+    "/LICENSE",
+    "/README.md",
+    "/pyproject.toml",
+]
 
 [tool.ruff]
 line-length = 120
