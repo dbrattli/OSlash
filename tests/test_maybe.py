@@ -230,3 +230,93 @@ class TestMaybeMonad(unittest.TestCase):
 
     def test_combine_just_or_nothing_rule2(self) -> None:
         assert (Just(0) or Nothing()) == Nothing()
+
+
+class TestMaybeOperators(unittest.TestCase):
+    """Tests for Maybe pipe and sequencing operators (issue #32)."""
+
+    def test_just_pipe_operator_simple(self) -> None:
+        # Test | operator with simple function
+        result = Just(5) | (lambda x: Just(x + 1))
+        assert result == Just(6)
+
+    def test_just_pipe_operator_chain(self) -> None:
+        # Test chaining multiple | operations
+        result = Just(5) | (lambda x: Just(x + 1)) | (lambda x: Just(x * 2))
+        assert result == Just(12)
+
+    def test_just_pipe_operator_nested(self) -> None:
+        # Test nested | operations (issue #32 example)
+        result = Just(5) | (lambda x: Just(x + 1) | (lambda y: Just(y * 2)))
+        assert result == Just(12)
+
+    def test_just_pipe_operator_full_example(self) -> None:
+        # Test full example from issue #32
+        result = Just(5) | (lambda x: Just(x + 1) | (lambda x: Just(x * 2) | (lambda x: Just(x - 4))))
+        assert result == Just(8)
+
+    def test_just_pipe_operator_equivalence_to_bind(self) -> None:
+        # Test that | is equivalent to bind
+        f = lambda x: Just(x * 2)
+        pipe_result = Just(5) | f
+        bind_result = Just(5).bind(f)
+        assert pipe_result == bind_result
+
+    def test_just_pipe_operator_with_nothing_result(self) -> None:
+        # Test | operator that returns Nothing
+        result = Just(5) | (lambda x: Nothing())
+        assert result == Nothing()
+
+    def test_nothing_pipe_operator(self) -> None:
+        # Test | operator on Nothing
+        result = Nothing() | (lambda x: Just(x + 1))
+        assert result == Nothing()
+
+    def test_nothing_pipe_operator_chain(self) -> None:
+        # Test chaining | operations on Nothing
+        result = Nothing() | (lambda x: Just(x + 1)) | (lambda x: Just(x * 2))
+        assert result == Nothing()
+
+    def test_just_rshift_operator_simple(self) -> None:
+        # Test >> operator with Just
+        result = Just(5) >> Just(10)
+        assert result == Just(10)
+
+    def test_just_rshift_operator_chain(self) -> None:
+        # Test chaining >> operations
+        result = Just(5) >> Just(10) >> Just(15)
+        assert result == Just(15)
+
+    def test_just_rshift_operator_discards_first(self) -> None:
+        # Test that >> discards the first value
+        result = Just(999) >> Just(42)
+        assert result == Just(42)
+
+    def test_just_rshift_operator_with_nothing(self) -> None:
+        # Test >> operator with Nothing as second argument
+        result = Just(5) >> Nothing()
+        assert result == Nothing()
+
+    def test_nothing_rshift_operator(self) -> None:
+        # Test >> operator on Nothing
+        result = Nothing() >> Just(10)
+        assert result == Nothing()
+
+    def test_nothing_rshift_operator_chain(self) -> None:
+        # Test chaining >> operations on Nothing
+        result = Nothing() >> Just(10) >> Just(20)
+        assert result == Nothing()
+
+    def test_pipe_and_rshift_combination(self) -> None:
+        # Test combining | and >> operators (need parentheses for precedence)
+        result = (Just(5) | (lambda x: Just(x + 1))) >> Just(100)
+        assert result == Just(100)
+
+    def test_complex_operator_chain(self) -> None:
+        # Test complex combination of operators (need parentheses for precedence)
+        result = (
+            (Just(1) | (lambda x: Just(x + 1)))  # Just(2)
+            >> Just(5)  # Just(5)
+            | (lambda x: Just(x * 2))  # Just(10)
+        )
+        assert result == Just(10)

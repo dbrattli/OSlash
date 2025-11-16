@@ -161,6 +161,36 @@ class Just[T](Maybe[T]):
         """Just x >>= f = f x."""
         return fn(self._value)
 
+    def __or__[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
+        """Use | as operator for bind.
+
+        Provide the | operator for monadic bind, allowing for more readable
+        chaining of operations.
+
+        Example:
+            >>> Just(5) | (lambda x: Just(x + 1))
+            Just 6
+
+        Returns a new Maybe.
+        """
+        return self.bind(fn)
+
+    def __rshift__[U](self, next: Maybe[U]) -> Maybe[U]:
+        """The Then operator >>.
+
+        Sequentially compose two monadic actions, discarding any value
+        produced by the first.
+
+        Haskell: (>>) :: m a -> m b -> m b
+
+        Example:
+            >>> Just(5) >> Just(10)
+            Just 10
+
+        Returns the second Maybe.
+        """
+        return self.bind(lambda _: next)
+
     # Utilities Section
     # =================
 
@@ -247,6 +277,33 @@ class Nothing[T](Maybe[T]):
         Nothing in, Nothing out.
         """
         return Nothing()
+
+    def __or__[U](self, fn: Callable[[T], Maybe[U]]) -> Maybe[U]:
+        """Use | as operator for bind on Nothing.
+
+        Since Nothing represents no value, the bind operation always
+        returns Nothing regardless of the function.
+
+        Example:
+            >>> Nothing() | (lambda x: Just(x + 1))
+            Nothing
+
+        Returns Nothing.
+        """
+        return self.bind(fn)
+
+    def __rshift__[U](self, next: Maybe[U]) -> Maybe[U]:
+        """The Then operator >> for Nothing.
+
+        Since Nothing represents no value, sequencing always returns Nothing.
+
+        Example:
+            >>> Nothing() >> Just(10)
+            Nothing
+
+        Returns Nothing.
+        """
+        return self.bind(lambda _: next)
 
     # Utilities Section
     # =================
