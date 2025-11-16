@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "oslash"
-version = "0.6.0"
+version = "1.0.0"
 description = "Functional library for Functors, Applicatives, and Monads in Python 3.12+"
 readme = "README.md"
 license = { text = "MIT License" }
@@ -15,7 +15,7 @@ maintainers = [
     { name = "Dag Brattli", email = "dag@brattli.net" }
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Other Environment",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
