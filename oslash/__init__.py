@@ -26,7 +26,7 @@ from .util import Unit, compose, fmap, identity, indent
 from .writer import MonadWriter, StringWriter, Writer
 
 # Version will be managed by release-please
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 __all__ = [
     "IO",
