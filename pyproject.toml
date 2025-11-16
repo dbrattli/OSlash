@@ -1,11 +1,139 @@
-[tool.poetry]
-name = "OSlash"
-version = "0.6.0"
-description = "A functional library for playing with Functors, Applicatives, and Monads in Python"
-authors = ["Dag Brattli <dag@brattli.net>"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.dependencies]
-python = "*"
+[project]
+name = "oslash"
+version = "1.0.0"
+description = "Functional library for Functors, Applicatives, and Monads in Python 3.12+"
+readme = "README.md"
+license = { text = "MIT License" }
+authors = [
+    { name = "Dag Brattli", email = "dag@brattli.net" }
+]
+maintainers = [
+    { name = "Dag Brattli", email = "dag@brattli.net" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+requires-python = ">=3.12"
+dependencies = []
 
-[tool.poetry.dev-dependencies]
-pytest = "^3.4"
+[project.urls]
+Homepage = "https://github.com/dbrattli/oslash"
+Repository = "https://github.com/dbrattli/oslash"
+"Bug Tracker" = "https://github.com/dbrattli/oslash/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.14.5",
+    "pyright>=1.1.407",
+    "pre-commit>=3.0",
+]
+
+[tool.hatchling.build.targets.wheel]
+packages = ["oslash"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "F",     # Pyflakes
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "YTT",   # flake8-2020
+    "ASYNC", # flake8-async
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "C4",    # flake8-comprehensions
+    "T10",   # flake8-debugger
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "PIE",   # flake8-pie
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SIM",   # flake8-simplify
+    "PTH",   # flake8-use-pathlib
+    "PL",    # Pylint
+    "RUF",   # Ruff-specific rules
+]
+ignore = [
+    "E731",    # Do not assign a lambda expression, use a def
+    "PT009",   # Use a regular assert instead of unittest-style assertions
+    "PLR2004", # Magic value used in comparison (OK in tests)
+    "PLW1641", # Object does not implement __hash__ method (intentional for monads)
+    "A002",    # Argument shadowing builtin (next parameter in monad operators)
+    "SIM108",  # Use ternary operator (less readable for complex conditions)
+    "E741",    # Ambiguous variable name (l is common in FP for list constructors)
+    "B904",    # raise from in except clause (test code simplification)
+    "N806",    # Variable naming in tests (dynamically created types)
+    "PLC3002", # Lambda called directly (intentional in test comparisons)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+pythonVersion = "3.12"
+pythonPlatform = "All"
+typeCheckingMode = "strict"
+reportUnknownMemberType = "error"
+reportUnknownArgumentType = "error"
+reportUnknownVariableType = "error"
+reportMissingTypeStubs = "warning"
+reportPrivateUsage = "warning"
+reportConstantRedefinition = "error"
+reportIncompatibleMethodOverride = "error"
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+include = ["oslash"]
+exclude = ["**/__pycache__", "**/.venv", "**/node_modules"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=oslash",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
+
+[tool.coverage.run]
+source = ["oslash"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]

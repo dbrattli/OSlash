@@ -1,142 +1,127 @@
 import unittest
+from collections.abc import Callable
 
 from oslash.observable import Observable
-from oslash.util import identity, compose
-
-# pure = Cont.pure
-unit = Observable.unit
-just = Observable.just
-call_cc = Observable.call_cc
+from oslash.util import compose, identity
 
 
 class TestObservable(unittest.TestCase):
-    def test_observable_just(self):
+    def test_observable_just(self) -> None:
         stream = Observable.just(42)
 
-        def on_next(x):
-            return "OnNext(%s)" % x
+        result: list[str] = []
 
-        self.assertEqual("OnNext(42)", stream.subscribe(on_next))
+        def on_next(x: int) -> None:
+            result.append(f"OnNext({x})")
 
-    def test_observable_just_map(self):
-        stream = Observable.just(42).map(lambda x: x*10)
-
-        def on_next(x):
-            return "OnNext(%s)" % x
-
-        self.assertEqual("OnNext(420)", stream.subscribe(on_next))
-
-    def test_observable_just_flatmap(self):
-        stream = Observable.just(42).flat_map(lambda x: just(x*10))
-
-        def on_next(x):
-            return "OnNext(%s)" % x
-
-        self.assertEqual("OnNext(420)", stream.subscribe(on_next))
-
-    def test_observable_filter(self):
-        stream = Observable.just(42).filter(lambda x: x < 100)
-        xs = []
-
-        def on_next(x):
-            xs.append("OnNext(%s)" % x)
         stream.subscribe(on_next)
-        self.assertEqual(["OnNext(42)"], xs)
+        assert result == ["OnNext(42)"]
 
-    def test_cont_call_cc(self):
-        f = lambda x: just(x*3)
-        g = lambda x: just(x-2)
+    def test_observable_just_map(self) -> None:
+        mapper: Callable[[int], int] = lambda x: x * 10
+        stream = Observable.just(42).map(mapper)
 
-        def h(x, on_next):
+        result: list[str] = []
+
+        def on_next(x: int) -> None:
+            result.append(f"OnNext({x})")
+
+        stream.subscribe(on_next)
+        assert result == ["OnNext(420)"]
+
+    def test_observable_just_flatmap(self) -> None:
+        flat_mapper: Callable[[int], Observable[int]] = lambda x: Observable.just(x * 10)
+        stream = Observable.just(42).flat_map(flat_mapper)
+
+        result: list[str] = []
+
+        def on_next(x: int) -> None:
+            result.append(f"OnNext({x})")
+
+        stream.subscribe(on_next)
+        assert result == ["OnNext(420)"]
+
+    def test_observable_filter(self) -> None:
+        predicate: Callable[[int], bool] = lambda x: x < 100
+        stream = Observable.just(42).filter(predicate)
+        xs: list[str] = []
+
+        def on_next(x: int) -> None:
+            xs.append(f"OnNext({x})")
+
+        stream.subscribe(on_next)
+        assert xs == ["OnNext(42)"]
+
+    def test_cont_call_cc(self) -> None:
+        f: Callable[[int], Observable[int]] = lambda x: Observable.just(x * 3)
+        g: Callable[[int], Observable[int]] = lambda x: Observable.just(x - 2)
+
+        def h(x: int, on_next: Callable[[int], Observable[int]]) -> Observable[int]:
             return f(x) if x == 5 else on_next(-1)
 
-        stream = just(5) | (
-            lambda x: call_cc(lambda on_next: h(x, on_next))) | (
-                lambda y: g(y))
+        stream = Observable.just(5) | (lambda x: Observable.call_cc(lambda on_next: h(x, on_next))) | (lambda y: g(y))
 
-        on_next = lambda x: "Done: %s" % x
+        result: list[str] = []
 
-        self.assertEqual(
-            "Done: 13",
-            stream.subscribe(on_next)
-        )
+        def on_result(x: int) -> None:
+            result.append(f"Done: {x}")
+
+        stream.subscribe(on_result)
+        assert result == ["Done: 13"]
 
 
 class TestObservableFunctor(unittest.TestCase):
+    def test_cont_functor_map(self) -> None:
+        x = Observable.unit(42)
+        f: Callable[[int], int] = lambda x: x * 10
 
-    def test_cont_functor_map(self):
-        x = unit(42)
-        f = lambda x: x * 10
+        assert x.map(f) == Observable.unit(420)
 
-        self.assertEqual(
-            x.map(f),
-            unit(420)
-        )
-
-    def test_cont_functor_law_1(self):
+    def test_cont_functor_law_1(self) -> None:
         # fmap id = id
-        x = unit(42)
+        x = Observable.unit(42)
 
-        self.assertEqual(
-            x.map(identity),
-            x
-        )
+        assert x.map(identity) == x
 
-    def test_cont_functor_law2(self):
+    def test_cont_functor_law2(self) -> None:
         # fmap (f . g) x = fmap f (fmap g x)
-        def f(x):
-            return x+10
+        def f(x: int) -> int:
+            return x + 10
 
-        def g(x):
-            return x*10
+        def g(x: int) -> int:
+            return x * 10
 
-        x = unit(42)
+        x = Observable.unit(42)
 
-        self.assertEqual(
-            x.map(compose(f, g)),
-            x.map(g).map(f)
-        )
+        assert x.map(compose(f, g)) == x.map(g).map(f)
 
 
 class TestObservableMonad(unittest.TestCase):
+    def test_cont_monad_bind(self) -> None:
+        m = Observable.unit(42)
+        f: Callable[[int], Observable[int]] = lambda x: Observable.unit(x * 10)
 
-    def test_cont_monad_bind(self):
-        m = unit(42)
-        f = lambda x: unit(x*10)
+        assert m.bind(f) == Observable.unit(420)
 
-        self.assertEqual(
-            m.bind(f),
-            unit(420)
-        )
-
-    def test_cont_monad_law_left_identity(self):
+    def test_cont_monad_law_left_identity(self) -> None:
         # return x >>= f is the same thing as f x
 
-        f = lambda x: unit(x+100000)
-        x = 3
+        f: Callable[[int], Observable[int]] = lambda x: Observable.unit(x + 100000)
+        x: int = 3
 
-        self.assertEqual(
-            unit(x).bind(f),
-            f(x)
-        )
+        assert Observable.unit(x).bind(f) == f(x)
 
-    def test_cont_monad_law_right_identity(self):
+    def test_cont_monad_law_right_identity(self) -> None:
         # m >>= return is no different than just m.
 
-        m = unit("move on up")
+        m = Observable.unit("move on up")
 
-        self.assertEqual(
-            m.bind(unit),
-            m
-        )
+        assert m.bind(Observable.unit) == m
 
-    def test_cont_monad_law_associativity(self):
+    def test_cont_monad_law_associativity(self) -> None:
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        m = unit(42)
-        f = lambda x: unit(x+1000)
-        g = lambda y: unit(y*42)
+        m = Observable.unit(42)
+        f: Callable[[int], Observable[int]] = lambda x: Observable.unit(x + 1000)
+        g: Callable[[int], Observable[int]] = lambda y: Observable.unit(y * 42)
 
-        self.assertEqual(
-            m.bind(f).bind(g),
-            m.bind(lambda x: f(x).bind(g))
-        )
+        assert m.bind(f).bind(g) == m.bind(lambda x: f(x).bind(g))

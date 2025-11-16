@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Monadic do notation for Python."""
 
-from collections import namedtuple
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any, NamedTuple
 
 from .typing import Monad
 from .util import Unit
@@ -14,11 +16,9 @@ from .util import Unit
 # and manually simulated lexical scoping for env attrs instead of just
 # borrowing Python's for run-of-the-mill names.
 
-__all__ = ["do", "let", "guard"]
-
 
 # TODO: guard belongs where in OSlash?
-def guard(M, test):
+def guard[T](m: Monad[T], test: bool) -> Monad[tuple[()]]:
     """Monadic guard.
 
     What it does::
@@ -27,14 +27,18 @@ def guard(M, test):
 
     https://en.wikibooks.org/wiki/Haskell/Alternative_and_MonadPlus#guard
     """
-    return M.pure(Unit) if test else M.empty()
+    return m.pure(Unit) if test else m.empty()  # type: ignore[return-value,attr-defined]
 
 
 # The kwargs syntax forces name to be a valid Python identifier.
-MonadicLet = namedtuple("MonadicLet", "name value")
+class MonadicLet(NamedTuple):
+    """Represents a monadic let binding."""
+
+    name: str
+    value: Any  # Any: Can be Monad or Callable returning Monad
 
 
-def let(**binding):
+def let(**binding: Any) -> MonadicLet | None:  # Any: Dynamic binding value
     """``<-`` for Python.
 
     Haskell::
@@ -46,12 +50,13 @@ def let(**binding):
         let(a=List.from_iterable((1, 2, 3)))
     """
     if len(binding) != 1:
-        raise ValueError("Expected exactly one binding, got {:d} with values {}".format(len(binding), binding))
+        raise ValueError(f"Expected exactly one binding, got {len(binding):d} with values {binding}")
     for k, v in binding.items():
         return MonadicLet(k, v)
+    return None
 
 
-def do(*lines):
+def do(*lines: Monad[Any] | MonadicLet | Callable[[Any], Monad[Any]]) -> Monad[Any]:
     """Do-notation.
 
     Syntax::
@@ -129,55 +134,58 @@ def do(*lines):
     bind = " | "
     seq = " >> "
 
-    class env:
-        def __init__(self):
-            self.names = set()
+    class Env:
+        def __init__(self) -> None:
+            self.names: set[str] = set()
 
-        def assign(self, k, v):
+        def assign(self, k: str, v: Any) -> None:  # Any: Dynamic attribute values
             self.names.add(k)
             setattr(self, k, v)
 
         # simulate lexical closure property for env attrs
-        #   - freevars: set of names that "fall in" from a surrounding lexical scope
-        def close_over(self, freevars):
-            names_to_clear = {k for k in self.names if k not in freevars}
+        #   - free_vars: set of names that "fall in" from a surrounding lexical scope
+        def close_over(self, free_vars: set[str]) -> None:
+            names_to_clear = {k for k in self.names if k not in free_vars}
             for k in names_to_clear:
                 delattr(self, k)
-            self.names = freevars.copy()
+            self.names = free_vars.copy()
 
     # stuff used inside the eval
-    e = env()
+    e = Env()
 
-    def begin(*exprs):  # args eagerly evaluated by Python
+    def begin(*exprs: Any) -> Any:  # Any: args eagerly evaluated by Python
         # begin(e1, e2, ..., en):
         #   perform side effects e1, e2, ..., e[n-1], return the value of en.
         return exprs[-1]
 
-    allcode = ""
-    names = set()  # names seen so far (working line by line, so textually!)
-    bodys = []
+    all_code = ""
+    names: set[str] = set()  # names seen so far (working line by line, so textually!)
+    bodies: list[Any] = []  # Any: Can be Monad or Callable
     begin_is_open = False
     for j, item in enumerate(lines):
         is_first = j == 0
         is_last = j == len(lines) - 1
 
+        name: str | None
+        body: Any  # Any: Can be Monad or Callable
         if isinstance(item, MonadicLet):
             name, body = item
         else:
             name, body = None, item
-        bodys.append(body)
+        bodies.append(body)
 
-        freevars = names.copy()  # names from the surrounding scopes
+        free_vars: set[str] = names.copy()  # names from the surrounding scopes
         if name:
             names.add(name)
 
+        code: str
         if isinstance(body, Monad):  # doesn't need the environment
-            code = "bodys[{j:d}]".format(j=j)
+            code = f"bodies[{j:d}]"
         elif callable(body):  # lambda e: ...
             # TODO: check arity (see unpythonic.arity.arity_includes)
-            code = "bodys[{j:d}](e)".format(j=j)
+            code = f"bodies[{j:d}](e)"
         else:
-            raise TypeError("Unexpected body type '{}' with value '{}'".format(type(body), body))
+            raise TypeError(f"Unexpected body type '{type(body)}' with value '{body}'")
 
         if begin_is_open:
             code += ")"
@@ -188,20 +196,20 @@ def do(*lines):
         # even though we use an imperative stateful object to implement it)
         if not is_last:
             if name:
-                code += "{bind:s}(lambda {n:s}:\nbegin(e.close_over({fvs}), e.assign('{n:s}', {n:s}), ".format(
-                    bind=bind, n=name, fvs=freevars
-                )
+                code += f"{bind:s}(lambda {name:s}:\nbegin(e.close_over({free_vars}), e.assign('{name:s}', {name:s}), "
+                begin_is_open = True
+            elif is_first:
+                code += f"{bind:s}(lambda _:\nbegin(e.close_over(set()), "
                 begin_is_open = True
             else:
-                if is_first:
-                    code += "{bind:s}(lambda _:\nbegin(e.close_over(set()), ".format(bind=bind)
-                    begin_is_open = True
-                else:
-                    code += "{seq:s}(\n".format(seq=seq)
+                code += f"{seq:s}(\n"
 
-        allcode += code
-    allcode += ")" * (len(lines) - 1)
+        all_code += code
+    all_code += ")" * (len(lines) - 1)
 
     # The eval'd code doesn't close over the current lexical scope,
     # so provide the necessary names as its globals.
-    return eval(allcode, {"e": e, "bodys": bodys, "begin": begin})
+    return eval(all_code, {"e": e, "bodies": bodies, "begin": begin})
+
+
+__all__ = ["do", "guard", "let"]

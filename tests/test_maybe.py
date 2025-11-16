@@ -1,334 +1,232 @@
-# coding=utf-8
 import unittest
+from collections.abc import Callable
 
-from oslash.maybe import Maybe, Just, Nothing
-from oslash.util import identity, compose, fmap
-
-pure = Just.pure
-unit = Just.unit
+from oslash.maybe import Just, Maybe, Nothing
+from oslash.util import compose, fmap, identity
 
 
 class TestMaybeFunctor(unittest.TestCase):
-    def test_just_functor_map(self):
-        f = lambda x: x * 2
-        x = Just(21)
+    def test_just_functor_map(self) -> None:
+        f: Callable[[int], int] = lambda x: x * 2
+        x: Maybe[int] = Just(21)
 
-        self.assertEqual(
-            x.map(f),
-            Just(42)
-        )
+        assert x.map(f) == Just(42)
 
-    def test_nothing_functor_map(self):
-        f = lambda x: x + 2
-        x = Nothing()
+    def test_nothing_functor_map(self) -> None:
+        f: Callable[[int], int] = lambda x: x + 2
+        x: Maybe[int] = Nothing()
 
-        self.assertEqual(
-            x.map(f),
-            x
-        )
+        assert x.map(f) == x
 
-    def test_nothing_functor_law1(self):
+    def test_nothing_functor_law1(self) -> None:
         # fmap id = id
-        self.assertEqual(
-            Nothing().map(identity),
-            Nothing()
-        )
+        assert Nothing().map(identity) == Nothing()
 
-    def test_just_functor_law1(self):
+    def test_just_functor_law1(self) -> None:
         # fmap id = id
-        x = Just(3)
-        self.assertEqual(
-            x.map(identity),
-            x
-        )
+        x: Maybe[int] = Just(3)
+        assert x.map(identity) == x
 
-    def test_just_functor_law2(self):
+    def test_just_functor_law2(self) -> None:
         # fmap (f . g) x = fmap f (fmap g x)
-        def f(x):
-            return x + 10
+        f: Callable[[int], int] = lambda x: x + 10
+        g: Callable[[int], int] = lambda x: x * 10
+        x: Maybe[int] = Just(42)
 
-        def g(x):
-            return x * 10
+        assert x.map(compose(f, g)) == x.map(g).map(f)
 
-        x = Just(42)
-
-        self.assertEqual(
-            x.map(compose(f, g)),
-            x.map(g).map(f)
-        )
-
-    def test_nothing_functor_law2(self):
+    def test_nothing_functor_law2(self) -> None:
         # fmap (f . g) x = fmap f (fmap g x)
-        def f(x):
-            return x+10
+        f: Callable[[int], int] = lambda x: x + 10
+        g: Callable[[int], int] = lambda x: x * 10
+        x: Maybe[int] = Nothing()
 
-        def g(x):
-            return x*10
-
-        x = Nothing()
-
-        self.assertEqual(
-            x.map(compose(f, g)),
-            x.map(g).map(f)
-        )
+        assert x.map(compose(f, g)) == x.map(g).map(f)
 
 
 class TestMaybeApplicative(unittest.TestCase):
-
-    def test_just_applicative_law_functor(self):
+    def test_just_applicative_law_functor(self) -> None:
         # pure f <*> x = fmap f x
-        x = unit(42)
-        f = lambda x: x * 42
+        x: Maybe[int] = Just.unit(42)
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(
-            pure(f).apply(x),
-            x.map(f)
-        )
+        assert Just.pure(f).apply(x) == x.map(f)
 
-    def test_nothing_applicative_law_functor(self):
+    def test_nothing_applicative_law_functor(self) -> None:
         # pure f <*> x = fmap f x
-        x = Nothing()
-        f = lambda x: x * 42
+        x: Maybe[int] = Nothing()
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(
-            pure(f).apply(x),
-            x.map(f)
-        )
+        assert Just.pure(f).apply(x) == x.map(f)
 
-    def test_just_applicative_law_identity(self):
+    def test_just_applicative_law_identity(self) -> None:
         # pure id <*> v = v
-        v = unit(42)
+        v: Maybe[int] = Just.unit(42)
 
-        self.assertEqual(
-            pure(identity).apply(v),
-            v
-        )
+        assert Just.pure(identity).apply(v) == v
 
-    def test_nothing_applicative_law_identity(self):
+    def test_nothing_applicative_law_identity(self) -> None:
         # pure id <*> v = v
-        v = Nothing()
+        v: Maybe[int] = Nothing()
 
-        self.assertEqual(
-            pure(identity).apply(v),
-            v
-        )
+        assert Just.pure(identity).apply(v) == v
 
-    def test_just_applicative_law_composition(self):
+    def test_just_applicative_law_composition(self) -> None:
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
-        w = unit(42)
-        u = pure(lambda x: x * 42)
-        v = pure(lambda x: x + 42)
+        w: Maybe[int] = Just.unit(42)
+        mul_42: Callable[[int], int] = lambda x: x * 42
+        add_42: Callable[[int], int] = lambda x: x + 42
 
-        self.assertEqual(
-            pure(fmap).apply(u).apply(v).apply(w),
-            u.apply(v.apply(w))
-        )
+        u = Just.pure(mul_42)
+        v = Just.pure(add_42)
 
-    def test_identity_applicative_law_composition(self):
+        assert Just.pure(fmap).apply(u).apply(v).apply(w) == u.apply(v.apply(w))
+
+    def test_identity_applicative_law_composition(self) -> None:
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
-        w = Nothing()
-        u = pure(lambda x: x * 42)
-        v = pure(lambda x: x + 42)
+        w: Maybe[int] = Nothing()
+        mul_42: Callable[[int], int] = lambda x: x * 42
+        add_42: Callable[[int], int] = lambda x: x + 42
 
-        self.assertEqual(
-            pure(fmap).apply(u).apply(v).apply(w),
-            u.apply(v.apply(w))
-        )
+        u = Just.pure(mul_42)
+        v = Just.pure(add_42)
 
-    def test_just_applicative_law_homomorphism(self):
+        assert Just.pure(fmap).apply(u).apply(v).apply(w) == u.apply(v.apply(w))
+
+    def test_just_applicative_law_homomorphism(self) -> None:
         # pure f <*> pure x = pure (f x)
-        x = 42
-        f = lambda x: x * 42
+        x: int = 42
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(
-            pure(f).apply(pure(x)),
-            pure(f(x))
-        )
+        assert Just.pure(f).apply(Just.pure(x)) == Just.pure(f(x))
 
-    def test_nothing_applicative_law_homomorphism(self):
+    def test_nothing_applicative_law_homomorphism(self) -> None:
         # pure f <*> pure x = pure (f x)
-        f = lambda x: x * 42
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(
-            pure(f).apply(Nothing()),
-            Nothing()
-        )
+        assert Just.pure(f).apply(Nothing()) == Nothing()
 
-    def test_just_applicative_law_interchange(self):
+    def test_just_applicative_law_interchange(self) -> None:
         # u <*> pure y = pure ($ y) <*> u
 
-        y = 43
-        u = unit(lambda x: x*42)
+        y: int = 43
+        mul_42: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(
-            u.apply(pure(y)),
-            pure(lambda f: f(y)).apply(u)
-        )
+        u: Maybe[int] = Just.unit(mul_42)
 
-    def test_nothing_applicative_law_interchange(self):
+        assert u.apply(Just.pure(y)) == Just.pure(lambda f: f(y)).apply(u)
+
+    def test_nothing_applicative_law_interchange(self) -> None:
         # u <*> pure y = pure ($ y) <*> u
+        mul_42: Callable[[int], int] = lambda x: x * 42
 
-        u = unit(lambda x: x*42)
+        u: Maybe[int] = Just.unit(mul_42)
 
-        self.assertEqual(
-            u.apply(Nothing()),
-            Nothing().apply(u)
-        )
+        assert u.apply(Nothing()) == Nothing().apply(u)
 
-    def test_just_applicative_1(self):
-        a = Just.pure(lambda x, y: x+y).apply(Just(2)).apply(Just(40))
-        self.assertNotEqual(a, Nothing())
-        self.assertEqual(a, Just(42))
+    def test_just_applicative_1(self) -> None:
+        a = Just.pure(lambda x, y: x + y).apply(Just(2)).apply(Just(40))
+        assert a != Nothing()
+        assert a == Just(42)
 
-    def test_just_applicative_2(self):
-        a = Just.pure(lambda x, y: x+y).apply(Nothing()).apply(Just(42))
-        self.assertEqual(a, Nothing())
+    def test_just_applicative_2(self) -> None:
+        a = Just.pure(lambda x, y: x + y).apply(Nothing()).apply(Just(42))
+        assert a == Nothing()
 
-    def test_just_applicative_3(self):
-        a = Just.pure(lambda x, y: x+y).apply(Just(42)).apply(Nothing())
-        self.assertEqual(a, Nothing())
+    def test_just_applicative_3(self) -> None:
+        a = Just.pure(lambda x, y: x + y).apply(Just(42)).apply(Nothing())
+        assert a == Nothing()
 
 
 class TestMaybeMonoid(unittest.TestCase):
+    def test_maybe_monoid_nothing_append_just(self) -> None:
+        m: Maybe[str] = Just("Python")
 
-    def test_maybe_monoid_nothing_append_just(self):
-        m = Just("Python")
+        assert Nothing() + m == m
 
-        self.assertEqual(
-            Nothing() + m,
-            m
-        )
+    def test_maybe_monoid_just_append_nothing(self) -> None:
+        m: Maybe[str] = Just("Python")
 
-    def test_maybe_monoid_just_append_nothing(self):
-        m = Just("Python")
+        assert m + Nothing() == m
 
-        self.assertEqual(
-            m + Nothing(),
-            m
-        )
+    def test_maybe_monoid_just_append_just(self) -> None:
+        m: Maybe[str] = Just("Python")
+        n: Maybe[str] = Just(" rocks!")
 
-    def test_maybe_monoid_just_append_just(self):
-        m = Just("Python")
-        n = Just(" rocks!")
+        assert m + n == Just("Python rocks!")
 
-        self.assertEqual(
-            m + n,
-            Just("Python rocks!")
-        )
-
-    def test_maybe_monoid_concat(self):
-
-        self.assertEqual(
-            Maybe.concat([Just(2), Just(40)]),
-            Just(42)
-        )
+    def test_maybe_monoid_concat(self) -> None:
+        assert Maybe.concat([Just(2), Just(40), Just(42)]) == Just(84)
 
 
 class TestMaybeMonad(unittest.TestCase):
+    def test_just_monad_bind(self) -> None:
+        m: Maybe[int] = Just.unit(42)
+        f: Callable[[int], Maybe[int]] = lambda x: Just.unit(x * 10)
 
-    def test_just_monad_bind(self):
-        m = unit(42)
-        f = lambda x: unit(x*10)
+        assert m.bind(f) == Just.unit(420)
 
-        self.assertEqual(
-            m.bind(f),
-            unit(420)
-        )
+    def test_nothing_monad_bind(self) -> None:
+        m: Maybe[int] = Nothing()
+        f: Callable[[int], Maybe[int]] = lambda x: Just.unit(x * 10)
 
-    def test_nothing_monad_bind(self):
-        m = Nothing()
-        f = lambda x: unit(x*10)
+        assert m.bind(f) == Nothing()
 
-        self.assertEqual(
-            m.bind(f),
-            Nothing()
-        )
-
-    def test_just_monad_law_left_identity(self):
+    def test_just_monad_law_left_identity(self) -> None:
         # return x >>= f is the same thing as f x
 
-        f = lambda x: unit(x+100000)
-        x = 3
+        f: Callable[[int], Maybe[int]] = lambda x: Just.unit(x + 100000)
+        x: int = 3
 
-        self.assertEqual(
-            unit(x).bind(f),
-            f(x)
-        )
+        assert Just.unit(x).bind(f) == f(x)
 
-    def test_nothing_monad_law_left_identity(self):
+    def test_nothing_monad_law_left_identity(self) -> None:
         # return x >>= f is the same thing as f x
 
-        f = lambda x: unit(x+100000)
+        f: Callable[[int], Maybe[int]] = lambda x: Just.unit(x + 100000)
 
-        self.assertEqual(
-            Nothing().bind(f),
-            Nothing()
-        )
+        assert Nothing().bind(f) == Nothing()
 
-    def test_just_monad_law_right_identity(self):
+    def test_just_monad_law_right_identity(self) -> None:
         # m >>= return is no different than just m.
 
-        m = unit("move on up")
+        m: Maybe[str] = Just.unit("move on up")
 
-        self.assertEqual(
-            m.bind(unit),
-            m
-        )
+        assert m.bind(Just.unit) == m
 
-    def test_nothing_monad_law_right_identity(self):
+    def test_nothing_monad_law_right_identity(self) -> None:
         # m >>= return is no different than just m.
 
-        m = Nothing()
+        m: Maybe[int] = Nothing()
 
-        self.assertEqual(
-            m.bind(unit),
-            m
-        )
+        assert m.bind(Just.unit) == m
 
-    def test_just_monad_law_associativity(self):
+    def test_just_monad_law_associativity(self) -> None:
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        m = unit(42)
-        f = lambda x: unit(x+1000)
-        g = lambda y: unit(y*42)
+        m: Maybe[int] = Just.unit(42)
+        f: Callable[[int], Maybe[int]] = lambda x: Just.unit(x + 1000)
+        g: Callable[[int], Maybe[int]] = lambda y: Just.unit(y * 42)
 
-        self.assertEqual(
-            m.bind(f).bind(g),
-            m.bind(lambda x: f(x).bind(g))
-        )
+        assert m.bind(f).bind(g) == m.bind(lambda x: f(x).bind(g))
 
-    def test_nothing_monad_law_associativity(self):
+    def test_nothing_monad_law_associativity(self) -> None:
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        m = Nothing()
-        f = lambda x: unit(x+1000)
-        g = lambda y: unit(y*42)
+        m: Maybe[int] = Nothing()
+        f: Callable[[int], Maybe[int]] = lambda x: Just.unit(x + 1000)
+        g: Callable[[int], Maybe[int]] = lambda y: Just.unit(y * 42)
 
-        self.assertEqual(
-            m.bind(f).bind(g),
-            m.bind(lambda x: f(x).bind(g))
-        )
+        assert m.bind(f).bind(g) == m.bind(lambda x: f(x).bind(g))
 
-    def test_combine_just_and_just_rule1(self):
-        self.assertEqual(
-            Just(5) and Just(6),
-            Just(6)
-        )
+    def test_combine_just_and_just_rule1(self) -> None:
+        assert (Just(5) and Just(6)) == Just(6)
 
-    def test_combine_just_and_just_rule2(self):
-        self.assertEqual(
-            Just(0) and Just(6),
-            Just(0)
-        )
+    def test_combine_just_and_just_rule2(self) -> None:
+        assert (Just(0) and Just(6)) == Just(0)
 
-    def test_combine_just_or_nothing_rule1(self):
-        self.assertEqual(
-            Just(5) or Nothing,
-            Just(5)
-        )
+    def test_combine_just_or_nothing_rule1(self) -> None:
+        assert (Just(5) or Nothing()) == Just(5)
 
-    def test_combine_just_or_nothing_rule2(self):
-        self.assertEqual(
-            Just(0) or Nothing,
-            Nothing
-        )
+    def test_combine_just_or_nothing_rule2(self) -> None:
+        assert (Just(0) or Nothing()) == Nothing()
