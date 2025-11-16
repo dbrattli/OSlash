@@ -1,11 +1,23 @@
 # Functors, Applicatives, And Monads in Python
 
-![Python package](https://github.com/dbrattli/OSlash/workflows/Python%20package/badge.svg)
+[![CI](https://github.com/dbrattli/OSlash/workflows/CI/badge.svg)](https://github.com/dbrattli/OSlash/actions)
+[![PyPI](https://img.shields.io/pypi/v/oslash.svg)](https://pypi.org/project/oslash/)
+[![Python Version](https://img.shields.io/pypi/pyversions/oslash.svg)](https://pypi.org/project/oslash/)
+[![License](https://img.shields.io/github/license/dbrattli/OSlash.svg)](https://github.com/dbrattli/OSlash/blob/master/LICENSE)
 
 OSlash (Ø) is a library for learning and understanding functional programming in Python 3.12+. It re-implements
 concepts from [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) using Python with modern type annotations. OSlash unifies
 functional and object-oriented paradigms by grouping related functions within classes. Objects are never used
 for storing values or mutable data; data exists only within function closures.
+
+## ✨ What's New in 1.0
+
+**OSlash 1.0 is a complete modernization** for Python 3.12+:
+
+- **Modern Type System**: Fully type-checked with Pyright in strict mode
+- **PEP 695 Syntax**: Clean type parameters (`class Maybe[T]:` instead of `Generic[T]`)
+- **Modern Tooling**: Built with uv, formatted with ruff, validated with pre-commit hooks
+- **Production Status**: Stable release ready for educational use
 
 **Type Safety**: OSlash is fully type-checked with Pyright in strict mode, providing excellent IDE support and catching errors at development time. It leverages Python 3.12's PEP 695 type parameter syntax for clean, ergonomic generic types.
 
@@ -15,7 +27,11 @@ should use [Expression](https://github.com/dbrattli/Expression) instead.
 ## Install
 
 ```bash
-> pip3 install oslash
+# Using pip
+pip install oslash
+
+# Or using uv (recommended)
+uv add oslash
 ```
 
 The project currently contains implementations for:
