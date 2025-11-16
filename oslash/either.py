@@ -122,9 +122,6 @@ class Right[T, E](Either[T, E]):
         return f"Right {self._value}"
 
     def __repr__(self) -> str:
-        return str(self)
-
-    def __repr__(self) -> str:
         return f"Right({self._value!r})"
 
 
@@ -184,9 +181,6 @@ class Left[T, E](Either[T, E]):
 
     def __str__(self) -> str:
         return f"Left: {self._error}"
-
-    def __repr__(self) -> str:
-        return str(self)
 
     def __repr__(self) -> str:
         return f"Left({self._error!r})"
