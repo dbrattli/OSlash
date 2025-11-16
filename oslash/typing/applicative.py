@@ -1,14 +1,19 @@
-from abc import abstractmethod
+"""Applicative Protocol."""
 
-from typing import Callable, TypeVar, Protocol
+from __future__ import annotations
+
+from abc import abstractmethod
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Protocol
+
 from typing_extensions import runtime_checkable
 
-TSource = TypeVar('TSource')
-TResult = TypeVar('TResult')
+if TYPE_CHECKING:
+    from typing import Self
 
 
 @runtime_checkable
-class Applicative(Protocol[TSource, TResult]):
+class Applicative[T](Protocol):
     """Applicative.
 
     Applicative functors are functors with some extra properties.
@@ -20,10 +25,10 @@ class Applicative(Protocol[TSource, TResult]):
     """
 
     @abstractmethod
-    def apply(self, something):
+    def apply[U](self, something: Applicative[Callable[[T], U]]) -> Applicative[U]:
         """Apply wrapped callable.
 
-        Python: apply(self: Applicative, something: Applicative[Callable[[A], B]]) -> Applicative
+        Python: apply(self: Applicative[A], something: Applicative[Callable[[A], B]]) -> Applicative[B]
         Haskell: (<*>) :: f (a -> b) -> f a -> f b.
 
         Apply (<*>) is a beefed up fmap. It takes a functor value that
@@ -31,28 +36,15 @@ class Applicative(Protocol[TSource, TResult]):
         function from the first functor and then maps it over the second
         one.
         """
-        raise NotImplementedError
-
-    #def __mul__(self, something):
-    #    """(<*>) :: f (a -> b) -> f a -> f b.
-
-    #    Provide the * as an infix version of apply() since we cannot
-    #    represent the Haskell's <*> operator in Python.
-    #    """
-    #    return self.apply(something)
-
-    #def lift_a2(self, func, b):
-    #    """liftA2 :: (Applicative f) => (a -> b -> c) -> f a -> f b -> f c."""
-
-    #    return func % self * b
+        ...
 
     @classmethod
     @abstractmethod
-    def pure(cls, fn: Callable[[TSource], TResult]) -> 'Applicative[TSource, TResult]':
+    def pure(cls, value: T) -> Self:
         """Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context
         (using them with <*>); otherwise, stick to the default class
         constructor.
         """
-        raise NotImplementedError
+        ...

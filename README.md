@@ -2,10 +2,12 @@
 
 ![Python package](https://github.com/dbrattli/OSlash/workflows/Python%20package/badge.svg)
 
-OSlash (Ø) is a library for playing with functional programming in Python 3.8+. It's an attempt to re-implement some of
-the code from [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) in Python 3.8. OSlash unifies
-functional and object oriented paradigms by grouping related functions within classes. Objects are however never used
-for storing values or mutable data, and data only lives within function closures.
+OSlash (Ø) is a library for learning and understanding functional programming in Python 3.12+. It re-implements
+concepts from [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) using Python with modern type annotations. OSlash unifies
+functional and object-oriented paradigms by grouping related functions within classes. Objects are never used
+for storing values or mutable data; data exists only within function closures.
+
+**Type Safety**: OSlash is fully type-checked with Pyright in strict mode, providing excellent IDE support and catching errors at development time. It leverages Python 3.12's PEP 695 type parameter syntax for clean, ergonomic generic types.
 
 OSlash is intended to be a tutorial. For practical functional programming in Python in production environments you
 should use [Expression](https://github.com/dbrattli/Expression) instead.

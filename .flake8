@@ -1,3 +1,0 @@
-[flake8]
-ignore =  E731 # Do not assign a lambda expression, use a def
-max-line-length = 120

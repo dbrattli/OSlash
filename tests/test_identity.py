@@ -11,106 +11,106 @@ Monad laws:
     * http://learnyouahaskell.com/a-fistful-of-monads#monad-laws
     * https://wiki.haskell.org/Monad_laws
 """
+
 import unittest
+from collections.abc import Callable
 
 from oslash.identity import Identity
-from oslash.util import identity, compose, fmap
-
-pure = Identity.pure
-unit = Identity.unit
+from oslash.util import compose, fmap, identity
 
 
 class TestIdentityFunctor(unittest.TestCase):
-    def test_identity_functor_map(self):
-        x = unit(42)
-        f = lambda x: x * 10
+    def test_identity_functor_map(self) -> None:
+        x = Identity.unit(42)
+        f: Callable[[int], int] = lambda x: x * 10
 
-        self.assertEqual(x.map(f), unit(420))
+        assert x.map(f) == Identity.unit(420)
 
-    def test_identity_functor_law_1(self):
+    def test_identity_functor_law_1(self) -> None:
         # fmap id = id
-        x = unit(42)
+        x = Identity.unit(42)
 
-        self.assertEqual(x.map(identity), x)
+        assert x.map(identity) == x
 
-    def test_identity_functor_law2(self):
+    def test_identity_functor_law2(self) -> None:
         # fmap (f . g) x = fmap f (fmap g x)
-        def f(x):
+        def f(x: int) -> int:
             return x + 10
 
-        def g(x):
+        def g(x: int) -> int:
             return x * 10
 
-        x = unit(42)
+        x = Identity.unit(42)
 
-        self.assertEqual(x.map(compose(f, g)), x.map(g).map(f))
+        assert x.map(compose(f, g)) == x.map(g).map(f)
 
 
 class TestIdentityApplicative(unittest.TestCase):
-    def test_identity_applicative_law_functor(self):
+    def test_identity_applicative_law_functor(self) -> None:
         # pure f <*> x = fmap f x
-        x = unit(42)
-        f = lambda x: x * 42
+        x = Identity.unit(42)
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(pure(f).apply(x), x.map(f))
+        assert Identity.pure(f).apply(x) == x.map(f)
 
-    def test_identity_applicative_law_identity(self):
+    def test_identity_applicative_law_identity(self) -> None:
         # pure id <*> v = v
-        v = unit(42)
+        v = Identity.unit(42)
 
-        self.assertEqual(pure(identity).apply(v), v)
+        assert Identity.pure(identity).apply(v) == v
 
-    def test_identity_applicative_law_composition(self):
+    def test_identity_applicative_law_composition(self) -> None:
         # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 
-        w = unit(42)
-        u = pure(lambda x: x * 42)
-        v = pure(lambda x: x + 42)
+        w = Identity.unit(42)
+        u: Identity[Callable[[int], int]] = Identity.pure(lambda x: x * 42)
+        v: Identity[Callable[[int], int]] = Identity.pure(lambda x: x + 42)
 
-        self.assertEqual(pure(fmap).apply(u).apply(v).apply(w), u.apply(v.apply(w)))
+        assert Identity.pure(fmap).apply(u).apply(v).apply(w) == u.apply(v.apply(w))
 
-    def test_identity_applicative_law_homomorphism(self):
+    def test_identity_applicative_law_homomorphism(self) -> None:
         # pure f <*> pure x = pure (f x)
-        x = 42
-        f = lambda x: x * 42
+        x: int = 42
+        f: Callable[[int], int] = lambda x: x * 42
 
-        self.assertEqual(pure(f).apply(pure(x)), pure(f(x)))
+        assert Identity.pure(f).apply(Identity.pure(x)) == Identity.pure(f(x))
 
-    def test_identity_applicative_law_interchange(self):
+    def test_identity_applicative_law_interchange(self) -> None:
         # u <*> pure y = pure ($ y) <*> u
 
-        y = 43
-        u = unit(lambda x: x * 42)
+        y: int = 43
+        u: Identity[Callable[[int], int]] = Identity.unit(lambda x: x * 42)
+        dollar_y: Callable[[Callable[[int], int]], int] = lambda f: f(y)
 
-        self.assertEqual(u.apply(pure(y)), pure(lambda f: f(y)).apply(u))
+        assert u.apply(Identity.pure(y)) == Identity.pure(dollar_y).apply(u)
 
 
 class TestIdentityMonad(unittest.TestCase):
-    def test_identity_monad_bind(self):
-        m = unit(42)
-        f = lambda x: unit(x * 10)
+    def test_identity_monad_bind(self) -> None:
+        m = Identity.unit(42)
+        f: Callable[[int], Identity[int]] = lambda x: Identity.unit(x * 10)
 
-        self.assertEqual(m.bind(f), unit(420))
+        assert m.bind(f) == Identity.unit(420)
 
-    def test_identity_monad_law_left_identity(self):
+    def test_identity_monad_law_left_identity(self) -> None:
         # return x >>= f is the same thing as f x
 
-        f = lambda x: unit(x + 100000)
-        x = 3
+        f: Callable[[int], Identity[int]] = lambda x: Identity.unit(x + 100000)
+        x: int = 3
 
-        self.assertEqual(unit(x).bind(f), f(x))
+        assert Identity.unit(x).bind(f) == f(x)
 
-    def test_identity_monad_law_right_identity(self):
+    def test_identity_monad_law_right_identity(self) -> None:
         # m >>= return is no different than just m.
 
-        m = unit("move on up")
+        m = Identity.unit("move on up")
 
-        self.assertEqual(m.bind(unit), m)
+        assert m.bind(Identity.unit) == m
 
-    def test_identity_monad_law_associativity(self):
+    def test_identity_monad_law_associativity(self) -> None:
         # (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)
-        m = unit(42)
-        f = lambda x: unit(x + 1000)
-        g = lambda y: unit(y * 42)
+        m = Identity.unit(42)
+        f: Callable[[int], Identity[int]] = lambda x: Identity.unit(x + 1000)
+        g: Callable[[int], Identity[int]] = lambda y: Identity.unit(y * 42)
 
-        self.assertEqual(m.bind(f).bind(g), m.bind(lambda x: f(x).bind(g)))
+        assert m.bind(f).bind(g) == m.bind(lambda x: f(x).bind(g))

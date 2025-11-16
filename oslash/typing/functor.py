@@ -1,13 +1,24 @@
-from abc import abstractmethod
+"""Functor Protocol.
 
-from typing import TypeVar, Protocol, Callable
+We use Protocol instead of ABC because:
+1. Structural subtyping: Any class implementing these methods
+   is automatically a Functor, no inheritance required
+2. Better type checker support: Protocols work better with pyright
+3. More Pythonic: Duck typing with static type safety
+4. Runtime checking: @runtime_checkable allows isinstance checks
+"""
+
+from __future__ import annotations
+
+from abc import abstractmethod
+from collections.abc import Callable
+from typing import Protocol
+
 from typing_extensions import runtime_checkable
 
-TSource = TypeVar('TSource', covariant=True)
-TResult = TypeVar('TResult')
 
 @runtime_checkable
-class Functor(Protocol[TSource]):
+class Functor[T](Protocol):
     """The Functor class is used for types that can be mapped over.
 
     Instances of Functor should satisfy the following laws:
@@ -24,23 +35,10 @@ class Functor(Protocol[TSource]):
     """
 
     @abstractmethod
-    def map(self, fn: Callable[[TSource], TResult]) -> 'Functor[TResult]':
+    def map[U](self, fn: Callable[[T], U]) -> Functor[U]:
         """Map a function over wrapped values.
 
         Map knows how to apply functions to values that are wrapped in
         a context.
         """
-        raise NotImplementedError
-
-    # def __rmod__(self, fn):
-    #     """Infix version of map.
-
-    #     Haskell: <$>
-
-    #     Example:
-    #     >>> (lambda x: x+2) % Just(40)
-    #     42
-
-    #     Returns a new Functor.
-    #     """
-    #     return self.map(fn)
+        ...
