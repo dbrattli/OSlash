@@ -23,7 +23,33 @@ class List[T](Iterable[T], Sized):
     """The list monad.
 
     Wraps an immutable list built from lambda expressions.
+
+    Can be instantiated directly with an iterable:
+        >>> List([1, 2, 3])
+        [1, 2, 3]
+        >>> List()
+        []
     """
+
+    def __new__(cls, iterable: Iterable[T] | None = None) -> List[T]:
+        """Create a new List from an iterable.
+
+        Args:
+            iterable: Optional iterable to create list from. If None, returns empty list.
+
+        Returns:
+            A new List instance (either Cons or Nil).
+        """
+        # Only handle factory creation when called on List itself, not subclasses
+        if cls is List:
+            if iterable is None:
+                # type: ignore here is safe - Nil() returns List[T] at runtime
+                return Nil()  # type: ignore[return-value]
+            # type: ignore here is safe - from_iterable returns properly typed List[T]
+            return cls.from_iterable(iterable)  # type: ignore[return-value]
+
+        # For subclasses (Cons, Nil), use normal object construction
+        return object.__new__(cls)
 
     @classmethod
     def unit(cls, value: T) -> List[T]:
@@ -117,9 +143,27 @@ class Cons[T](List[T]):
 
     __match_args__ = ("_list",)
 
-    def __init__(self, run: Callable[[ListSelector[T]], T | List[T]]) -> None:
-        """Initialize List with a selector function."""
-        self._list = run
+    def __new__(cls, run: Callable[[ListSelector[T]], T | List[T]] | None = None) -> Cons[T]:  # type: ignore[misc]
+        """Create new Cons instance.
+
+        Args:
+            run: Selector function for list operations.
+
+        Returns:
+            A new Cons instance.
+        """
+        return object.__new__(cls)
+
+    def __init__(self, run: Callable[[ListSelector[T]], T | List[T]] | None = None) -> None:
+        """Initialize List with a selector function.
+
+        Args:
+            run: Selector function, or None if constructed via List() factory.
+        """
+        # If _list already exists, we were created by List() factory via __new__
+        # Don't overwrite it
+        if not hasattr(self, "_list") and run is not None:
+            self._list = run
 
     def cons(self, element: T) -> List[T]:
         """Add element to front of List."""
@@ -176,6 +220,19 @@ class Cons[T](List[T]):
         yield self.head()
         yield from self.tail()
 
+    def __rmod__[U](self, fn: Callable[[T], U]) -> List[U]:
+        """Infix version of map.
+
+        Haskell: <$>
+
+        Example:
+        >>> (lambda x: x+2) % List.from_iterable([1, 2, 3])
+        [3, 4, 5]
+
+        Returns a new Functor.
+        """
+        return self.map(fn)
+
     def __or__[U](self, func: Callable[[T], List[U]]) -> List[U]:
         """Use | as operator for bind.
 
@@ -228,8 +285,23 @@ class Nil[T](List[T]):
 
     __match_args__ = ()
 
-    def __init__(self) -> None:
-        """Initialize empty List."""
+    def __new__(cls, _: None = None) -> Nil[T]:  # type: ignore[misc]
+        """Create new Nil instance.
+
+        Args:
+            _: Ignored parameter for consistency.
+
+        Returns:
+            A new Nil instance.
+        """
+        return object.__new__(cls)
+
+    def __init__(self, _: None = None) -> None:
+        """Initialize empty List.
+
+        Args:
+            _: Ignored argument to handle List() factory calls.
+        """
 
     def cons(self, element: T) -> List[T]:
         """Add element to front of List."""
@@ -268,6 +340,15 @@ class Nil[T](List[T]):
     def __iter__(self) -> Iterator[T]:
         """Return iterator for empty List."""
         return iter([])
+
+    def __rmod__[U](self, fn: Callable[[T], U]) -> List[U]:
+        """Infix version of map for empty list.
+
+        Haskell: <$>
+
+        Returns an empty list.
+        """
+        return self.map(fn)
 
     def __or__[U](self, func: Callable[[T], List[U]]) -> List[U]:
         """Use | as operator for bind."""

@@ -12,9 +12,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Protocol
-
-from typing_extensions import runtime_checkable
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
