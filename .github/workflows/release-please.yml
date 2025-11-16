@@ -25,7 +25,7 @@ jobs:
 
       - name: Install uv
         if: ${{ steps.release.outputs.release_created }}
-        uses: astral-sh/setup-uv@v1
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python
         if: ${{ steps.release.outputs.release_created }}
