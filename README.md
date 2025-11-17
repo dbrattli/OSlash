@@ -22,7 +22,7 @@ for storing values or mutable data; data exists only within function closures.
 **Type Safety**: OSlash is fully type-checked with Pyright in strict mode, providing excellent IDE support and catching errors at development time. It leverages Python 3.12's PEP 695 type parameter syntax for clean, ergonomic generic types.
 
 OSlash is intended to be a tutorial. For practical functional programming in Python in production environments you
-should use [Expression](https://github.com/dbrattli/Expression) instead.
+should consider using [Expression](https://github.com/dbrattli/Expression) instead.
 
 ## Install
 
