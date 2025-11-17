@@ -13,9 +13,8 @@ from typing import Any, cast
 
 from .typing import Applicative, Functor, Monad, Monoid
 
-# Type alias for list selector function
-# Any: Selector function type varies by usage and cannot be
-# statically determined without higher-kinded types
+# Type alias for list selector function used in Church encoding
+# Returns either the head (T) or tail (List[T]) depending on which selector is passed
 type ListSelector[T] = Callable[[T, List[T]], T | List[T]]
 
 
