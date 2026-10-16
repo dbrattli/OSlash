@@ -7,8 +7,8 @@
 
 OSlash (Ø) is a library for learning and understanding functional programming in Python 3.12+. It re-implements
 concepts from [Learn You a Haskell for Great Good!](http://learnyouahaskell.com/) using Python with modern type annotations. OSlash unifies
-functional and object-oriented paradigms by grouping related functions within classes. Objects are never used
-for storing values or mutable data; data exists only within function closures.
+functional and object-oriented paradigms by grouping related functions within classes. Most monads store wrapped
+values or computations on their instances; the immutable linked list stores its elements within function closures.
 
 ## ✨ What's New in 1.0
 
@@ -36,7 +36,7 @@ uv add oslash
 
 The project currently contains implementations for:
 
-## Abstract Base Classes
+## Protocols
 
 - **[Functor](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#functors)**, for stuff that can be mapped
 - **[Applicative](https://github.com/dbrattli/OSlash/wiki/Functors,-Applicatives,-And-Monads-In-Pictures#applicatives)**, for callable stuff
@@ -58,8 +58,6 @@ The project currently contains implementations for:
 ## Monadic functions
 
 - **>>**, for sequencing monadic actions
-- **lift**, for mapping a function over monadic values
-- **join**, for removing one level of monadic structure
 - **compose**, for composing monadic functions
 
 ## Utility functions
