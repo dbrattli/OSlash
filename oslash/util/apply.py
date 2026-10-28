@@ -9,7 +9,7 @@ from typing import Any
 def apply_callable(func: Callable[..., Any], value: object) -> Any:
     """Apply a unary callable, or bind the first argument of a multi-arg callable.
 
-    Inspect arity before calling so a TypeError raised inside a unary function
+    Inspect arity after a TypeError so one raised inside a unary function
     is not mistaken for a request to curry it.
     """
     try:
@@ -18,7 +18,8 @@ def apply_callable(func: Callable[..., Any], value: object) -> Any:
         try:
             callable_signature = signature(func)
         except (TypeError, ValueError):
-            raise
+            # Some built-ins accept more arguments but have no inspectable signature.
+            return partial(func, value)
 
         try:
             callable_signature.bind(value)
