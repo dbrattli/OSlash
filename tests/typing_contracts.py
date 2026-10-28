@@ -6,7 +6,20 @@ Pyright checks this file, while pytest does not collect it as a runtime test.
 from collections.abc import Callable
 from typing import assert_type
 
-from oslash import Either, Identity, Just, List, Maybe, Reader, Right, Writer, guard, monadic_compose
+from oslash import (
+    Either,
+    Identity,
+    Just,
+    List,
+    Maybe,
+    Reader,
+    Right,
+    Validation,
+    Writer,
+    guard,
+    monadic_compose,
+    or_else,
+)
 from oslash.typing import Applicative, Functor, Monad
 
 
@@ -41,6 +54,10 @@ def check_applicative() -> None:
     either_fn: Right[Callable[[int], str], str] = Right(fn)
     either: Applicative[Callable[[int], str], Either[int, str], Either[str, str]] = either_fn
     assert_type(either.apply(Right(1)), Either[str, str])
+
+    validation_fn: Validation[Callable[[int], str], str] = Validation[Callable[[int], str], str].valid(fn)
+    validation: Applicative[Callable[[int], str], Validation[int, str], Validation[str, str]] = validation_fn
+    assert_type(validation.apply(Validation[int, str].valid(1)), Validation[str, str])
 
     reader_fn: Reader[str, Callable[[int], str]] = Reader(lambda _: fn)
     reader: Applicative[Callable[[int], str], Reader[str, int], Reader[str, str]] = reader_fn
@@ -85,6 +102,11 @@ def check_curried_apply() -> None:
     either_fn: Right[Callable[[int, int], int], str] = Right(fn)
     assert_type(either_fn.apply(Right(1)).apply(Right(2)), Either[int, str])
 
+    validation_fn: Validation[Callable[[int, int], int], str] = Validation[Callable[[int, int], int], str].valid(fn)
+    assert_type(
+        validation_fn.apply(Validation[int, str].valid(1)).apply(Validation[int, str].valid(2)), Validation[int, str]
+    )
+
     reader_fn: Reader[str, Callable[[int, int], int]] = Reader(lambda _: fn)
     assert_type(
         reader_fn.apply(Reader[str, int].unit(1)).apply(Reader[str, int].unit(2)),
@@ -93,3 +115,10 @@ def check_curried_apply() -> None:
 
     list_fn: List[Callable[[int, int], int]] = List[Callable[[int, int], int]].from_iterable([fn])
     assert_type(list_fn.apply(List[int].from_iterable([1])).apply(List[int].from_iterable([2])), List[int])
+
+
+def check_validation_conversions_and_fallback() -> None:
+    result: Either[int, str] = Right(1)
+    assert_type(or_else(result, Right(2)), Either[int, str])
+    assert_type(Validation.from_either(result), Validation[int, str])
+    assert_type(Validation.from_either(result).to_either(), Either[int, List[str]])
