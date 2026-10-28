@@ -7,6 +7,44 @@ on:
     branches: [master]
 
 jobs:
+  conventional-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check commit subjects and PR title
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9][a-z0-9._/-]*\))?!?:[[:space:]]+[^[:space:]]'
+
+          if [[ "$BASE_SHA" =~ ^0+$ ]]; then
+            range="$HEAD_SHA^..$HEAD_SHA"
+          else
+            range="$BASE_SHA..$HEAD_SHA"
+          fi
+          git log --no-merges --format=%s "$range" > "$RUNNER_TEMP/commit-subjects"
+
+          failed=0
+          while IFS= read -r subject; do
+            if [[ ! "$subject" =~ $pattern ]]; then
+              echo "::error::Commit subject is not conventional: $subject"
+              failed=1
+            fi
+          done < "$RUNNER_TEMP/commit-subjects"
+
+          if [[ "$GITHUB_EVENT_NAME" == pull_request && ! "$PR_TITLE" =~ $pattern ]]; then
+            echo "::error::PR title is not conventional: $PR_TITLE"
+            failed=1
+          fi
+          exit "$failed"
+
   pre-commit:
     runs-on: ubuntu-latest
     steps:
