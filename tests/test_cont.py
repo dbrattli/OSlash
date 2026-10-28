@@ -10,7 +10,7 @@ class TestCont(unittest.TestCase):
         add: Callable[[int], Callable[[int], Cont[int, int]]] = lambda x: lambda y: Cont.unit(x + y)
         square: Callable[[int], Cont[int, int]] = lambda x: Cont.unit(x * x)
 
-        pythagoras = lambda x: lambda y: square(x) | (lambda xx: (square(y) | (lambda yy: add(xx)(yy))))
+        pythagoras = lambda x: lambda y: square(x) | (lambda xx: square(y) | add(xx))
 
         assert pythagoras(4)(4)(identity) == 32
 
@@ -45,7 +45,7 @@ class TestCont(unittest.TestCase):
         g: Callable[[int], Cont[int, int]] = lambda x: Cont.unit(x - 2)
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
-        do_c = lambda n: Cont.unit(n) | (lambda x: Cont.call_cc(lambda abort: h(x, abort))) | (lambda y: g(y))
+        do_c = lambda n: Cont.unit(n) | (lambda x: Cont.call_cc(lambda abort: h(x, abort))) | g
         final_c: Callable[[int], str] = lambda x: f"Done: {x}"
 
         assert do_c(5).run(final_c) == "Done: 13"
@@ -55,7 +55,7 @@ class TestCont(unittest.TestCase):
         g: Callable[[int], Cont[int, int]] = lambda x: Cont.unit(x - 2)
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
-        do_c = lambda n: Cont.unit(n) | (lambda x: Cont.call_cc(lambda abort: h(x, abort))) | (lambda y: g(y))
+        do_c = lambda n: Cont.unit(n) | (lambda x: Cont.call_cc(lambda abort: h(x, abort))) | g
         final_c: Callable[[int], str] = lambda x: f"Done: {x}"
 
         assert do_c(4).run(final_c) == "Done: -3"
@@ -65,7 +65,7 @@ class TestCont(unittest.TestCase):
         g: Callable[[int], Cont[int, int]] = lambda x: Cont.unit(x - 2)
         h = lambda x, abort: f(x) if x == 5 else abort(-1)
 
-        do_c = lambda n: Cont.unit(n) | (lambda x: Cont.call_cc(lambda abort: h(x, abort) | (lambda y: g(y))))
+        do_c = lambda n: Cont.unit(n) | (lambda x: Cont.call_cc(lambda abort: h(x, abort) | g))
 
         final_c: Callable[[int], str] = lambda x: f"Done: {x}"
 

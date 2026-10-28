@@ -59,7 +59,7 @@ class TestObservable(unittest.TestCase):
         def h(x: int, on_next: Callable[[int], Observable[int]]) -> Observable[int]:
             return f(x) if x == 5 else on_next(-1)
 
-        stream = Observable.just(5) | (lambda x: Observable.call_cc(lambda on_next: h(x, on_next))) | (lambda y: g(y))
+        stream = Observable.just(5) | (lambda x: Observable.call_cc(lambda on_next: h(x, on_next))) | g
 
         result: list[str] = []
 

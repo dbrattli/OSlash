@@ -22,8 +22,10 @@ class TestDo(unittest.TestCase):
             lambda e: List.unit((e.x, e.y, e.z)),  # type: ignore[misc]
         )  # type: ignore[misc]
         out2 = r(1, 21) | (  # type: ignore[operator]
-            lambda z: r(1, z + 1)  # type: ignore[misc]
-            | (lambda x: r(x, z + 1) | (lambda y: guard(List, x * x + y * y == z * z) >> List.unit((x, y, z))))  # type: ignore[misc]
+            lambda z: (
+                r(1, z + 1)  # type: ignore[misc]
+                | (lambda x: r(x, z + 1) | (lambda y: guard(List, x * x + y * y == z * z) >> List.unit((x, y, z))))
+            )  # type: ignore[misc]
         )  # type: ignore[misc]
         assert out1 == out2
 

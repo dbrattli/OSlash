@@ -372,7 +372,7 @@ class TestListOperators(unittest.TestCase):
     def test_list_rmod_operator_type_change(self) -> None:
         # Test % operator changing type
         lst: List[int] = List([1, 2, 3])
-        result = (lambda x: str(x)) % lst
+        result = str % lst
         assert result == List(["1", "2", "3"])
 
     def test_list_rmod_operator_equivalence_to_map(self) -> None:
