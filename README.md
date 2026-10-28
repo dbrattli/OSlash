@@ -55,6 +55,25 @@ The project currently contains implementations for:
 - **State**, for stateful computations of stuff
 - **Cont**, for continuation of stuff
 
+## Validation
+
+`Validation` is an applicative for independent checks. `Either` stops at the first
+`Left`, while `Validation.apply` collects errors in argument order. Convert an
+`Either` with `Validation.from_either`; a `Left` becomes a singleton OSlash `List`.
+
+```python
+from oslash import Left, List, Validation, or_else
+
+name = Validation.from_either(Left("name is missing"))
+age = Validation.from_either(Left("age is invalid"))
+result = Validation.pure(lambda name, age: (name, age)).apply(name).apply(age)
+assert result.to_either() == Left(List(["name is missing", "age is invalid"]))
+```
+
+Use `or_else(first, fallback)` for a choice between two `Either` results. It
+keeps the first `Right`; if that fails, it returns the fallback, including its
+error when both fail. Both arguments are evaluated before the call.
+
 ## Typing
 
 The concrete classes keep the wrapped result type through `map`, `bind`, and `apply`.

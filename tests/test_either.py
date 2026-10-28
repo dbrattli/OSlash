@@ -1,7 +1,7 @@
 import unittest
 from collections.abc import Callable
 
-from oslash.either import Either, Left, Right
+from oslash.either import Either, Left, Right, or_else
 
 
 class TestEither(unittest.TestCase):
@@ -64,3 +64,14 @@ class TestEither(unittest.TestCase):
         f: Callable[[int], Either[str, int]] = lambda x: Right(x * 10)
         m: Either[str, int] = Left("error").bind(f)
         assert m == Left("error")
+
+    def test_or_else_keeps_first_success(self) -> None:
+        first: Either[int, str] = Right(1)
+        fallback: Either[int, str] = Right(2)
+        assert or_else(first, fallback) is first
+
+    def test_or_else_uses_fallback_after_failure(self) -> None:
+        assert or_else(Left("first"), Right(2)) == Right(2)
+
+    def test_or_else_returns_fallback_error_when_both_fail(self) -> None:
+        assert or_else(Left("first"), Left("second")) == Left("second")

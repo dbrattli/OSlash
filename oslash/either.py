@@ -200,6 +200,16 @@ class Left[T, E](Either[T, E]):
         return f"Left({self._error!r})"
 
 
+def or_else[T, E](first: Either[T, E], fallback: Either[T, E]) -> Either[T, E]:
+    """Return the first success, or the fallback result if the first failed.
+
+    Both arguments are already evaluated. If both fail, the fallback error wins.
+    """
+    if isinstance(first, Right):
+        return first
+    return fallback
+
+
 # Type assertions for runtime checking
 assert isinstance(Either, Functor)
 assert isinstance(Either, Applicative)
