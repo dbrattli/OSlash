@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.0.0](https://github.com/dbrattli/OSlash/compare/oslash-v2.0.0...oslash-v3.0.0) (2026-10-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* correct public typing contracts ([#67](https://github.com/dbrattli/OSlash/issues/67))
+
+### Features
+
+* add error-accumulating validation ([#68](https://github.com/dbrattli/OSlash/issues/68)) ([cec0c6b](https://github.com/dbrattli/OSlash/commit/cec0c6bcfa1be30dca627e2b031b12b7a53df149))
+
+
+### Bug Fixes
+
+* correct public typing contracts ([#67](https://github.com/dbrattli/OSlash/issues/67)) ([bae0e4d](https://github.com/dbrattli/OSlash/commit/bae0e4da0aa6182f1451b61ed3833aa9cfe4b851))
+* preserve file input when mapping IO actions ([#50](https://github.com/dbrattli/OSlash/issues/50)) ([18000ca](https://github.com/dbrattli/OSlash/commit/18000ca6977fe0e4d8ab3f0a339caa502480f2d4))
+
+
+### Documentation
+
+* align Reader tutorial and API descriptions with current interfaces ([#51](https://github.com/dbrattli/OSlash/issues/51)) ([ce7a93c](https://github.com/dbrattli/OSlash/commit/ce7a93c3e934868ae5d56fb92a0e6031b568b5bf))
+
 ## [2.0.0](https://github.com/dbrattli/OSlash/compare/oslash-v1.0.0...oslash-v2.0.0) (2025-11-17)
 
 
