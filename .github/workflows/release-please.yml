@@ -21,7 +21,7 @@ jobs:
       # Publish to PyPI when a release is created
       - name: Checkout code
         if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install uv
         if: ${{ steps.release.outputs.release_created }}
