@@ -294,12 +294,12 @@ def compose[T](*funcs: Callable[[T], T]) -> Callable[[T], T]:
 
 identity: Callable[[T], T] = compose()
 
-def fmap[T, U](func: Callable[[T], U], functor: Functor[T]) -> Functor[U]:
-    """Flipped version of map for partial application."""
-    return functor.map(func)
+def fmap[A, B, C](f: Callable[[B], C], g: Callable[[A], B]) -> Callable[[A], C]:
+    """Map a function over a function (function composition)."""
+    return compose(f, g)
 ```
 
-**Note**: Uses 7 `@overload` signatures to provide perfect type inference for 0-7 arguments.
+**Note**: Uses 7 `@overload` signatures for 0-6 arguments.
 
 #### [basic.py](oslash/util/basic.py) - Basic Utilities
 
