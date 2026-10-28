@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable
-from functools import partial, reduce
-from typing import Any, Self, cast
+from functools import reduce
+from typing import Any, Self, cast, overload
 
 from .typing import Applicative, Functor, Monad, Monoid
+from .util.apply import apply_callable
 
 
 class Maybe[T]:
@@ -45,8 +46,16 @@ class Maybe[T]:
         """Applicative pure operation."""
         raise NotImplementedError
 
+    @overload
     @abstractmethod
-    def apply[U](self: Maybe[Callable[[T], U]], something: Maybe[T]) -> Maybe[U]:
+    def apply[A, B](self: Maybe[Callable[[A], B]], something: Maybe[A]) -> Maybe[B]: ...
+
+    @overload
+    @abstractmethod
+    def apply[A, B, C](self: Maybe[Callable[[A, B], C]], something: Maybe[A]) -> Maybe[Callable[[B], C]]: ...
+
+    @abstractmethod
+    def apply(self: Maybe[Callable[..., Any]], something: Maybe[Any]) -> Maybe[Any]:
         """Applicative apply operation."""
         raise NotImplementedError
 
@@ -137,17 +146,15 @@ class Just[T](Maybe[T]):
         """Wrap a value in Just."""
         return Just[U](value)
 
-    def apply[U](self: Just[Callable[[T], U]], something: Maybe[T]) -> Maybe[U]:
-        """Apply a wrapped function to a wrapped value."""
+    @overload
+    def apply[A, B](self: Just[Callable[[A], B]], something: Maybe[A]) -> Maybe[B]: ...
 
-        def mapper(other_value: T) -> U:
-            try:
-                return self._value(other_value)
-            except TypeError:
-                # Partial application for curried functions
-                return partial(self._value, other_value)  # type: ignore
+    @overload
+    def apply[A, B, C](self: Just[Callable[[A, B], C]], something: Maybe[A]) -> Maybe[Callable[[B], C]]: ...
 
-        return something.map(mapper)
+    def apply(self: Just[Callable[..., Any]], something: Maybe[Any]) -> Maybe[Any]:
+        """Apply a wrapped function, currying it when more arguments remain."""
+        return something.map(lambda value: apply_callable(self._value, value))
 
     # Monad Section
     # =============
@@ -259,7 +266,13 @@ class Nothing[T](Maybe[T]):
         """Nothing cannot be pure, returns Nothing."""
         return cls()
 
-    def apply[U](self: Nothing[Callable[[T], U]], something: Maybe[T]) -> Maybe[U]:
+    @overload
+    def apply[A, B](self: Nothing[Callable[[A], B]], something: Maybe[A]) -> Maybe[B]: ...
+
+    @overload
+    def apply[A, B, C](self: Nothing[Callable[[A, B], C]], something: Maybe[A]) -> Maybe[Callable[[B], C]]: ...
+
+    def apply(self: Nothing[Callable[..., Any]], something: Maybe[Any]) -> Maybe[Any]:
         """Nothing <*> _ = Nothing"""
         return Nothing()
 

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from functools import partial
-from typing import Any, Self, cast
+from typing import Any, Self, cast, overload
 
 from .typing import Applicative, Functor, Monad
+from .util.apply import apply_callable
 
 
 class Identity[T]:
@@ -38,17 +38,15 @@ class Identity[T]:
         """Wrap a value in the Identity context."""
         return cls(value)
 
-    def apply[U](self: Identity[Callable[[T], U]], something: Identity[T]) -> Identity[U]:
-        """Apply a wrapped function to a wrapped value."""
+    @overload
+    def apply[A, B](self: Identity[Callable[[A], B]], something: Identity[A]) -> Identity[B]: ...
 
-        def mapper(other_value: T) -> U:
-            try:
-                return self._value(other_value)
-            except TypeError:
-                # Partial application for curried functions
-                return partial(self._value, other_value)  # type: ignore
+    @overload
+    def apply[A, B, C](self: Identity[Callable[[A, B], C]], something: Identity[A]) -> Identity[Callable[[B], C]]: ...
 
-        return something.map(mapper)
+    def apply(self: Identity[Callable[..., Any]], something: Identity[Any]) -> Identity[Any]:
+        """Apply a wrapped function, currying it when more arguments remain."""
+        return something.map(lambda value: apply_callable(self._value, value))
 
     def run(self) -> T:
         """Extract the value from the Identity."""

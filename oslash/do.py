@@ -18,7 +18,7 @@ from .util import Unit
 
 
 # TODO: guard belongs where in OSlash?
-def guard[T](m: Monad[T], test: bool) -> Monad[tuple[()]]:
+def guard[T](m: Monad[T, Any], test: bool) -> Monad[tuple[()], Any]:
     """Monadic guard.
 
     What it does::
@@ -56,7 +56,7 @@ def let(**binding: Any) -> MonadicLet | None:  # Any: Dynamic binding value
     return None
 
 
-def do(*lines: Monad[Any] | MonadicLet | Callable[[Any], Monad[Any]]) -> Monad[Any]:
+def do(*lines: Monad[Any, Any] | MonadicLet | Callable[[Any], Monad[Any, Any]]) -> Monad[Any, Any]:
     """Do-notation.
 
     Syntax::
