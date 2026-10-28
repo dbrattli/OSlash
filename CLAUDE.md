@@ -52,7 +52,7 @@ Located in [oslash/typing/](oslash/typing/), these define the "laws" of function
 ```python
 @runtime_checkable
 class Functor[T](Protocol):
-    def map[U](self, fn: Callable[[T], U]) -> Functor[U]:
+    def map(self, fn: Callable[[T], T], /) -> Functor[T]:
         """Transform values inside the container."""
         ...
 ```
@@ -65,13 +65,13 @@ class Functor[T](Protocol):
 
 ```python
 @runtime_checkable
-class Applicative[T](Protocol):
-    def apply[U](self, something: Applicative[Callable[[T], U]]) -> Applicative[U]:
+class Applicative[T, Arg, Result](Protocol):
+    def apply(self, something: Arg, /) -> Result:
         """Apply a wrapped function to wrapped values."""
         ...
 
     @classmethod
-    def pure(cls, value: T) -> Self:
+    def pure(cls, value: T, /) -> Applicative[T, Arg, Result]:
         """Wrap a pure value."""
         ...
 ```
@@ -82,13 +82,13 @@ class Applicative[T](Protocol):
 
 ```python
 @runtime_checkable
-class Monad[T](Protocol):
-    def bind[U](self, fn: Callable[[T], Monad[U]]) -> Monad[U]:
+class Monad[T, Result](Protocol):
+    def bind(self, fn: Callable[[T], Result], /) -> Result:
         """Chain computations that produce wrapped values."""
         ...
 
     @classmethod
-    def unit(cls, value: T) -> Self:
+    def unit(cls, value: T, /) -> Monad[T, Result]:
         """Wrap a pure value."""
         ...
 ```
@@ -328,10 +328,10 @@ succ: Callable[[ChurchNumeral[T]], ChurchNumeral[T]] = ...
 ### [Kleisli Composition](oslash/monadic.py)
 
 ```python
-def compose[A, B, C](
-    f: Callable[[B], Monad[C]],
-    g: Callable[[A], Monad[B]]
-) -> Callable[[A], Monad[C]]:
+def compose[A, B, Result](
+    f: Callable[[B], Result],
+    g: Callable[[A], Monad[B, Result]]
+) -> Callable[[A], Result]:
     """Compose monadic functions."""
     return lambda x: g(x).bind(f)
 ```
@@ -385,7 +385,9 @@ Continuation: TypeAlias = Callable[[T], R]  # T, R must be defined elsewhere
 
 ### When `Any` is Acceptable
 
-We minimize `Any` usage (<10 instances), but it's justified when:
+Keep `Any` at dynamic implementation boundaries and expose precise public types.
+The `apply` overloads, for example, describe unary and two-argument callables
+while their shared implementation accepts both shapes.
 
 1. **Higher-kinded types aren't supported**:
 
@@ -394,21 +396,23 @@ We minimize `Any` usage (<10 instances), but it's justified when:
    type ListSelector[T] = Callable[[T, List[T]], Any]  # Any: Return type varies
    ```
 
-2. **Partial application creates ambiguity**:
+2. **Partial application across callable arities**:
 
    ```python
-   # Partially applied function has complex intermediate type
-   result = partial(func, arg1)  # type: ignore  # Partial: Complex type inference
+   # Public overloads return either U or Callable[[Next], U].
+   # Only the shared implementation handles Callable[..., Any].
+   result = apply_callable(func, arg1)
    ```
 
-3. **Protocol limitations**:
+3. **Protocol implementation boundaries**:
 
    ```python
-   # Protocol can't express "returns same type as receiver"
-   def copy(self) -> Any:  # Any: Protocol limitation, actual type is Self
+   # Keep a type-erased implementation behind precise overloads.
+   def apply(self: Identity[Callable[..., Any]], something: Identity[Any]) -> Identity[Any]:
+       ...
    ```
 
-**Always add inline comment** explaining why:
+Document why `Any` is needed at its implementation boundary:
 
 ```python
 value: Any  # Any: [Brief explanation of why static types insufficient]
@@ -579,14 +583,9 @@ pythonVersion = "3.12"
 3. **Protocol implementation**:
 
    ```python
-   # Ensure all protocol methods are implemented
-   class MyMonad[T](Monad[T]):
-       def bind[U](self, fn: Callable[[T], Monad[U]]) -> Monad[U]:
-           ...  # Must implement
-
-       @classmethod
-       def unit(cls, value: T) -> Self:
-           ...  # Must implement
+   # Check the public structural contract from caller code.
+   value: Monad[int, Identity[str]] = Identity(1)
+   result: Identity[str] = value.bind(lambda x: Identity(str(x)))
    ```
 
 ### Linting and Formatting
@@ -842,7 +841,7 @@ OSlash uses **Protocol** instead of **ABC** for type definitions. Here's why:
 ```python
 @runtime_checkable
 class Functor[T](Protocol):
-    def map[U](self, fn: Callable[[T], U]) -> Functor[U]: ...
+    def map(self, fn: Callable[[T], T], /) -> Functor[T]: ...
 
 # Any class with a map method is a Functor - no inheritance needed
 class MyClass[T]:

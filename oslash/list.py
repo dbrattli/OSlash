@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable, Iterable, Iterator, Sized
-from functools import partial, reduce
-from typing import Any, cast
+from functools import reduce
+from typing import Any, cast, overload
 
 from .typing import Applicative, Functor, Monad, Monoid
+from .util.apply import apply_callable
 
 # Type alias for list selector function used in Church encoding
 # Returns either the head (T) or tail (List[T]) depending on which selector is passed
@@ -101,8 +102,16 @@ class List[T](Iterable[T], Sized):
         """Return tail of List."""
         raise NotImplementedError
 
+    @overload
     @abstractmethod
-    def apply[U](self: List[Callable[[T], U]], something: List[T]) -> List[U]:
+    def apply[A, B](self: List[Callable[[A], B]], something: List[A]) -> List[B]: ...
+
+    @overload
+    @abstractmethod
+    def apply[A, B, C](self: List[Callable[[A, B], C]], something: List[A]) -> List[Callable[[B], C]]: ...
+
+    @abstractmethod
+    def apply(self: List[Callable[..., Any]], something: List[Any]) -> List[Any]:
         """Applicative apply operation."""
         raise NotImplementedError
 
@@ -190,18 +199,19 @@ class Cons[T](List[T]):
         """Map a function over a List."""
         return self.tail().map(mapper).cons(mapper(self.head()))
 
-    def apply[U](self: Cons[Callable[[T], U]], something: List[T]) -> List[U]:
+    @overload
+    def apply[A, B](self: Cons[Callable[[A], B]], something: List[A]) -> List[B]: ...
+
+    @overload
+    def apply[A, B, C](self: Cons[Callable[[A, B], C]], something: List[A]) -> List[Callable[[B], C]]: ...
+
+    def apply(self: Cons[Callable[..., Any]], something: List[Any]) -> List[Any]:
         """Apply wrapped functions to wrapped values.
 
         Haskell: fs <*> xs = [f x | f <- fs, x <- xs]
         """
-        try:
-            xs = [f(x) for f in self for x in something]
-        except TypeError:
-            # Partial application for curried functions
-            xs = [partial(f, x) for f in self for x in something]  # type: ignore
-
-        return List.from_iterable(xs)  # type: ignore[return-value]
+        xs = [apply_callable(f, x) for f in self for x in something]
+        return List[Any].from_iterable(xs)
 
     def append(self, other: List[T]) -> List[T]:
         """Append other list to this list."""
@@ -322,7 +332,13 @@ class Nil[T](List[T]):
         """Map a function over an empty List."""
         return Nil()
 
-    def apply[U](self: Nil[Callable[[T], U]], something: List[T]) -> List[U]:
+    @overload
+    def apply[A, B](self: Nil[Callable[[A], B]], something: List[A]) -> List[B]: ...
+
+    @overload
+    def apply[A, B, C](self: Nil[Callable[[A, B], C]], something: List[A]) -> List[Callable[[B], C]]: ...
+
+    def apply(self: Nil[Callable[..., Any]], something: List[Any]) -> List[Any]:
         """Apply empty list of functions."""
         # fs <*> xs = [f x | f <- fs, x <- xs]
         # Empty list produces empty result

@@ -48,7 +48,7 @@ def make_pair[T](first: T) -> Callable[[T], Callable[[ChurchBoolean[T]], T]]:
 # Application
 def apply[T, U](func: Callable[[T], U]) -> Callable[[T], U]:
     """Apply a function to an argument."""
-    return lambda arg: func(arg)
+    return func
 
 
 # Conditional
@@ -87,7 +87,11 @@ def and_[T](x: ChurchBoolean[T]) -> Callable[[ChurchBoolean[T]], ChurchBoolean[T
 
 def or_[T](x: ChurchBoolean[T]) -> Callable[[ChurchBoolean[T]], ChurchBoolean[T]]:
     """Logical OR."""
-    return lambda y: x(true)(y)  # type: ignore[arg-type,return-value]
+
+    def choose(y: ChurchBoolean[T]) -> ChurchBoolean[T]:
+        return x(true)(y)  # type: ignore[arg-type,return-value]
+
+    return choose
 
 
 # Church numerals
@@ -104,7 +108,7 @@ def zero[T](f: Callable[[T], T]) -> Callable[[T], T]:
 
 def one[T](f: Callable[[T], T]) -> Callable[[T], T]:
     """Church numeral one."""
-    return lambda x: f(x)
+    return f
 
 
 # Derived numerals

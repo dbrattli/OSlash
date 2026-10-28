@@ -7,9 +7,11 @@ in addition to the computed values (e.g., logging).
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast, overload
 
 from .typing import Functor, Monad, Monoid
+
+_MISSING = object()
 
 
 class Writer[T, Log]:
@@ -28,15 +30,17 @@ class Writer[T, Log]:
         """
         self._value: tuple[T, Log] = (value, log)
 
-    def map[U](self, func: Callable[[tuple[T, Log]], tuple[U, Log]]) -> Writer[U, Log]:
+    def map[U](self, func: Callable[[T], U]) -> Writer[U, Log]:
         """Map a function func over the Writer value.
 
-        Haskell:
-        fmap f m = Writer $ let (a, w) = runWriter m in (f a, w)
+        The log is preserved, as required by Functor.map.
         """
         a, w = self.run()
-        b, w_ = func((a, w))
-        return Writer(b, w_)
+        return Writer(func(a), w)
+
+    def map_with_log[U](self, func: Callable[[tuple[T, Log]], tuple[U, Log]]) -> Writer[U, Log]:
+        """Transform the value and log together."""
+        return Writer(*func(self.run()))
 
     def bind[U](self, func: Callable[[T], Writer[U, Log]]) -> Writer[U, Log]:
         """Flat is better than nested.
@@ -52,16 +56,24 @@ class Writer[T, Log]:
         # Any: Log type is generic and determined at runtime
         return Writer(b, w__)  # type: ignore[arg-type]
 
+    @overload
     @classmethod
-    def unit(cls, value: T) -> Writer[T, Log]:
+    def unit[U](cls, value: U) -> Writer[U, str]: ...
+
+    @overload
+    @classmethod
+    def unit[U, EmptyLog](cls, value: U, *, empty_log: EmptyLog) -> Writer[U, EmptyLog]: ...
+
+    @classmethod
+    def unit[U](cls: type[Writer[Any, Any]], value: U, *, empty_log: object = _MISSING) -> Writer[U, Any]:
         """Wrap a single value in a Writer.
 
-        Use the factory method to create Writer classes that
-        use a different monoid than str, or use the constructor
-        directly.
+        The default log is an empty string. Supply empty_log for another
+        log type, or use a class created with create().
         """
-        # Log: Empty log is empty string by default
-        return Writer(value, log="")  # type: ignore
+        # The default writer uses string logs; other log types must supply
+        # their own identity element (or use a class created with create()).
+        return cls(value, cast(Any, "" if empty_log is _MISSING else empty_log))
 
     def run(self) -> tuple[T, Log]:
         """Extract value from Writer.

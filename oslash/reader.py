@@ -7,9 +7,10 @@ Functions may read that state, but can't change it.
 from __future__ import annotations
 
 from collections.abc import Callable
-from functools import partial
+from typing import Any, overload
 
 from .typing import Applicative, Functor, Monad
+from .util.apply import apply_callable
 
 
 class Reader[Env, T]:
@@ -64,7 +65,15 @@ class Reader[Env, T]:
         """Wrap a value in Reader context."""
         return cls.unit(value)
 
-    def apply[U](self: Reader[Env, Callable[[T], U]], something: Reader[Env, T]) -> Reader[Env, U]:
+    @overload
+    def apply[A, B](self: Reader[Env, Callable[[A], B]], something: Reader[Env, A]) -> Reader[Env, B]: ...
+
+    @overload
+    def apply[A, B, C](
+        self: Reader[Env, Callable[[A, B], C]], something: Reader[Env, A]
+    ) -> Reader[Env, Callable[[B], C]]: ...
+
+    def apply(self: Reader[Env, Callable[..., Any]], something: Reader[Env, Any]) -> Reader[Env, Any]:
         r"""(<*>) :: f (a -> b) -> f a -> f b.
 
         Haskell: f <*> g = \x -> f x (g x)
@@ -75,14 +84,10 @@ class Reader[Env, T]:
         one (composes the two functions).
         """
 
-        def comp(env: Env) -> U:
-            func: Callable[[T], U] = self.run(env)
-            value: T = something.run(env)
-            try:
-                return func(value)
-            except TypeError:
-                # Partial application for curried functions
-                return partial(func, value)  # type: ignore
+        def comp(env: Env) -> Any:
+            func = self.run(env)
+            value = something.run(env)
+            return apply_callable(func, value)
 
         return Reader(comp)
 

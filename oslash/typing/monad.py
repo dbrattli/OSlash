@@ -18,21 +18,18 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    from typing import Self
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
-class Monad[T](Protocol):
+class Monad[T, Result](Protocol):
     """Monad protocol"""
 
     @abstractmethod
-    def bind[U](self, fn: Callable[[T], Monad[U]]) -> Monad[U]:
+    def bind(self, fn: Callable[[T], Result], /) -> Result:
         """Monad bind method.
 
-        Python: bind(self: Monad[A], func: Callable[[A], Monad[B]]) -> Monad[B]
+        Python: bind(self: Monad[A, F[B]], func: Callable[[A], F[B]]) -> F[B]
         Haskell: (>>=) :: m a -> (a -> m b) -> m b
 
         This is the mother of all methods. It's hard to describe what it
@@ -49,13 +46,15 @@ class Monad[T](Protocol):
         The Monad doesn't specify what is happening, only that whatever
         is happening satisfies the laws of associativity and identity.
 
-        Returns a new Monad.
+        Result is the concrete container returned by the callback. Keeping it
+        explicit lets a type checker verify the monad family without requiring
+        higher-kinded type parameters.
         """
         ...
 
     @classmethod
     @abstractmethod
-    def unit(cls, value: T) -> Self:
+    def unit(cls, value: T, /) -> Monad[T, Result]:
         """Wrap a value in a default context.
 
         Haskell: return :: a -> m a .

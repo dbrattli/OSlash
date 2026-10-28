@@ -55,6 +55,33 @@ The project currently contains implementations for:
 - **State**, for stateful computations of stuff
 - **Cont**, for continuation of stuff
 
+## Typing
+
+The concrete classes keep the wrapped result type through `map`, `bind`, and `apply`.
+The structural protocols describe a particular operation and its result container:
+
+```python
+from collections.abc import Callable
+from oslash import Identity
+from oslash.typing import Applicative, Monad
+
+monad: Monad[int, Identity[str]] = Identity(1)
+result: Identity[str] = monad.bind(lambda value: Identity(str(value)))
+
+fn: Callable[[int], str] = str
+applicative: Applicative[Callable[[int], str], Identity[int], Identity[str]] = Identity(fn)
+applied: Identity[str] = applicative.apply(Identity(1))
+```
+
+`Monad` now takes the input value type and the concrete bind result type.
+`Applicative` takes the wrapped function type, argument container type, and result container type.
+`Functor[T]` describes same-type mappings; concrete functors also support mappings to other types.
+
+`Writer.map` maps the value and keeps its log. Use `Writer.map_with_log` to transform both.
+`Writer.unit(value)` uses a string log; for another log type, pass `empty_log` or use `Writer.create`.
+`apply` has typed overloads for unary and two-argument functions; applying the first argument of a
+two-argument function returns a wrapped one-argument function.
+
 ## Monadic functions
 
 - **>>**, for sequencing monadic actions
