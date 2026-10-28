@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from collections.abc import Callable
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    from typing import Self
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
-class Applicative[T](Protocol):
+class Applicative[T, Arg, Result](Protocol):
     """Applicative.
 
     Applicative functors are functors with some extra properties.
@@ -23,10 +19,10 @@ class Applicative[T](Protocol):
     """
 
     @abstractmethod
-    def apply[U](self, something: Applicative[Callable[[T], U]]) -> Applicative[U]:
+    def apply(self, something: Arg, /) -> Result:
         """Apply wrapped callable.
 
-        Python: apply(self: Applicative[A], something: Applicative[Callable[[A], B]]) -> Applicative[B]
+        Python: apply(self: Applicative[Callable[[A], B], F[A], F[B]], something: F[A]) -> F[B]
         Haskell: (<*>) :: f (a -> b) -> f a -> f b.
 
         Apply (<*>) is a beefed up fmap. It takes a functor value that
@@ -38,7 +34,7 @@ class Applicative[T](Protocol):
 
     @classmethod
     @abstractmethod
-    def pure(cls, value: T) -> Self:
+    def pure(cls, value: T, /) -> Applicative[T, Arg, Result]:
         """Applicative functor constructor.
 
         Use pure if you're dealing with values in an applicative context

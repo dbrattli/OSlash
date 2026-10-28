@@ -15,6 +15,8 @@ Monad laws:
 import unittest
 from collections.abc import Callable
 
+import pytest
+
 from oslash.identity import Identity
 from oslash.util import compose, fmap, identity
 
@@ -46,6 +48,13 @@ class TestIdentityFunctor(unittest.TestCase):
 
 
 class TestIdentityApplicative(unittest.TestCase):
+    def test_apply_preserves_type_error_from_function_body(self) -> None:
+        def fail(value: int) -> int:
+            raise TypeError(f"bad value: {value}")
+
+        with pytest.raises(TypeError, match="bad value: 1"):
+            Identity(fail).apply(Identity(1))
+
     def test_identity_applicative_law_functor(self) -> None:
         # pure f <*> x = fmap f x
         x = Identity.unit(42)

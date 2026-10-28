@@ -33,10 +33,10 @@ class Functor[T](Protocol):
     """
 
     @abstractmethod
-    def map[U](self, fn: Callable[[T], U]) -> Functor[U]:
+    def map(self, fn: Callable[[T], T], /) -> Functor[T]:
         """Map a function over wrapped values.
 
-        Map knows how to apply functions to values that are wrapped in
-        a context.
+        This protocol describes mappings that preserve the wrapped value
+        type. Concrete functors also support mappings to a different type.
         """
         ...

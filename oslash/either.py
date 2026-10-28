@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable
-from functools import partial
-from typing import Any, Self, cast
+from typing import Any, Self, cast, overload
 
 from oslash.typing import Applicative, Functor, Monad
+from oslash.util.apply import apply_callable
 
 
 class Either[T, E]:
@@ -33,8 +33,18 @@ class Either[T, E]:
         """Applicative pure operation."""
         raise NotImplementedError
 
+    @overload
     @abstractmethod
-    def apply[U](self: Either[Callable[[T], U], E], something: Either[T, E]) -> Either[U, E]:
+    def apply[A, B](self: Either[Callable[[A], B], E], something: Either[A, E]) -> Either[B, E]: ...
+
+    @overload
+    @abstractmethod
+    def apply[A, B, C](
+        self: Either[Callable[[A, B], C], E], something: Either[A, E]
+    ) -> Either[Callable[[B], C], E]: ...
+
+    @abstractmethod
+    def apply(self: Either[Callable[..., Any], E], something: Either[Any, E]) -> Either[Any, E]:
         """Applicative apply operation."""
         raise NotImplementedError
 
@@ -79,17 +89,15 @@ class Right[T, E](Either[T, E]):
         """Wrap a value in Right."""
         return cls(value)
 
-    def apply[U](self: Right[Callable[[T], U], E], something: Either[T, E]) -> Either[U, E]:
-        """Apply a wrapped function to a wrapped value."""
+    @overload
+    def apply[A, B](self: Right[Callable[[A], B], E], something: Either[A, E]) -> Either[B, E]: ...
 
-        def mapper(other_value: T) -> U:
-            try:
-                return self._value(other_value)
-            except TypeError:
-                # Partial application for curried functions
-                return partial(self._value, other_value)  # type: ignore
+    @overload
+    def apply[A, B, C](self: Right[Callable[[A, B], C], E], something: Either[A, E]) -> Either[Callable[[B], C], E]: ...
 
-        return something.map(mapper)
+    def apply(self: Right[Callable[..., Any], E], something: Either[Any, E]) -> Either[Any, E]:
+        """Apply a wrapped function, currying it when more arguments remain."""
+        return something.map(lambda value: apply_callable(self._value, value))
 
     # Monad Section
     # =============
@@ -148,7 +156,13 @@ class Left[T, E](Either[T, E]):
         """Left cannot be pure, returns Right."""
         return Right(value)
 
-    def apply[U](self: Left[Callable[[T], U], E], something: Either[T, E]) -> Either[U, E]:
+    @overload
+    def apply[A, B](self: Left[Callable[[A], B], E], something: Either[A, E]) -> Either[B, E]: ...
+
+    @overload
+    def apply[A, B, C](self: Left[Callable[[A, B], C], E], something: Either[A, E]) -> Either[Callable[[B], C], E]: ...
+
+    def apply(self: Left[Callable[..., Any], E], something: Either[Any, E]) -> Either[Any, E]:
         """Left values cannot apply."""
         return Left(self._error)
 

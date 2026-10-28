@@ -116,7 +116,7 @@ reportIncompatibleMethodOverride = "error"
 strictListInference = true
 strictDictionaryInference = true
 strictSetInference = true
-include = ["oslash"]
+include = ["oslash", "tests/typing_contracts.py"]
 exclude = ["**/__pycache__", "**/.venv", "**/node_modules"]
 
 [tool.pytest.ini_options]

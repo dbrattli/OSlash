@@ -12,7 +12,7 @@ from collections.abc import Callable
 from .typing import Monad
 
 
-def compose[A, B, C](f: Callable[[B], Monad[C]], g: Callable[[A], Monad[B]]) -> Callable[[A], Monad[C]]:
+def compose[A, B, Result](f: Callable[[B], Result], g: Callable[[A], Monad[B, Result]]) -> Callable[[A], Result]:
     r"""Monadic compose function.
 
     Right-to-left Kleisli composition of two monadic functions.

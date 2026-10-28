@@ -15,6 +15,18 @@ class TestWriterMonad(unittest.TestCase):
         w: Any = IntWriter.unit(42)  # type: ignore[attr-defined]
         assert w.run() == (42, 0)
 
+    def test_generic_writer_unit_uses_explicit_empty_log(self) -> None:
+        assert Writer[int, list[str]].unit(42, empty_log=[]).run() == (42, [])
+        assert Writer[int, None].unit(42, empty_log=None).run() == (42, None)
+
+    def test_writer_map_preserves_log(self) -> None:
+        writer = Writer(42, ["before"])
+        assert writer.map(str).run() == ("42", ["before"])
+        assert writer.map_with_log(lambda pair: (str(pair[0]), [*pair[1], "after"])).run() == (
+            "42",
+            ["before", "after"],
+        )
+
     def test_writer_monad_bind(self) -> None:
         entry: str = "Multiplied by 10"
         f: Callable[[int], StringWriter] = lambda x: StringWriter(x * 10, entry)
