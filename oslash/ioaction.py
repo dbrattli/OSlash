@@ -166,35 +166,33 @@ class Get[T](IO[T]):
         return f"{ind(m)}Get ({i} => \n{a}\n{ind(m)})"
 
 
-class ReadFile(IO[str]):
-    """A container holding a filename and a function from string -> IO[str],
+class ReadFile[T](IO[T]):
+    """A container holding a filename and a function from string -> IO[T],
     which can be applied to whatever string is read from the file.
     """
 
-    def __init__(self, filename: str, func: Callable[[str], IO[str]]) -> None:
+    def __init__(self, filename: str, func: Callable[[str], IO[T]]) -> None:
         self.open_func = open
-        self._value: tuple[str, Callable[[str], IO[str]]] = (filename, func)
+        self._value: tuple[str, Callable[[str], IO[T]]] = (filename, func)
 
-    def bind[U](self, func: Callable[[str], IO[U]]) -> IO[U]:
+    def bind[U](self, func: Callable[[T], IO[U]]) -> IO[U]:
         """IO a -> (a -> IO b) -> IO b"""
         filename, g = self._value
-        # IO: Flexible IO type for file reading
-        return ReadFile(filename, lambda s: g(s).bind(func))  # type: ignore
+        return ReadFile(filename, lambda s: g(s).bind(func))
 
-    def map[U](self, func: Callable[[str], U]) -> IO[U]:
-        r"""Get (\s -> fmap f (g s))"""
-        _, g = self._value
-        # IO: Flexible IO type for file reading
-        return Get(lambda s: g(s).map(func))  # type: ignore
+    def map[U](self, func: Callable[[T], U]) -> IO[U]:
+        """Map the result while preserving the file-reading action."""
+        filename, g = self._value
+        return ReadFile(filename, lambda s: g(s).map(func))
 
-    def run(self, world: int) -> str:
+    def run(self, world: int) -> T:
         """Run IO Action"""
         filename, func = self._value
         with self.open_func(filename) as f:
             action = func(f.read())
         return action(world=world + 1)
 
-    def __call__(self, world: int = 0) -> str:
+    def __call__(self, world: int = 0) -> T:
         return self.run(world)
 
     def __str__(self, m: int = 0, n: int = 0) -> str:
