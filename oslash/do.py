@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Protocol
 
 from .typing import Monad
 from .util import Unit
@@ -17,8 +17,16 @@ from .util import Unit
 # borrowing Python's for run-of-the-mill names.
 
 
+class _Guardable[Result](Protocol):
+    @classmethod
+    def pure(cls, value: tuple[()], /) -> Result: ...
+
+    @classmethod
+    def empty(cls) -> Result: ...
+
+
 # TODO: guard belongs where in OSlash?
-def guard[T](m: Monad[T, Any], test: bool) -> Monad[tuple[()], Any]:
+def guard[Result](m: type[_Guardable[Result]], test: bool) -> Result:
     """Monadic guard.
 
     What it does::
@@ -27,7 +35,7 @@ def guard[T](m: Monad[T, Any], test: bool) -> Monad[tuple[()], Any]:
 
     https://en.wikibooks.org/wiki/Haskell/Alternative_and_MonadPlus#guard
     """
-    return m.pure(Unit) if test else m.empty()  # type: ignore[return-value,attr-defined]
+    return m.pure(Unit) if test else m.empty()
 
 
 # The kwargs syntax forces name to be a valid Python identifier.
@@ -35,10 +43,10 @@ class MonadicLet(NamedTuple):
     """Represents a monadic let binding."""
 
     name: str
-    value: Any  # Any: Can be Monad or Callable returning Monad
+    value: object
 
 
-def let(**binding: Any) -> MonadicLet | None:  # Any: Dynamic binding value
+def let(**binding: object) -> MonadicLet:
     """``<-`` for Python.
 
     Haskell::
@@ -51,11 +59,12 @@ def let(**binding: Any) -> MonadicLet | None:  # Any: Dynamic binding value
     """
     if len(binding) != 1:
         raise ValueError(f"Expected exactly one binding, got {len(binding):d} with values {binding}")
-    for k, v in binding.items():
-        return MonadicLet(k, v)
-    return None
+    name, value = next(iter(binding.items()))
+    return MonadicLet(name, value)
 
 
+# The generated environment has arbitrary named attributes, and the result
+# depends on the final line of a variadic sequence.
 def do(*lines: Monad[Any, Any] | MonadicLet | Callable[[Any], Monad[Any, Any]]) -> Monad[Any, Any]:
     """Do-notation.
 
@@ -138,7 +147,7 @@ def do(*lines: Monad[Any, Any] | MonadicLet | Callable[[Any], Monad[Any, Any]]) 
         def __init__(self) -> None:
             self.names: set[str] = set()
 
-        def assign(self, k: str, v: Any) -> None:  # Any: Dynamic attribute values
+        def assign(self, k: str, v: object) -> None:
             self.names.add(k)
             setattr(self, k, v)
 
@@ -153,21 +162,21 @@ def do(*lines: Monad[Any, Any] | MonadicLet | Callable[[Any], Monad[Any, Any]]) 
     # stuff used inside the eval
     e = Env()
 
-    def begin(*exprs: Any) -> Any:  # Any: args eagerly evaluated by Python
+    def begin(*exprs: object) -> object:
         # begin(e1, e2, ..., en):
         #   perform side effects e1, e2, ..., e[n-1], return the value of en.
         return exprs[-1]
 
     all_code = ""
     names: set[str] = set()  # names seen so far (working line by line, so textually!)
-    bodies: list[Any] = []  # Any: Can be Monad or Callable
+    bodies: list[object] = []
     begin_is_open = False
     for j, item in enumerate(lines):
         is_first = j == 0
         is_last = j == len(lines) - 1
 
         name: str | None
-        body: Any  # Any: Can be Monad or Callable
+        body: object
         if isinstance(item, MonadicLet):
             name, body = item
         else:

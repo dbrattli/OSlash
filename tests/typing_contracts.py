@@ -6,7 +6,7 @@ Pyright checks this file, while pytest does not collect it as a runtime test.
 from collections.abc import Callable
 from typing import assert_type
 
-from oslash import Either, Identity, Just, List, Maybe, Reader, Right, Writer, monadic_compose
+from oslash import Either, Identity, Just, List, Maybe, Reader, Right, Writer, guard, monadic_compose
 from oslash.typing import Applicative, Functor, Monad
 
 
@@ -66,6 +66,11 @@ def check_monadic_compose() -> None:
         return Identity(str(value))
 
     assert_type(monadic_compose(second, first)(1), Identity[str])
+
+
+def check_guard() -> None:
+    assert_type(guard(List, True), List[tuple[()]])
+    assert_type(guard(Just, False), Maybe[tuple[()]])
 
 
 def check_curried_apply() -> None:
