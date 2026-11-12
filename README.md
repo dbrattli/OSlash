@@ -82,7 +82,10 @@ The structural protocols describe a particular operation and its result containe
 ```python
 from collections.abc import Callable
 from oslash import Identity
-from oslash.typing import Applicative, Monad
+from oslash.typing import Applicative, Functor, Monad
+
+functor: Functor[int, str, Identity[str]] = Identity(1)
+mapped: Identity[str] = functor.map(str)
 
 monad: Monad[int, Identity[str]] = Identity(1)
 result: Identity[str] = monad.bind(lambda value: Identity(str(value)))
@@ -94,10 +97,15 @@ applied: Identity[str] = applicative.apply(Identity(1))
 
 `Monad` now takes the input value type and the concrete bind result type.
 `Applicative` takes the wrapped function type, argument container type, and result container type.
-`Functor[T]` describes same-type mappings; concrete functors also support mappings to other types.
+`Functor[T, U, Result]` takes the input value type, mapped value type, and output container type.
+This replaces the previous `Functor[T]` protocol, which only supported same-type mappings.
 
 `Writer.map` maps the value and keeps its log. Use `Writer.map_with_log` to transform both.
 `Writer.unit(value)` uses a string log; for another log type, pass `empty_log` or use `Writer.create`.
+Factories expose `WriterFactory[Log]`: their `unit(value)` always uses the configured log identity
+and does not accept `empty_log`. For example, `Writer.create("IntWriter", int).unit(1)` returns
+`Writer[int, int]`. Annotate instances as `Writer[T, Log]`, rather than using a dynamic factory
+name such as `StringWriter` as a type. Import `WriterFactory` from `oslash.writer` when needed.
 `apply` has typed overloads for unary and two-argument functions; applying the first argument of a
 two-argument function returns a wrapped one-argument function.
 

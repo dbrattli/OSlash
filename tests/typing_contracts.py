@@ -3,6 +3,8 @@
 Pyright checks this file, while pytest does not collect it as a runtime test.
 """
 
+# pyright: reportUnnecessaryTypeIgnoreComment=true
+
 from collections.abc import Callable
 from typing import assert_type
 
@@ -14,6 +16,7 @@ from oslash import (
     Maybe,
     Reader,
     Right,
+    StringWriter,
     Validation,
     Writer,
     guard,
@@ -24,12 +27,12 @@ from oslash.typing import Applicative, Functor, Monad
 
 
 def check_functor_and_monad() -> None:
-    identity_functor: Functor[int] = Identity(1)
-    maybe_functor: Functor[int] = Just(1)
-    writer_functor: Functor[int] = Writer(1, "")
-    identity_functor.map(lambda value: value + 1)
-    maybe_functor.map(lambda value: value + 1)
-    writer_functor.map(lambda value: value + 1)
+    identity_functor: Functor[int, str, Identity[str]] = Identity(1)
+    maybe_functor: Functor[int, str, Maybe[str]] = Just(1)
+    writer_functor: Functor[int, str, Writer[str, str]] = Writer(1, "")
+    assert_type(identity_functor.map(str), Identity[str])
+    assert_type(maybe_functor.map(str), Maybe[str])
+    assert_type(writer_functor.map(str), Writer[str, str])
 
     identity_monad: Monad[int, Identity[str]] = Identity(1)
     maybe_monad: Monad[int, Maybe[str]] = Just(1)
@@ -122,3 +125,46 @@ def check_validation_conversions_and_fallback() -> None:
     assert_type(or_else(result, Right(2)), Either[int, str])
     assert_type(Validation.from_either(result), Validation[int, str])
     assert_type(Validation.from_either(result).to_either(), Either[int, List[str]])
+
+
+def check_writer_factories() -> None:
+    assert_type(StringWriter.unit(1), Writer[int, str])
+    assert_type(StringWriter.unit(True), Writer[bool, str])
+    assert_type(StringWriter(1, "log"), Writer[int, str])
+    default_writer = Writer.create("DefaultWriter")
+    assert_type(default_writer.unit(1), Writer[int, str])
+    int_writer = Writer.create("IntWriter", int)
+    assert_type(int_writer.unit(1), Writer[int, int])
+    list_writer = Writer.create("ListWriter", list[str])
+    assert_type(list_writer.unit(1), Writer[int, list[str]])
+    assert_type(list_writer("value", ["log"]), Writer[str, list[str]])
+    assert_type(list_writer.unit(1).map(str), Writer[str, list[str]])
+    assert_type(list_writer.unit(1).bind(lambda value: list_writer(str(value), [])), Writer[str, list[str]])
+
+
+def map_to_string[Result](functor: Functor[int, str, Result]) -> Result:
+    return functor.map(str)
+
+
+def check_functor_consumers() -> None:
+    assert_type(map_to_string(Identity(1)), Identity[str])
+    assert_type(map_to_string(Just(1)), Maybe[str])
+    assert_type(map_to_string(Writer(1, "log")), Writer[str, str])
+    assert_type(map_to_string(List[int].from_iterable([1])), List[str])
+    reader = Reader[str, int](len)
+    assert_type(map_to_string(reader), Reader[str, str])
+    either: Either[int, str] = Right(1)
+    assert_type(map_to_string(either), Either[str, str])
+    validation = Validation[int, str].valid(1)
+    assert_type(map_to_string(validation), Validation[str, str])
+
+
+def check_rejected_writer_factory_calls() -> None:
+    # These ignores must remain necessary: factory log types are fixed, and
+    # only the base Writer.unit accepts an explicit log identity.
+    empty: list[str] = []
+    StringWriter.unit(1, empty_log=empty)  # pyright: ignore[reportCallIssue]
+    StringWriter(1, empty)  # pyright: ignore[reportArgumentType]
+    int_writer = Writer.create("IntWriter", int)
+    int_writer(1, "wrong log")  # pyright: ignore[reportArgumentType]
+    int_writer.unit(1, empty_log=0)  # pyright: ignore[reportCallIssue]
