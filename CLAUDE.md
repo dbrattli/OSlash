@@ -51,8 +51,8 @@ Located in [oslash/typing/](oslash/typing/), these define the "laws" of function
 
 ```python
 @runtime_checkable
-class Functor[T](Protocol):
-    def map(self, fn: Callable[[T], T], /) -> Functor[T]:
+class Functor[T, U, Result](Protocol):
+    def map(self, fn: Callable[[T], U], /) -> Result:
         """Transform values inside the container."""
         ...
 ```
@@ -840,8 +840,8 @@ OSlash uses **Protocol** instead of **ABC** for type definitions. Here's why:
 
 ```python
 @runtime_checkable
-class Functor[T](Protocol):
-    def map(self, fn: Callable[[T], T], /) -> Functor[T]: ...
+class Functor[T, U, Result](Protocol):
+    def map(self, fn: Callable[[T], U], /) -> Result: ...
 
 # Any class with a map method is a Functor - no inheritance needed
 class MyClass[T]:
