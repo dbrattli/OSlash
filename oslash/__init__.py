@@ -27,7 +27,7 @@ from .validation import Validation
 from .writer import MonadWriter, StringWriter, Writer
 
 # Version will be managed by release-please
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 __all__ = [
     "IO",
